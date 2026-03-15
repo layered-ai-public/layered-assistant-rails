@@ -731,11 +731,6 @@
          transition-colors;
 }
 
-.l-ui-button--disabled {
-  @apply opacity-50
-         cursor-not-allowed;
-}
-
 /* Notice */
 
 @utility notice {
