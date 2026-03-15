@@ -2,8 +2,10 @@ module Layered
   module Assistant
     module Public
       class ConversationsController < ApplicationController
+        include StoppableResponse
+
         before_action :set_public_assistant, only: [:create]
-        before_action :set_conversation, only: [:show]
+        before_action :set_conversation, only: [:show, :stop]
 
         def create
           @conversation = @assistant.conversations.new(name: Conversation.default_name)

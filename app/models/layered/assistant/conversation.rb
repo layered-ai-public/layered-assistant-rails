@@ -28,6 +28,17 @@ module Layered
         "New conversation"
       end
 
+      def stop_response!
+        message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
+        return unless message
+
+        estimated = TokenEstimator.estimate(message.content)
+        message.update!(stopped: true, output_tokens: estimated, tokens_estimated: true)
+        update_token_totals!
+        message.broadcast_updated
+        message.broadcast_response_complete
+      end
+
       def update_name_from_content!(content)
         return unless name == self.class.default_name
         return if content.blank?

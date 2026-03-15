@@ -1,7 +1,9 @@
 module Layered
   module Assistant
     class ConversationsController < ApplicationController
-      before_action :set_conversation, only: [:show, :edit, :update, :destroy]
+      include StoppableResponse
+
+      before_action :set_conversation, only: [:show, :edit, :update, :destroy, :stop]
       before_action :set_assistants, only: [:new, :create]
 
       def index

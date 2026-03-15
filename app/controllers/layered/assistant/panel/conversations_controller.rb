@@ -2,9 +2,10 @@ module Layered
   module Assistant
     module Panel
       class ConversationsController < ApplicationController
+        include StoppableResponse
         layout false
 
-        before_action :set_conversation, only: [:show, :destroy]
+        before_action :set_conversation, only: [:show, :destroy, :stop]
         before_action :set_conversations, only: [:index, :show]
         before_action :set_assistants, only: [:index, :show, :new, :create]
 

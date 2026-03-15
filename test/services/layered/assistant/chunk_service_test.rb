@@ -149,6 +149,24 @@ module Layered
         assert message.tokens_estimated?
       end
 
+      test "stops processing chunks after stop check detects stopped message" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: "Partial")
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        message.update!(stopped: true)
+
+        # Send enough chunks to trigger the periodic stop check, then one more
+        (ChunkService::STOP_CHECK_INTERVAL + 1).times do
+          service.call({ "type" => "content_block_delta", "delta" => { "text" => " more" } })
+        end
+
+        # The chunk after the stop check should not be appended
+        content = message.reload.content
+        appended_count = content.scan(" more").length
+        assert appended_count <= ChunkService::STOP_CHECK_INTERVAL,
+          "Expected at most #{ChunkService::STOP_CHECK_INTERVAL} chunks before stop, got #{appended_count}"
+      end
+
       test "does not mark tokens as estimated when API provides usage" do
         conversation = layered_assistant_conversations(:greeting)
         message = conversation.messages.create!(role: :assistant, content: nil)

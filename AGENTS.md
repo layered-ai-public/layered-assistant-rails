@@ -46,6 +46,8 @@ Verify dependencies before modifying host app files. Use `inject_into_file` for 
 ## Making changes to `layered-ui-rails`
 
 The UI kit gem for this app is located at `../layered-ui-rails`.
+Use existing classes where possible to keep the UI project lean.
+If there’s a class missing that would be genuinely useful, let me know before making any edits.
 You can find and make edits to that project directly if necessary.
 It has its own `AGENTS.md` file — inspect it for context on the apps's conventions, architecture, and development workflows.
 

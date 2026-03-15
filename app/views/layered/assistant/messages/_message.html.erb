@@ -3,8 +3,8 @@
     <% unless message.user? %>
       <div class="l-ui-message__author"><%= message.role.capitalize %></div>
     <% end %>
-    <div class="<%= dom_id(message) %>_body l-ui-message__body<%= " l-ui-markdown" unless message.assistant? && message.content.blank? %>">
-      <% if message.assistant? && message.content.blank? %>
+    <div class="<%= dom_id(message) %>_body l-ui-message__body<%= " l-ui-markdown" unless message.assistant? && message.content.blank? && !message.stopped? %>">
+      <% if message.assistant? && message.content.blank? && !message.stopped? %>
         <div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">
           <span class="l-ui-typing-indicator__dot"></span>
           <span class="l-ui-typing-indicator__dot"></span>
@@ -12,6 +12,9 @@
         </div>
       <% else %>
         <%= render_message_content(message) %>
+      <% end %>
+      <% if message.stopped? %>
+        <div class="l-ui-notice--warning">The response was stopped</div>
       <% end %>
     </div>
     <div class="l-ui-message__footer">

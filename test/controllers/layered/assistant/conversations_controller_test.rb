@@ -75,6 +75,22 @@ module Layered
         assert_select ".l-ui-form__errors"
       end
 
+      test "should stop responding assistant message" do
+        conversation = layered_assistant_conversations(:greeting)
+        assistant_message = conversation.messages.create!(
+          uid: "msg_stop_test",
+          role: :assistant,
+          content: "Partial response",
+          model: layered_assistant_models(:sonnet)
+        )
+
+        patch "/layered/assistant/conversations/#{conversation.id}/stop"
+        assert_response :ok
+
+        assistant_message.reload
+        assert assistant_message.stopped?
+      end
+
       test "should destroy conversation" do
         conversation = layered_assistant_conversations(:greeting)
 

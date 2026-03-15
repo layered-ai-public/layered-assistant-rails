@@ -1,6 +1,6 @@
-<%= form_with url: layered_assistant.conversation_messages_path(conversation), id: "composer-form", class: "#{dom_id(conversation)}_composer", data: { controller: "composer", composer_target: "form", action: "submit->composer#submit", composer_responding_value: local_assigns.fetch(:responding, false) } do |f| %>
+<%= form_with url: layered_assistant.conversation_messages_path(conversation), id: "composer-form", class: "#{dom_id(conversation)}_composer", data: { controller: "composer", composer_target: "form", action: "submit->composer#submit", composer_responding_value: local_assigns.fetch(:responding, false), composer_stop_url_value: layered_assistant.stop_conversation_path(conversation) } do |f| %>
   <div class="l-ui-conversation__composer">
-    <%= f.text_area :content, name: "message[content]", class: "l-ui-conversation__composer-input", placeholder: "Type a message...", "aria-label": "Message", rows: 1, data: { composer_target: "input", action: "keydown->composer#submitOnEnter" } %>
+    <%= f.text_area :content, name: "message[content]", class: "l-ui-conversation__composer-input", placeholder: "Type a message...", "aria-label": "Message", rows: 1, data: { composer_target: "input", action: "keydown->composer#submitOnEnter input->composer#updateButtonDisabled" } %>
 
     <button type="submit" class="l-ui-button--primary" title="Send (Enter)" data-composer-target="button">Send</button>
   </div>

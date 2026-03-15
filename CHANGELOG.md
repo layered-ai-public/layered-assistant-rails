@@ -6,8 +6,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [0.1.1] - 2026-03-15
 
-- Composer is disabled while the assistant is responding, preventing duplicate submissions
-- Composer automatically re-enables after 60 seconds if the completion broadcast is missed
+- Stop button to cancel an in-progress assistant response
+- Send button is disabled when the composer input is empty
 
 ## [0.1.0] - 2026-03-14
 
