@@ -1,4 +1,4 @@
-<%= form_with(model: provider, url: url, html: { class: "l-ui-form l-ui-utility--mt-2xl" }) do |f| %>
+<%= form_with(model: provider, url: url, html: { class: "l-ui-form" }) do |f| %>
   <%= render "layered_ui/shared/form_errors", item: provider %>
 
   <div data-controller="provider-template" data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>">
