@@ -14,7 +14,7 @@
         <%= render_message_content(message) %>
       <% end %>
       <% if message.stopped? %>
-        <div class="l-ui-notice--warning">The response was stopped</div>
+        <div class="l-ui-notice--warning" role="status">The response was stopped</div>
       <% end %>
     </div>
     <div class="l-ui-message__footer">
