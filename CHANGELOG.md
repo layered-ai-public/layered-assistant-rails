@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-15
+
+- Composer is disabled while the assistant is responding, preventing duplicate submissions
+- Composer automatically re-enables after 60 seconds if the completion broadcast is missed
+
 ## [0.1.0] - 2026-03-14
 
 Initial release.
