@@ -35,7 +35,7 @@ module Layered
         message.with_lock do
           return false if message.stopped?
 
-          estimated = TokenEstimator.estimate(message.content)
+          estimated = TokenEstimator.estimate(message.content) || 0
           message.update!(stopped: true, output_tokens: estimated, tokens_estimated: true)
           update_token_totals!
           message.broadcast_updated

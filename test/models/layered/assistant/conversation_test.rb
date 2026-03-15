@@ -62,6 +62,18 @@ module Layered
         assert assistant_message.reload.stopped?
       end
 
+      test "stop_response! sets output_tokens to zero when content is blank" do
+        conversation = layered_assistant_conversations(:greeting)
+        assistant_message = conversation.messages.create!(role: :assistant, content: nil, model: layered_assistant_models(:sonnet))
+
+        conversation.stop_response!
+
+        assistant_message.reload
+        assert assistant_message.stopped?
+        assert_equal 0, assistant_message.output_tokens
+        assert assistant_message.tokens_estimated?
+      end
+
       test "stop_response! does nothing when no assistant message exists" do
         assistant = layered_assistant_assistants(:general)
         conversation = Conversation.create!(name: "Empty", assistant: assistant)
