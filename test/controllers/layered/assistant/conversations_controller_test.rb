@@ -91,6 +91,13 @@ module Layered
         assert assistant_message.stopped?
       end
 
+      test "stop returns no content when nothing to stop" do
+        conversation = layered_assistant_conversations(:coding)
+
+        patch "/layered/assistant/conversations/#{conversation.id}/stop"
+        assert_response :no_content
+      end
+
       test "should destroy conversation" do
         conversation = layered_assistant_conversations(:greeting)
 
