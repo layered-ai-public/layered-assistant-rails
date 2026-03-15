@@ -4,7 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // "Send" and "Stop" depending on whether the assistant is responding,
 // and disables "Send" when the input is empty.
 export default class extends Controller {
-  static targets = ["form", "input", "button"]
+  static targets = ["form", "input", "sendButton", "stopButton"]
   static values = {
     responding: { type: Boolean, default: false },
     stopUrl: { type: String, default: "" }
@@ -77,33 +77,25 @@ export default class extends Controller {
     if (this.respondingValue) return
 
     const empty = this.inputTarget.value.trim() === ""
-    this.buttonTarget.disabled = empty
-    this.buttonTarget.classList.toggle("l-ui-button--disabled", empty)
+    this.sendButtonTarget.disabled = empty
+    this.sendButtonTarget.classList.toggle("l-ui-button--disabled", empty)
   }
 
-  // Switch the button between Send and Stop modes. While responding a
+  // Toggle visibility of the Send and Stop buttons. While responding a
   // 60-second safety timeout resets the composer in case the server
   // never signals completion. The timeout is reset each time a chunk
   // is received so long-running responses are not interrupted.
   _applyRespondingState() {
-    const button = this.buttonTarget
-
     clearTimeout(this._respondingTimeout)
 
     if (this.respondingValue) {
-      button.disabled = false
-      button.classList.remove("l-ui-button--disabled")
-      button.type = "button"
-      button.title = "Stop"
-      button.textContent = "Stop"
-      button.dataset.action = "click->composer#stop"
+      this.sendButtonTarget.hidden = true
+      this.stopButtonTarget.hidden = false
 
       this._resetRespondingTimeout()
     } else {
-      button.type = "submit"
-      button.title = "Send (Enter)"
-      button.textContent = "Send"
-      button.dataset.action = ""
+      this.stopButtonTarget.hidden = true
+      this.sendButtonTarget.hidden = false
       this.updateButtonDisabled()
 
       if (!this.element.closest("turbo-frame")) {
