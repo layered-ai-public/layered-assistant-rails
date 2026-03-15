@@ -127,4 +127,7 @@ Turbo.StreamActions.append_chunk = function () {
     // Schedule debounced render
     scheduleRender(target)
   })
+
+  // Notify the composer so it can reset its safety timeout
+  document.dispatchEvent(new CustomEvent("assistant:chunk-received"))
 }

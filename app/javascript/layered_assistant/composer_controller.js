@@ -11,8 +11,15 @@ export default class extends Controller {
   }
 
   connect() {
+    this._onChunkReceived = () => this._resetRespondingTimeout()
+    document.addEventListener("assistant:chunk-received", this._onChunkReceived)
     this._applyRespondingState()
     this.updateButtonDisabled()
+  }
+
+  disconnect() {
+    document.removeEventListener("assistant:chunk-received", this._onChunkReceived)
+    clearTimeout(this._respondingTimeout)
   }
 
   respondingValueChanged() {
@@ -76,7 +83,8 @@ export default class extends Controller {
 
   // Switch the button between Send and Stop modes. While responding a
   // 60-second safety timeout resets the composer in case the server
-  // never signals completion.
+  // never signals completion. The timeout is reset each time a chunk
+  // is received so long-running responses are not interrupted.
   _applyRespondingState() {
     const button = this.buttonTarget
 
@@ -90,7 +98,7 @@ export default class extends Controller {
       button.textContent = "Stop"
       button.dataset.action = "click->composer#stop"
 
-      this._respondingTimeout = setTimeout(() => { this.respondingValue = false }, 60000)
+      this._resetRespondingTimeout()
     } else {
       button.type = "submit"
       button.title = "Send (Enter)"
@@ -102,5 +110,11 @@ export default class extends Controller {
         this.inputTarget.focus()
       }
     }
+  }
+
+  _resetRespondingTimeout() {
+    if (!this.respondingValue) return
+    clearTimeout(this._respondingTimeout)
+    this._respondingTimeout = setTimeout(() => { this.respondingValue = false }, 60000)
   }
 }
