@@ -1,4 +1,4 @@
-<%= form_with url: layered_assistant.public_panel_conversation_messages_path(conversation), id: "public-panel-composer-form", data: { controller: "composer", composer_target: "form", turbo_frame: "_top", action: "submit->composer#submit" } do |f| %>
+<%= form_with url: layered_assistant.public_panel_conversation_messages_path(conversation), id: "public-panel-composer-form", class: "#{dom_id(conversation)}_composer", data: { controller: "composer", composer_target: "form", turbo_frame: "_top", action: "submit->composer#submit", composer_responding_value: local_assigns.fetch(:responding, false) } do |f| %>
   <div class="l-ui-conversation__composer">
     <%= f.text_area :content, name: "message[content]", class: "l-ui-conversation__composer-input", placeholder: "Type a message...", "aria-label": "Message", rows: 1, data: { composer_target: "input", action: "keydown->composer#submitOnEnter" } %>
 

@@ -105,6 +105,12 @@ function scheduleRender(target) {
   renderTimers.set(target, id)
 }
 
+Turbo.StreamActions.enable_composer = function () {
+  this.targetElements.forEach((form) => {
+    form.setAttribute("data-composer-responding-value", "false")
+  })
+}
+
 Turbo.StreamActions.append_chunk = function () {
   this.targetElements.forEach((target) => {
     const text = this.templateContent.textContent || ""

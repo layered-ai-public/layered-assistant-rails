@@ -10,6 +10,7 @@ module Layered
           unless message.model&.provider
             message.update(content: "No provider is configured for this model.")
             message.broadcast_updated
+            message.broadcast_response_complete
             return
           end
 
@@ -28,6 +29,7 @@ module Layered
             error_note = "Something went wrong while generating a response."
             message.update(content: existing.present? ? "#{existing}\n\n---\n\n#{error_note}" : error_note)
             message.broadcast_updated
+            message.broadcast_response_complete
           end
         end
       end

@@ -21,6 +21,7 @@ module Layered
         if chunk_finished?(chunk) || usage_chunk?(chunk)
           save_token_usage
           @message.broadcast_updated
+          @message.broadcast_response_complete
         end
       end
 
