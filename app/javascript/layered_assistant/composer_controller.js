@@ -34,8 +34,8 @@ export default class extends Controller {
   }
 
   _applyRespondingState() {
-    this.inputTarget.disabled = this.respondingValue
     this.buttonTarget.disabled = this.respondingValue
+    this.buttonTarget.classList.toggle("l-ui-button--disabled", this.respondingValue)
 
     clearTimeout(this._respondingTimeout)
 
