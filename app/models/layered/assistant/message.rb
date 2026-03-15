@@ -39,6 +39,12 @@ module Layered
           locals: { message: self }
       end
 
+      def broadcast_response_complete
+        broadcast_action_to conversation,
+          action: :enable_composer,
+          targets: ".#{dom_id(conversation)}_composer"
+      end
+
       def broadcast_chunk(text)
         broadcast_action_to conversation,
           action: :append_chunk,

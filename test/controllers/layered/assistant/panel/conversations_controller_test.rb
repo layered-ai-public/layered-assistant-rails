@@ -41,6 +41,22 @@ module Layered
           follow_redirect!
           assert_response :success
         end
+
+        test "should stop responding assistant message" do
+          conversation = layered_assistant_conversations(:greeting)
+          assistant_message = conversation.messages.create!(
+            uid: "msg_panel_stop",
+            role: :assistant,
+            content: "Partial",
+            model: layered_assistant_models(:sonnet)
+          )
+
+          patch "/layered/assistant/panel/conversations/#{conversation.id}/stop"
+          assert_response :ok
+
+          assistant_message.reload
+          assert assistant_message.stopped?
+        end
       end
     end
   end

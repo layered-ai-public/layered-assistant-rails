@@ -38,6 +38,24 @@ module Layered
           assert_select "h1", text: conversation.name
         end
 
+        test "stop marks assistant message as stopped" do
+          post "/layered/assistant/public/conversations", params: { assistant_id: @assistant.id }
+          conversation = Conversation.order(:id).last
+
+          assistant_message = conversation.messages.create!(
+            uid: "msg_pub_stop",
+            role: :assistant,
+            content: "Partial",
+            model: layered_assistant_models(:sonnet)
+          )
+
+          patch "/layered/assistant/public/conversations/#{conversation.id}/stop"
+          assert_response :ok
+
+          assistant_message.reload
+          assert assistant_message.stopped?
+        end
+
         test "show redirects to assistants when conversation not in session" do
           conversation = layered_assistant_conversations(:coding)
           get "/layered/assistant/public/conversations/#{conversation.id}"

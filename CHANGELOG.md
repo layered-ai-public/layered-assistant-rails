@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-15
+
+- Stop button to cancel an in-progress assistant response
+- Send button is disabled when the composer input is empty
+
 ## [0.1.0] - 2026-03-14
 
 Initial release.

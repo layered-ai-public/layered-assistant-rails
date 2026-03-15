@@ -1,0 +1,14 @@
+<div class="l-ui-conversation__composer">
+  <%= f.text_area :content, name: "message[content]", class: "l-ui-conversation__composer-input", placeholder: "Type a message...", "aria-label": "Message", rows: 1, data: { composer_target: "input", action: "keydown->composer#submitOnEnter input->composer#updateButtonDisabled" } %>
+
+  <button type="submit" class="l-ui-button--primary" title="Send (Enter)" data-composer-target="sendButton">Send</button>
+  <button type="button" class="l-ui-button--primary" title="Stop" data-composer-target="stopButton" data-action="click->composer#stop" hidden>Stop</button>
+</div>
+
+<% if local_assigns[:models]&.any? %>
+  <div class="l-ui-form__group">
+    <div class="l-ui-select-wrapper">
+      <%= f.select :model_id, options_for_select(models.map { |m| ["#{m.provider.name}: #{m.name}", m.id] }, selected_model_id), {}, name: "message[model_id]", class: "l-ui-select", "aria-label": "AI model" %>
+    </div>
+  </div>
+<% end %>

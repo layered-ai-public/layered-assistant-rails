@@ -1,14 +1,26 @@
 module Layered
   module Assistant
     class ChunkService
+      STOP_CHECK_INTERVAL = 25
+
       def initialize(message, provider:)
         @message = message
         @provider = provider
         @input_tokens = 0
         @output_tokens = 0
+        @chunk_count = 0
+        @stopped = false
       end
 
       def call(chunk)
+        return if @stopped
+
+        @chunk_count += 1
+        if @chunk_count % STOP_CHECK_INTERVAL == 0
+          @stopped = @message.reload.stopped?
+          return if @stopped
+        end
+
         Rails.logger.debug { "[ChunkService] #{chunk.inspect}" }
         text = extract_text(chunk)
         extract_usage(chunk)

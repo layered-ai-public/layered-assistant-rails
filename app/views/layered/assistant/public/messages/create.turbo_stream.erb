@@ -5,5 +5,5 @@
 <% end %>
 
 <%= turbo_stream.replace "public-composer-form" do %>
-  <%= render "layered/assistant/public/messages/composer", conversation: @conversation %>
+  <%= render "layered/assistant/public/messages/composer", conversation: @conversation, responding: @error.nil? %>
 <% end %>

@@ -3,10 +3,11 @@ module Layered
     module Public
       module Panel
         class ConversationsController < Public::ApplicationController
+          include StoppableResponse
           layout false
 
           before_action :set_public_assistant, only: [:index, :new, :create]
-          before_action :set_conversation, only: [:show]
+          before_action :set_conversation, only: [:show, :stop]
           before_action :set_session_conversations, only: [:index, :show]
 
           def index

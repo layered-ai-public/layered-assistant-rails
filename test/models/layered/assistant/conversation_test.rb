@@ -53,6 +53,45 @@ module Layered
         assert_equal 85, conversation.token_estimate
       end
 
+      test "stop_response! marks latest assistant message as stopped" do
+        conversation = layered_assistant_conversations(:greeting)
+        assistant_message = conversation.messages.create!(role: :assistant, content: "Partial", model: layered_assistant_models(:sonnet))
+
+        assert conversation.stop_response!
+
+        assert assistant_message.reload.stopped?
+      end
+
+      test "stop_response! sets output_tokens to zero when content is blank" do
+        conversation = layered_assistant_conversations(:greeting)
+        assistant_message = conversation.messages.create!(role: :assistant, content: nil, model: layered_assistant_models(:sonnet))
+
+        conversation.stop_response!
+
+        assistant_message.reload
+        assert assistant_message.stopped?
+        assert_equal 0, assistant_message.output_tokens
+        assert assistant_message.tokens_estimated?
+      end
+
+      test "stop_response! returns false when no assistant message exists" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Empty", assistant: assistant)
+
+        assert_equal false, conversation.stop_response!
+      end
+
+      test "stop_response! is idempotent" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Idempotent", assistant: assistant)
+        message = conversation.messages.create!(role: :assistant, content: "Partial", model: layered_assistant_models(:sonnet))
+
+        assert_equal true, conversation.stop_response!
+        assert message.reload.stopped?
+
+        assert_equal false, conversation.stop_response!
+      end
+
       test "update_token_totals! treats nil tokens as zero" do
         assistant = layered_assistant_assistants(:general)
         conversation = Conversation.create!(name: "Token Test Nil", assistant: assistant)

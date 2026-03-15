@@ -51,6 +51,15 @@ This will:
 
 All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.
 
+### Upgrading
+
+After updating the gem, copy any new migrations and run them:
+
+```bash
+bin/rails generate layered:assistant:migrations
+bin/rails db:migrate
+```
+
 ## Authorization
 
 All non-public engine routes are **blocked by default** (403 Forbidden) until you configure an `authorize` block. The install generator creates a starter initialiser at `config/initializers/layered_assistant.rb` - uncomment one of the examples to get started.
