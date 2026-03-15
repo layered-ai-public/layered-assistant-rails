@@ -1,0 +1,34 @@
+<h1>Assistants</h1>
+
+<% if @assistants.any? %>
+  <div class="l-ui-container--table l-ui-utility--mt-lg">
+    <table class="l-ui-table">
+      <caption class="l-ui-sr-only">Public assistants</caption>
+      <thead class="l-ui-table__header">
+        <tr>
+          <th scope="col" class="l-ui-table__header-cell">Name</th>
+          <th scope="col" class="l-ui-table__header-cell">Description</th>
+        </tr>
+      </thead>
+
+      <tbody class="l-ui-table__body">
+        <% @assistants.each do |assistant| %>
+          <tr>
+            <th scope="row" class="l-ui-table__cell--primary">
+              <%= link_to assistant.name, layered_assistant.public_assistant_path(assistant) %>
+            </th>
+            <td class="l-ui-table__cell">
+              <%= truncate(assistant.description, length: 60) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div class="l-ui-utility--mt-lg">
+      <%= l_ui_pagy(@pagy) %>
+    </div>
+  </div>
+<% else %>
+  <p>No assistants are currently available.</p>
+<% end %>

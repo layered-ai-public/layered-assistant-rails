@@ -1,0 +1,30 @@
+<%= form_with(model: model, url: url, html: { class: "l-ui-form l-ui-utility--mt-2xl" }) do |f| %>
+  <%= render "layered_ui/shared/form_errors", item: model %>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :name, required: true %>
+    <%= f.text_field :name, class: "l-ui-form__field" %>
+    <%= render "layered_ui/shared/field_error", object: model, field: :name %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :identifier, required: true %>
+    <%= f.text_field :identifier, class: "l-ui-form__field" %>
+    <%= render "layered_ui/shared/field_error", object: model, field: :identifier %>
+  </div>
+
+  <label class="l-ui-switch l-ui-utility--mt-xl">
+    <%= f.check_box :enabled, class: "l-ui-switch__input", role: "switch" %>
+    <span class="l-ui-switch__track"></span>
+    Enabled
+  </label>
+
+  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+    <% if model.persisted? %>
+      <%= link_to "Delete", layered_assistant.provider_model_path(@provider, model), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <%= f.submit f.object.new_record? ? 'Create' : 'Update', class: "l-ui-button--primary" %>
+  </div>
+<% end %>

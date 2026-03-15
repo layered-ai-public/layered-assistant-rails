@@ -1,0 +1,25 @@
+<%= tag.div id: dom_id(message), class: "#{dom_id(message)} #{message.user? ? "l-ui-message--sent" : "l-ui-message"}" do %>
+  <div class="l-ui-message__bubble">
+    <% unless message.user? %>
+      <div class="l-ui-message__author"><%= message.role.capitalize %></div>
+    <% end %>
+    <div class="<%= dom_id(message) %>_body l-ui-message__body<%= " l-ui-markdown" unless message.assistant? && message.content.blank? %>">
+      <% if message.assistant? && message.content.blank? %>
+        <div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">
+          <span class="l-ui-typing-indicator__dot"></span>
+          <span class="l-ui-typing-indicator__dot"></span>
+          <span class="l-ui-typing-indicator__dot"></span>
+        </div>
+      <% else %>
+        <%= render_message_content(message) %>
+      <% end %>
+    </div>
+    <div class="l-ui-message__footer">
+      <% total_tokens = message.input_tokens.to_i + message.output_tokens.to_i %>
+      <% if message.model || total_tokens > 0 %>
+        <span class="l-ui-message__metadata"><%= [message.model&.name, total_tokens > 0 ? "#{message.tokens_estimated? ? "~" : ""}#{number_with_delimiter(total_tokens)} tokens" : nil].compact.join(" · ") %></span>
+      <% end %>
+      <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
+    </div>
+  </div>
+<% end %>

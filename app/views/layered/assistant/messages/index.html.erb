@@ -1,0 +1,46 @@
+<div class="l-ui-container--spread">
+  <h1>Messages</h1>
+  <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
+</div>
+
+<div class="l-ui-container--table l-ui-utility--mt-lg">
+  <table class="l-ui-table">
+    <caption class="l-ui-sr-only">Messages</caption>
+    <thead class="l-ui-table__header">
+      <tr>
+        <th scope="col" class="l-ui-table__header-cell">Role</th>
+        <th scope="col" class="l-ui-table__header-cell">Content</th>
+        <th scope="col" class="l-ui-table__header-cell">Tokens</th>
+        <th scope="col" class="l-ui-table__header-cell">Created</th>
+        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="l-ui-table__body">
+      <% @messages.each do |message| %>
+        <tr>
+          <th scope="row" class="l-ui-table__cell--primary">
+            <%= message.role %>
+          </th>
+          <td class="l-ui-table__cell">
+            <%= truncate(message.content, length: 100) %>
+          </td>
+          <td class="l-ui-table__cell">
+            <% total = message.input_tokens.to_i + message.output_tokens.to_i %>
+            <%= number_with_delimiter(total) || 0 %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= message.created_at.to_fs(:short) %>
+          </td>
+          <td class="l-ui-table__cell--action">
+            <%= link_to "Delete", layered_assistant.conversation_message_path(@conversation, message), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="l-ui-utility--mt-lg">
+    <%= l_ui_pagy(@pagy) %>
+  </div>
+</div>

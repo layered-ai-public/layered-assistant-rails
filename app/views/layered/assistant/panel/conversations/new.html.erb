@@ -1,0 +1,23 @@
+<%= render "layered/assistant/panel/conversations/header", assistants: @assistants, conversations: [], selected: "new" %>
+
+<%= turbo_frame_tag "assistant_panel" do %>
+  <%= form_with(model: @conversation, url: layered_assistant.panel_conversations_path, html: { class: "l-ui-form l-ui-utility--mt-0" }) do |f| %>
+    <%= render "layered_ui/shared/form_errors", item: @conversation %>
+
+    <div class="l-ui-form__group l-ui-utility--mt-0">
+      <%= render "layered_ui/shared/label", form: f, field: :assistant_id, name: "Assistant", required: true %>
+      <%= f.select :assistant_id, @assistants.map { |a| [a.name, a.id] }, { include_blank: "Select:" }, class: "l-ui-select" %>
+      <%= render "layered_ui/shared/field_error", object: @conversation, field: :assistant %>
+    </div>
+
+    <div class="l-ui-form__group">
+      <%= render "layered_ui/shared/label", form: f, field: :name, required: false %>
+      <%= f.text_field :name, class: "l-ui-form__field" %>
+      <p class="l-ui-form__hint">Auto-set from first message if left blank</p>
+    </div>
+
+    <div class="l-ui-utility--mt-lg">
+      <%= f.submit "Create conversation", class: "l-ui-button--primary" %>
+    </div>
+  <% end %>
+<% end %>

@@ -1,0 +1,25 @@
+<%= turbo_stream_from @conversation %>
+
+<div class="l-ui-conversation__container">
+  <div class="l-ui-container--spread">
+    <h1><%= @conversation.name %></h1>
+    <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
+  </div>
+
+  <div class="l-ui-conversation__messages" data-controller="messages">
+    <div id="<%= dom_id(@conversation) %>_messages" class="<%= dom_id(@conversation) %>_messages l-ui-conversation" aria-live="polite" data-messages-target="list">
+      <%= render "layered/assistant/messages/system_prompt", conversation: @conversation %>
+      <%= render partial: "layered/assistant/messages/message", collection: @messages, as: :message %>
+    </div>
+
+    <button class="l-ui-scroll-to-bottom"
+            data-messages-target="scrollButton"
+            data-action="click->messages#jumpToBottom"
+            aria-label="Scroll to bottom"
+            type="button">
+      <%= image_tag "layered_ui/icon_chevron_down.svg", class: "l-ui-icon--sm l-ui-icon--dark-invert", alt: "" %>
+    </button>
+  </div>
+
+  <%= render "layered/assistant/messages/composer", conversation: @conversation, models: @models, selected_model_id: @selected_model_id %>
+</div>

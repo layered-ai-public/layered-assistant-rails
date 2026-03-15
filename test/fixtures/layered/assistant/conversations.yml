@@ -1,0 +1,19 @@
+greeting:
+  uid: conv_greeting_fixture_001
+  name: Greeting
+  assistant: general
+
+coding:
+  uid: conv_coding_fixture_002
+  name: Coding Help
+  assistant: coding
+
+empty:
+  uid: conv_empty_fixture_003
+  name: Empty Conversation
+  assistant: general
+
+private_convo:
+  uid: conv_private_fixture_004
+  name: Private conversation
+  assistant: private

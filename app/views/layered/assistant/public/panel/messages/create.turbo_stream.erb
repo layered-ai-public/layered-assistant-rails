@@ -1,0 +1,9 @@
+<% if @error %>
+  <%= turbo_stream.append_all ".#{dom_id(@conversation)}_messages" do %>
+    <div class="l-ui-notice--error l-ui-utility--mb-0" role="alert"><%= @error %></div>
+  <% end %>
+<% end %>
+
+<%= turbo_stream.replace "public-panel-composer-form" do %>
+  <%= render "layered/assistant/public/panel/messages/composer", conversation: @conversation %>
+<% end %>

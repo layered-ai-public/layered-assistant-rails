@@ -1,0 +1,17 @@
+<%= render "layered/assistant/public/panel/conversations/header", assistant: @assistant, conversations: [], selected: :new %>
+
+<%= turbo_frame_tag "assistant_panel" do %>
+  <div class="l-assistant-panel__lobby">
+    <h2 class="l-ui-heading--md"><%= @assistant.name %></h2>
+
+    <% if @assistant.description.present? %>
+      <p class="l-ui-text"><%= @assistant.description %></p>
+    <% end %>
+
+    <%= form_with url: layered_assistant.public_panel_conversations_path(assistant_id: @assistant.id), method: :post do |f| %>
+      <div class="l-ui-utility--mt-lg">
+        <%= f.submit "Start conversation", class: "l-ui-button--primary" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

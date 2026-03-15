@@ -1,0 +1,121 @@
+<p class="l-ui-utility--mt-md">Run the install generator to copy CSS, JS, and migrations to your application:</p>
+<code class="l-ui-surface l-ui-utility--mt-md">bin/rails generate layered:assistant:install</code>
+<p class="l-ui-utility--mt-lg">This will:</p>
+<ul class="l-ui-list l-ui-utility--mt-sm">
+  <li>Copy <code>layered_ui.css</code> to <code>app/assets/tailwind/</code></li>
+  <li>Add <code>@import "./layered_ui";</code> to your <code>application.css</code></li>
+  <li>Add <code>import "layered_ui"</code> to your <code>application.js</code></li>
+  <li>Copy <code>layered_assistant.css</code> to <code>app/assets/tailwind/layered_assistant.css</code></li>
+  <li>Add <code>@import "./layered_assistant";</code> to your <code>application.css</code> (after the layered-ui import)</li>
+  <li>Add <code>import "layered_assistant"</code> to your <code>application.js</code> (after the layered-ui import)</li>
+  <li>Mount the engine at <code>/layered/assistant</code> in your <code>config/routes.rb</code></li>
+  <li>Copy engine migrations into your application</li>
+</ul>
+<p class="l-ui-utility--mt-md">All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.</p>
+
+<h2 class="l-ui-utility--mt-xl">Authorization</h2>
+<p class="l-ui-utility--mt-md">
+  All non-public engine routes are blocked by default (403 Forbidden) until you configure an
+  <code>authorize</code> block in <code>config/initializers/layered_assistant.rb</code>.
+</p>
+<p class="l-ui-utility--mt-md">
+  The install generator creates this file for you. Uncomment one of the examples to get started.
+</p>
+<p class="l-ui-utility--mt-lg">
+  The block runs in controller context, so you have access to
+  <code>request</code>, <code>current_user</code>, <code>redirect_to</code>,
+  <code>head</code>, <code>main_app</code>, and all other controller methods.
+</p>
+
+<h3 class="l-ui-utility--mt-lg">Allow all requests</h3>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+  # No-op: all requests permitted
+end</code></pre>
+
+<h3 class="l-ui-utility--mt-lg">Require sign-in (Devise)</h3>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+  redirect_to main_app.new_user_session_path unless user_signed_in?
+end</code></pre>
+
+<h3 class="l-ui-utility--mt-lg">Restrict to admins</h3>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+  head :forbidden unless current_user&amp;.admin?
+end</code></pre>
+
+<h3 class="l-ui-utility--mt-lg">Checking access in views</h3>
+<p class="l-ui-utility--mt-md">
+  The <code>l_assistant_accessible?</code> helper evaluates the authorize block
+  without side effects. Use it to conditionally show navigation or links to the engine:
+</p>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;% if l_assistant_accessible? %&gt;
+  &lt;%= link_to "Assistant", layered_assistant.root_path %&gt;
+&lt;% end %&gt;</code></pre>
+
+<h2 class="l-ui-utility--mt-xl">Panel helpers</h2>
+<p class="l-ui-utility--mt-md">
+  Two helpers are available to wire the <code>layered-ui</code> panel to the assistant engine.
+  Add these to your application layout's <code>content_for</code> blocks:
+</p>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;% content_for :l_ui_panel_heading do %&gt;
+  &lt;%= layered_assistant_panel_header %&gt;
+&lt;% end %&gt;
+
+&lt;% content_for :l_ui_panel_body do %&gt;
+  &lt;%= layered_assistant_panel_body %&gt;
+&lt;% end %&gt;
+
+&lt;%= render template: "layouts/layered_ui/application" %&gt;</code></pre>
+<p class="l-ui-utility--mt-lg">Both helpers accept keyword arguments forwarded as HTML attributes:</p>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;%= layered_assistant_panel_body data: { controller: "panel" } %&gt;</code></pre>
+
+<div class="l-ui-container--table l-ui-utility--mt-lg">
+  <table class="l-ui-table">
+    <caption class="l-ui-sr-only">Panel helpers reference</caption>
+    <thead class="l-ui-table__header">
+      <tr>
+        <th class="l-ui-table__header-cell" scope="col">Helper</th>
+        <th class="l-ui-table__header-cell" scope="col">Description</th>
+      </tr>
+    </thead>
+    <tbody class="l-ui-table__body">
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_header</code></th>
+        <td class="l-ui-table__cell">Empty Turbo Frame populated by the engine's panel views</td>
+      </tr>
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_body</code></th>
+        <td class="l-ui-table__cell">Turbo Frame that loads the conversation list from the engine's panel routes</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="l-ui-utility--mt-xl">Getting started</h2>
+<ol class="l-ui-list l-ui-utility--mt-md">
+  <li><%= link_to "Create a provider", layered_assistant.new_provider_path %> (e.g. Anthropic or OpenAI) with your API key</li>
+  <li>Add one or more models to the provider</li>
+  <li><%= link_to "Create an assistant", layered_assistant.new_assistant_path %> and assign a default model</li>
+  <li><%= link_to "Start a conversation", layered_assistant.new_conversation_path %></li>
+</ol>
+
+<h2 class="l-ui-utility--mt-xl">License</h2>
+<p class="l-ui-utility--mt-md">
+  Released under the <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/LICENSE">Apache 2.0 License</a>.
+</p>
+<p class="l-ui-utility--mt-md">
+  Copyright 2026 LAYERED AI LIMITED (UK company number: 17056830).
+  See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/NOTICE">NOTICE</a> for attribution details.
+</p>
+
+<h2 class="l-ui-utility--mt-xl">Trademarks</h2>
+<p class="l-ui-utility--mt-md">
+  The source code is fully open, but the layered.ai name, logo, and brand assets are trademarks of LAYERED AI LIMITED.
+  The Apache 2.0 license does not grant rights to use the layered.ai branding.
+  Forks and redistributions must use a distinct name.
+  See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/TRADEMARK.md">TRADEMARK.md</a> for the full policy.
+</p>
+
+<h2 class="l-ui-utility--mt-xl">Contributing</h2>
+<ul class="l-ui-list l-ui-utility--mt-md">
+  <li><a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/CLA.md">CLA.md</a> - contributor licence agreement</li>
+</ul>

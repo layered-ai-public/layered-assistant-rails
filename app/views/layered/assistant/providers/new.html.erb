@@ -1,0 +1,6 @@
+<div class="l-ui-container--spread">
+  <h1>New Provider</h1>
+  <%= link_to "Back", layered_assistant.providers_path, class: "l-ui-button--outline" %>
+</div>
+
+<%= render "form", provider: @provider, url: layered_assistant.providers_path %>

@@ -1,0 +1,23 @@
+<%= render "layered/assistant/public/panel/conversations/header", assistant: @conversation.assistant, conversations: @conversations, selected: @conversation.id %>
+
+<%= turbo_frame_tag "assistant_panel" do %>
+  <div class="l-ui-conversation__container">
+    <%= turbo_stream_from @conversation %>
+
+    <div class="l-ui-conversation__messages" data-controller="messages">
+      <div id="public_panel_<%= dom_id(@conversation) %>_messages" class="<%= dom_id(@conversation) %>_messages l-ui-conversation" aria-live="polite" data-messages-target="list">
+        <%= render partial: "layered/assistant/messages/message", collection: @messages, as: :message %>
+      </div>
+
+      <button class="l-ui-scroll-to-bottom"
+              data-messages-target="scrollButton"
+              data-action="click->messages#jumpToBottom"
+              aria-label="Scroll to bottom"
+              type="button">
+        <%= image_tag "layered_ui/icon_chevron_down.svg", class: "l-ui-icon--sm l-ui-icon--dark-invert", alt: "" %>
+      </button>
+    </div>
+
+    <%= render "layered/assistant/public/panel/messages/composer", conversation: @conversation %>
+  </div>
+<% end %>

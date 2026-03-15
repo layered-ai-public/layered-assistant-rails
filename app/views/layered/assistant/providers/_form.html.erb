@@ -1,0 +1,81 @@
+<%= form_with(model: provider, url: url, html: { class: "l-ui-form l-ui-utility--mt-2xl" }) do |f| %>
+  <%= render "layered_ui/shared/form_errors", item: provider %>
+
+  <div data-controller="provider-template" data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>">
+    <% unless provider.persisted? %>
+      <div class="l-ui-form__group">
+        <label class="l-ui-label" for="provider_template">Template</label>
+        <select id="provider_template" class="l-ui-select" data-action="provider-template#apply">
+          <option value="">Manual</option>
+          <% Layered::Assistant::Provider::TEMPLATES.each do |group, templates| %>
+            <optgroup label="<%= group %>">
+              <% templates.each do |t| %>
+                <option value="<%= t[:key] %>"><%= t[:name] %></option>
+              <% end %>
+            </optgroup>
+          <% end %>
+        </select>
+        <div class="l-ui-form__hint" hidden data-provider-template-target="description"></div>
+      </div>
+    <% end %>
+
+    <div class="l-ui-form__group">
+      <%= render "layered_ui/shared/label", form: f, field: :name, required: true %>
+      <%= f.text_field :name, class: "l-ui-form__field", data: { provider_template_target: "name" } %>
+      <%= render "layered_ui/shared/field_error", object: provider, field: :name %>
+    </div>
+
+    <div class="l-ui-form__group">
+      <%= render "layered_ui/shared/label", form: f, field: :protocol, required: true %>
+      <%= f.select :protocol, Layered::Assistant::Provider.protocols.map { |k, v| [v, k] }, { include_blank: "Select:" }, { class: "l-ui-select", data: { provider_template_target: "protocol" } } %>
+      <%= render "layered_ui/shared/field_error", object: provider, field: :protocol %>
+    </div>
+
+    <div class="l-ui-form__group">
+      <%= render "layered_ui/shared/label", form: f, field: :url, name: "URL", required: false %>
+      <%= f.url_field :url, class: "l-ui-form__field", data: { provider_template_target: "url" } %>
+      <%= render "layered_ui/shared/field_error", object: provider, field: :url %>
+    </div>
+
+    <div class="l-ui-form__group">
+      <%= render "layered_ui/shared/label", form: f, field: :secret, name: "Secret", required: false %>
+      <%= f.password_field :secret, class: "l-ui-form__field" %>
+      <%= render "layered_ui/shared/field_error", object: provider, field: :secret %>
+      <div class="l-ui-form__hint" hidden data-provider-template-target="secretHint"></div>
+    </div>
+  </div>
+
+  <label class="l-ui-switch l-ui-utility--mt-xl">
+    <%= f.check_box :enabled, class: "l-ui-switch__input", role: "switch" %>
+    <span class="l-ui-switch__track"></span>
+    Enabled
+  </label>
+
+  <% unless provider.persisted? %>
+    <div class="l-ui-form__group">
+      <label class="l-ui-label">Models</label>
+      <div class="l-ui-radio__group">
+        <div class="l-ui-radio__item">
+          <%= f.radio_button :create_models, "1", class: "l-ui-radio__input", checked: true %>
+          <%= f.label :create_models_1, "If available, automatically create popular models for this provider", class: "l-ui-radio__label" %>
+        </div>
+        <div class="l-ui-radio__item">
+          <%= f.radio_button :create_models, "0", class: "l-ui-radio__input" %>
+          <%= f.label :create_models_0, "Add your own models manually", class: "l-ui-radio__label" %>
+        </div>
+      </div>
+      <div class="l-ui-form__hint">
+        Popular model identifiers are sourced from: <%= link_to "https://github.com/layered-ai-public/layered-assistant-rails/blob/main/data/models.json", "https://github.com/layered-ai-public/layered-assistant-rails/blob/main/data/models.json", target: "_blank", rel: "noopener noreferrer" %>.
+      </div>
+    </div>
+  <% end %>
+
+  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+    <% if provider.persisted? %>
+      <%= link_to "Delete", layered_assistant.provider_path(provider), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <%= f.submit f.object.new_record? ? 'Create' : 'Update', class: "l-ui-button--primary" %>
+  </div>
+<% end %>

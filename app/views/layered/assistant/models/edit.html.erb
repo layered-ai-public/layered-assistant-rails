@@ -1,0 +1,6 @@
+<div class="l-ui-container--spread">
+  <h1>Edit Model</h1>
+  <%= link_to "Back", layered_assistant.provider_models_path(@provider), class: "l-ui-button--outline" %>
+</div>
+
+<%= render "form", model: @model, url: layered_assistant.provider_model_path(@provider, @model) %>

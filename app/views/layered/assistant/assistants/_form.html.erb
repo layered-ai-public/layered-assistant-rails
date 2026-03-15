@@ -1,0 +1,42 @@
+<%= form_with(model: assistant, url: url, html: { class: "l-ui-form l-ui-utility--mt-2xl" }) do |f| %>
+  <%= render "layered_ui/shared/form_errors", item: assistant %>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :name, required: true %>
+    <%= f.text_field :name, class: "l-ui-form__field" %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :name %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :description, required: false %>
+    <%= f.text_area :description, class: "l-ui-form__field", rows: 3 %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :description %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :system_prompt, name: "System prompt", required: false %>
+    <%= f.text_area :system_prompt, class: "l-ui-form__field", rows: 5 %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :system_prompt %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :default_model_id, name: "Default model", required: false %>
+    <%= f.select :default_model_id, @models.map { |m| ["#{m.provider.name} - #{m.name}", m.id] }, { include_blank: "None" }, class: "l-ui-select" %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :default_model_id %>
+  </div>
+
+  <label class="l-ui-switch l-ui-utility--mt-xl">
+    <%= f.check_box :public, class: "l-ui-switch__input", role: "switch" %>
+    <span class="l-ui-switch__track"></span>
+    Public
+  </label>
+
+  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+    <% if assistant.persisted? %>
+      <%= link_to "Delete", layered_assistant.assistant_path(assistant), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <%= f.submit assistant.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+  </div>
+<% end %>

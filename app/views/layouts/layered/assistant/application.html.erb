@@ -1,0 +1,32 @@
+<% content_for :l_ui_navigation_items do %>
+  <%= render "layouts/layered/assistant/host_navigation" %>
+  <% if l_assistant_accessible? %>
+    <%= l_ui_navigation_item "Setup", layered_assistant.root_path %>
+    <%= l_ui_navigation_item "Providers", layered_assistant.providers_path %>
+    <%= l_ui_navigation_item "Assistants", layered_assistant.assistants_path %>
+    <%= l_ui_navigation_item "Conversations", layered_assistant.conversations_path %>
+  <% end %>
+<% end %>
+
+<% content_for :l_ui_panel_heading do %>
+  <% if l_assistant_accessible? %>
+    <%= layered_assistant_panel_header %>
+  <% else %>
+    <%= layered_assistant_panel_header do %>Assistant<% end %>
+  <% end %>
+<% end %>
+
+<% if l_assistant_accessible? %>
+  <% content_for :l_ui_panel_body do %>
+    <%= layered_assistant_panel_body data: { controller: "panel" } %>
+  <% end %>
+<% else %>
+  <% public_assistant = Layered::Assistant::Assistant.publicly_available.by_name.first %>
+  <% if public_assistant %>
+    <% content_for :l_ui_panel_body do %>
+      <%= layered_assistant_public_panel_body assistant: public_assistant, data: { controller: "panel", panel_storage_key_value: "public_assistant_panel_url" } %>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= render template: "layouts/layered_ui/application" %>

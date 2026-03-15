@@ -1,0 +1,46 @@
+<%= render "layered/assistant/panel/conversations/header", assistants: @assistants, conversations: @conversations, selected: layered_assistant.panel_conversations_path %>
+
+<%= turbo_frame_tag "assistant_panel" do %>
+  <div class="l-ui-container--table">
+      <table class="l-ui-table l-ui-utility--mt-0">
+        <caption class="l-ui-sr-only">Conversations in panel</caption>
+        <thead class="l-ui-table__header">
+          <tr>
+            <th scope="col" class="l-ui-table__header-cell">Created</th>
+            <th scope="col" class="l-ui-table__header-cell">Name</th>
+            <th scope="col" class="l-ui-table__header-cell">Messages</th>
+            <th scope="col" class="l-ui-table__header-cell">Tokens</th>
+            <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody class="l-ui-table__body">
+          <% if @conversations.any? %>
+            <% @conversations.each do |conversation| %>
+              <tr>
+                <td class="l-ui-table__cell">
+                  <%= conversation.created_at.to_fs(:short) %>
+                </td>
+                <th scope="row" class="l-ui-table__cell--primary">
+                  <%= link_to conversation.name, layered_assistant.panel_conversation_path(conversation), data: { turbo_frame: "assistant_panel" } %>
+                </th>
+                <td class="l-ui-table__cell">
+                  <%= link_to conversation.messages_count || 0, layered_assistant.conversation_messages_path(conversation), data: { turbo_frame: "_top" } %>
+                </td>
+                <td class="l-ui-table__cell">
+                  <%= number_with_delimiter(conversation.token_estimate.to_i) %>
+                </td>
+                <td class="l-ui-table__cell--action">
+                  <%= button_to "Delete", layered_assistant.panel_conversation_path(conversation), method: :delete, class: "l-ui-table__action--danger", data: { turbo_confirm: "Delete this conversation?" } %>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td class="l-ui-table__cell" colspan="5">No conversations yet.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+  </div>
+<% end %>

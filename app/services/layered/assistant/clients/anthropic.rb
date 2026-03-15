@@ -1,0 +1,24 @@
+module Layered
+  module Assistant
+    module Clients
+      class Anthropic < Base
+        def chat(messages:, model:, stream_proc:, system_prompt: nil)
+          formatted = MessagesService.new.format(messages, provider: @provider, system_prompt: system_prompt)
+
+          parameters = {
+            model: model,
+            messages: formatted[:messages],
+            max_tokens: 4096,
+            stream: stream_proc
+          }
+          parameters[:system] = formatted[:system] if formatted[:system].present?
+
+          ::Anthropic::Client.new(
+            access_token: @api_key,
+            log_errors: ENV.fetch("LAYERED_ASSISTANT_LOG_ERRORS", "no") == "yes"
+          ).messages(parameters: parameters)
+        end
+      end
+    end
+  end
+end

@@ -1,0 +1,48 @@
+<%= render "layered/assistant/public/panel/conversations/header", assistant: @assistant, conversations: @conversations, selected: :index %>
+
+<%= turbo_frame_tag "assistant_panel" do %>
+  <div class="l-assistant-panel__lobby">
+    <h2 class="l-ui-heading--md"><%= @assistant.name %></h2>
+
+    <% if @assistant.description.present? %>
+      <p class="l-ui-text"><%= @assistant.description %></p>
+    <% end %>
+
+    <% if @conversations.any? %>
+      <div class="l-ui-container--table">
+        <table class="l-ui-table l-ui-utility--mt-0">
+          <caption class="l-ui-sr-only">Your conversations</caption>
+          <thead class="l-ui-table__header">
+            <tr>
+              <th scope="col" class="l-ui-table__header-cell">Created</th>
+              <th scope="col" class="l-ui-table__header-cell">Name</th>
+              <th scope="col" class="l-ui-table__header-cell">Messages</th>
+            </tr>
+          </thead>
+
+          <tbody class="l-ui-table__body">
+            <% @conversations.each do |conversation| %>
+              <tr>
+                <td class="l-ui-table__cell">
+                  <%= conversation.created_at.to_fs(:short) %>
+                </td>
+                <th scope="row" class="l-ui-table__cell--primary">
+                  <%= link_to conversation.name, layered_assistant.public_panel_conversation_path(conversation), data: { turbo_frame: "assistant_panel" } %>
+                </th>
+                <td class="l-ui-table__cell">
+                  <%= conversation.messages_count || 0 %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% end %>
+
+    <%= form_with url: layered_assistant.public_panel_conversations_path(assistant_id: @assistant.id), method: :post do |f| %>
+      <div class="l-ui-utility--mt-lg">
+        <%= f.submit "Start conversation", class: "l-ui-button--primary" %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

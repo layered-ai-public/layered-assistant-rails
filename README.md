@@ -1,0 +1,176 @@
+# layered-assistant-rails
+
+[![CI](https://github.com/layered-ai-public/layered-ui-rails/actions/workflows/ci.yml/badge.svg)](https://github.com/layered-ai-public/layered-assistant-rails/actions/workflows/ci.yml)
+[![WCAG 2.2 AA](https://img.shields.io/badge/WCAG_2.2-AA-green)](https://www.w3.org/WAI/WCAG22/quickref/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Website](https://img.shields.io/badge/Website-layered.ai-purple)](https://www.layered.ai/)
+[![GitHub](https://img.shields.io/badge/GitHub-layered--assistant--rails-black)](https://github.com/layered-ai-public/layered-assistant-rails)
+[![Discord](https://img.shields.io/badge/Discord-join-5865F2)](https://discord.gg/aCGqz9Bx)
+
+An open source Rails 8+ engine built on [layered-ui-rails](https://github.com/layered-ai-public/layered-ui-rails) that provides a multi-provider AI assistant with streaming responses and a full conversation UI.
+
+## Requirements
+
+- Ruby >= 3.2.0
+- Ruby on Rails >= 8.0
+- [layered-ui-rails](https://github.com/layered-ai-public/layered-ui-rails) installed in the host app
+
+## Installation
+
+Add to your Gemfile:
+
+```ruby
+gem "layered-assistant-rails"
+```
+
+Then run:
+
+```bash
+bundle install
+```
+
+## Setup
+
+### Install generator
+
+Run the install generator to copy CSS and register imports:
+
+```bash
+bin/rails generate layered:assistant:install
+```
+
+This will:
+- Copy `layered_ui.css` to `app/assets/tailwind/`
+- Add `@import "./layered_ui";` to your `application.css`
+- Add `import "layered_ui"` to your `application.js`
+- Copy `layered_assistant.css` to `app/assets/tailwind/layered_assistant.css`
+- Add `@import "./layered_assistant";` to your `app/assets/tailwind/application.css` (after the layered-ui import)
+- Add `import "layered_assistant"` to your `app/javascript/application.js` (after the layered-ui import)
+- Mount the engine at `/layered/assistant` in your `config/routes.rb`
+- Copy engine migrations into your application
+
+All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.
+
+## Authorization
+
+All non-public engine routes are **blocked by default** (403 Forbidden) until you configure an `authorize` block. The install generator creates a starter initialiser at `config/initializers/layered_assistant.rb` - uncomment one of the examples to get started.
+
+Once configured, visit `/layered/assistant` (or wherever you mounted the engine) to verify access.
+
+### Allow all requests
+
+```ruby
+Layered::Assistant.authorize do
+  # No-op: all requests permitted
+end
+```
+
+### Require sign-in (Devise)
+
+```ruby
+Layered::Assistant.authorize do
+  redirect_to main_app.new_user_session_path unless user_signed_in?
+end
+```
+
+### Restrict to admins
+
+```ruby
+Layered::Assistant.authorize do
+  head :forbidden unless current_user&.admin?
+end
+```
+
+The block runs in controller context, so you have access to `request`, `current_user`, `redirect_to`, `head`, `main_app`, and all other controller methods.
+
+### Checking access in views
+
+The `l_assistant_accessible?` helper evaluates the authorize block without side effects. Use it to conditionally show navigation or links to the engine:
+
+```erb
+<% if l_assistant_accessible? %>
+  <%= link_to "Assistant", layered_assistant.root_path %>
+<% end %>
+```
+
+## Panel helpers
+
+The engine provides two convenience helpers for wiring the layered-ui panel to the assistant. Use them inside `content_for` blocks in your application layout:
+
+```erb
+<% content_for :l_ui_panel_heading do %>
+  <%= layered_assistant_panel_header %>
+<% end %>
+
+<% content_for :l_ui_panel_body do %>
+  <%= layered_assistant_panel_body %>
+<% end %>
+
+<%= render template: "layouts/layered_ui/application" %>
+```
+
+Both helpers accept keyword arguments that are forwarded as HTML attributes to the underlying `turbo_frame_tag`:
+
+```erb
+<%= layered_assistant_panel_body data: { controller: "panel" } %>
+```
+
+| Helper | Description |
+|---|---|
+| `layered_assistant_panel_header` | Empty Turbo Frame (`assistant_panel_header`) populated by the engine's panel views |
+| `layered_assistant_panel_body` | Turbo Frame (`assistant_panel`) that loads the conversation list from the engine's panel routes |
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `LAYERED_ASSISTANT_DANGEROUSLY_SKIP_DB_ENCRYPTION` | `nil` | Set to `"yes"` to skip Active Record Encryption on `Provider#secret`. Only for development/test environments without encryption keys configured |
+| `LAYERED_ASSISTANT_LOG_ERRORS` | `nil` | Set to `"yes"` to enable error logging from the AI API clients |
+
+## Demo
+
+A dummy Rails app is included for development and testing:
+
+```bash
+cd test/dummy
+bin/setup
+bin/dev
+```
+
+Then visit `http://localhost:3000`.
+
+### Deploying the dummy app
+
+The dummy app can be deployed with [Kamal](https://kamal-deploy.org). Set the required environment variables and deploy from `test/dummy`:
+
+```bash
+cd test/dummy
+export KAMAL_DEPLOY_IP=<server-ip>
+export KAMAL_DEPLOY_DOMAIN=<domain>
+export KAMAL_SSH_KEY=<path-to-ssh-key>
+kamal deploy
+```
+
+## Testing
+
+Run the gem tests from the root directory:
+
+```bash
+bundle exec rake test
+```
+
+## License
+
+Released under the [Apache 2.0 License](LICENSE).
+
+Copyright 2026 LAYERED AI LIMITED (UK company number: 17056830). See [NOTICE](NOTICE) for attribution details.
+
+## Trademarks
+
+The source code is fully open, but the layered.ai name, logo, and brand assets are trademarks of LAYERED AI LIMITED. The Apache 2.0 license does not grant rights to use the layered.ai branding. Forks and redistributions must use a distinct name. See [TRADEMARK.md](TRADEMARK.md) for the full policy.
+
+## Contributing
+
+- [CLA.md](CLA.md) - contributor license agreement

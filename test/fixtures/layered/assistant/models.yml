@@ -1,0 +1,17 @@
+sonnet:
+  provider: anthropic
+  name: Sonnet
+  identifier: claude-sonnet
+  position: 1
+
+haiku:
+  provider: anthropic
+  name: Haiku
+  identifier: claude-haiku
+  position: 2
+
+gpt:
+  provider: openai
+  name: GPT-4
+  identifier: gpt-4
+  position: 1

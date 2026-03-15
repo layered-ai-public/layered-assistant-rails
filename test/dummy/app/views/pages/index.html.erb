@@ -1,0 +1,77 @@
+<h1>layered-assistant-rails (v<%= Layered::Assistant::VERSION %>)</h1>
+
+<p class="l-ui-utility--mt-md">
+  <%= Gem.loaded_specs["layered-assistant-rails"].description %>
+</p>
+
+<!-- MailerLite Universal -->
+<script>
+    (function(w,d,e,u,f,l,n){w[f]=w[f]||function(){(w[f].q=w[f].q||[])
+    .push(arguments);},l=d.createElement(e),l.async=1,l.src=u,
+    n=d.getElementsByTagName(e)[0],n.parentNode.insertBefore(l,n);})
+    (window,document,'script','https://assets.mailerlite.com/js/universal.js','ml');
+    ml('account', '1877799');
+</script>
+<!-- End MailerLite Universal -->
+
+<div class="flex gap-2 l-ui-utility--mt-md">
+  <%= link_to "https://www.layered.ai/", target: "_blank", rel: "noopener noreferrer", class: "l-ui-button l-ui-button--outline" do %>
+    <%= image_tag "icon_globe.svg", class: "l-ui-icon--sm", alt: "" %> Website
+  <% end %>
+  <%= link_to "https://github.com/layered-ai-public/layered-assistant-rails", target: "_blank", rel: "noopener noreferrer", class: "l-ui-button l-ui-button--outline" do %>
+    <%= image_tag "icon_github.svg", class: "l-ui-icon--sm", alt: "" %> GitHub
+  <% end %>
+  <%= link_to "https://discord.gg/aCGqz9Bx", target: "_blank", rel: "noopener noreferrer", class: "l-ui-button l-ui-button--outline" do %>
+    <%= image_tag "icon_discord.svg", class: "l-ui-icon--sm", alt: "" %> Discord
+  <% end %>
+  <button type="button" class="ml-onclick-form l-ui-button l-ui-button--outline" onclick="ml('show', 'CbhpAg', true)">
+    <%= image_tag "icon_mail.svg", class: "l-ui-icon--sm", alt: "" %> Newsletter
+  </button>
+</div>
+
+<h2 class="l-ui-utility--mt-xl">Features</h2>
+<div class="l-ui-container--grid l-ui-utility--mt-lg">
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_cloud.svg", class: "l-ui-icon--md dark:invert", alt: "Cloud icon representing multi-provider support" %>
+      <h3>Multi-provider and model support</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Use cloud (Anthropic, OpenAI, Gemini, Mistral, Groq, OpenRouter) or local (Ollama or LM Studio) providers with configurable models.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_bolt.svg", class: "l-ui-icon--md dark:invert", alt: "Lightning bolt icon representing streaming responses" %>
+      <h3>Streaming responses</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Real-time streaming via Turbo Streams for a responsive chat experience with dynamic token fade-in and chunked markdown formatting.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_chat.svg", class: "l-ui-icon--md dark:invert", alt: "Chat bubbles icon representing conversation interface" %>
+      <h3>Conversation UI</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Full conversation interface with message history, model selection, and a slide-out panel mode.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_lock.svg", class: "l-ui-icon--md dark:invert", alt: "Padlock icon representing encrypted secrets" %>
+      <h3>Encrypted secrets</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">API keys are encrypted at rest using Active Record Encryption.</p>
+  </div>
+</div>
+
+<h2 class="l-ui-utility--mt-xl">Requirements</h2>
+<ul class="l-ui-list l-ui-utility--mt-md">
+  <li>Ruby on Rails >= 8.0</li>
+  <li><code>layered-ui-rails</code> gem</li>
+</ul>
+
+<h2 class="l-ui-utility--mt-xl">Installation</h2>
+<p class="l-ui-utility--mt-md">Add to your Gemfile:</p>
+<code class="l-ui-surface l-ui-utility--mt-md">gem "layered-assistant-rails"</code>
+<p class="l-ui-utility--mt-lg">Then run:</p>
+<code class="l-ui-surface l-ui-utility--mt-md">bundle install</code>
+
+<h2 class="l-ui-utility--mt-xl">Setup</h2>
+<%= render "layered/assistant/setup/setup" %>

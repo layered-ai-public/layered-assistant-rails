@@ -1,0 +1,23 @@
+<%= turbo_frame_tag "assistant_panel_header" do %>
+  <div class="l-ui-form__group l-ui-utility--mt-0">
+    <div class="l-ui-select-wrapper l-ui-utility--mt-0 l-ui-utility---mr-2">
+      <select name="conversation_id" class="l-ui-select" aria-label="Select conversation"
+              data-controller="panel-nav"
+              data-action="change->panel-nav#navigate"
+              data-panel-nav-new-url-value="<%= layered_assistant.new_panel_conversation_path %>">
+        <option value="<%= layered_assistant.panel_conversations_path %>" <%= "selected" if selected == layered_assistant.panel_conversations_path %>>Conversations</option>
+        <option value="new" <%= "selected" if selected == "new" %>>+ New</option>
+        <% assistants.each do |assistant| %>
+          <% assistant_conversations = conversations.select { |c| c.assistant_id == assistant.id } %>
+          <% if assistant_conversations.any? %>
+            <optgroup label="<%= assistant.name %>">
+              <% assistant_conversations.each do |c| %>
+                <option value="<%= layered_assistant.panel_conversation_path(c) %>" <%= "selected" if selected == layered_assistant.panel_conversation_path(c) %>><%= c.name %></option>
+              <% end %>
+            </optgroup>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+  </div>
+<% end %>

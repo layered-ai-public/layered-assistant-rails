@@ -1,0 +1,6 @@
+<div class="l-ui-container--spread">
+  <h1>Edit assistant</h1>
+  <%= link_to "Back", layered_assistant.assistants_path, class: "l-ui-button--outline" %>
+</div>
+
+<%= render "form", assistant: @assistant, url: layered_assistant.assistant_path(@assistant) %>

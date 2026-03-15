@@ -1,0 +1,54 @@
+<div class="l-ui-container--spread">
+  <h1>Models</h1>
+  <div class="l-ui-container--spread">
+    <%= link_to "Back", layered_assistant.providers_path, class: "l-ui-button--outline" %>
+    <%= link_to "New", layered_assistant.new_provider_model_path(@provider), class: "l-ui-button--primary" %>
+  </div>
+</div>
+
+<div class="l-ui-container--table l-ui-utility--mt-lg">
+  <table class="l-ui-table">
+    <caption class="l-ui-sr-only">Models</caption>
+    <thead class="l-ui-table__header">
+      <tr>
+        <th scope="col" class="l-ui-table__header-cell">Name</th>
+        <th scope="col" class="l-ui-table__header-cell">Identifier</th>
+        <th scope="col" class="l-ui-table__header-cell">Enabled</th>
+        <th scope="col" class="l-ui-table__header-cell">Assistants</th>
+        <th scope="col" class="l-ui-table__header-cell">Messages</th>
+        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="l-ui-table__body">
+      <% @models.each do |model| %>
+        <tr>
+          <td class="l-ui-table__cell--primary">
+            <%= model.name %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= model.identifier %>
+          </td>
+          <td class="l-ui-table__cell">
+            <span class="<%= model.enabled? ? "l-ui-badge--success" : "l-ui-badge--danger" %>">
+              <%= model.enabled? ? "Enabled" : "Disabled" %>
+            </span>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= model.assistants_count %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= model.messages_count %>
+          </td>
+          <td class="l-ui-table__cell--action">
+            <%= link_to "Edit", layered_assistant.edit_provider_model_path(@provider, model) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="l-ui-utility--mt-lg">
+    <%= l_ui_pagy(@pagy) %>
+  </div>
+</div>

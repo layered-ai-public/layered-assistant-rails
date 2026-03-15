@@ -1,0 +1,20 @@
+anthropic:
+  name: Anthropic
+  protocol: anthropic
+  enabled: true
+  secret: sk-ant-test
+  position: 1
+
+openai:
+  name: OpenAI
+  protocol: openai
+  enabled: true
+  secret: sk-oai-test
+  position: 2
+
+disabled:
+  name: Disabled Provider
+  protocol: openai
+  enabled: false
+  secret: sk-disabled
+  position: 3
