@@ -29,8 +29,9 @@ module Layered
             error_note = "Something went wrong while generating a response."
             message.update(content: existing.present? ? "#{existing}\n\n---\n\n#{error_note}" : error_note)
             message.broadcast_updated
-            message.broadcast_response_complete
           end
+
+          message.broadcast_response_complete unless message.reload.stopped?
         end
       end
     end
