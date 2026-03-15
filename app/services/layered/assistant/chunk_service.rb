@@ -1,7 +1,7 @@
 module Layered
   module Assistant
     class ChunkService
-      STOP_CHECK_INTERVAL = 5
+      STOP_CHECK_INTERVAL = 25
 
       def initialize(message, provider:)
         @message = message
