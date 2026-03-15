@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-15
+
+- Fixed race condition where user message could display after assistant message due to out-of-order ActionCable broadcasts
+
 ## [0.1.1] - 2026-03-15
 
 - Stop button to cancel an in-progress assistant response
