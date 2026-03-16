@@ -3,13 +3,19 @@ module Layered
     class ChunkService
       STOP_CHECK_INTERVAL = 25
 
-      def initialize(message, provider:)
+      def initialize(message, provider:, started_at: nil)
         @message = message
         @provider = provider
         @input_tokens = 0
         @output_tokens = 0
         @chunk_count = 0
         @stopped = false
+        @started_at = started_at
+        @first_token_at = nil
+      end
+
+      def mark_started!
+        @started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       end
 
       def call(chunk)
@@ -26,6 +32,7 @@ module Layered
         extract_usage(chunk)
 
         if text
+          @first_token_at ||= Process.clock_gettime(Process::CLOCK_MONOTONIC)
           @message.update(content: (@message.content || "") + text)
           @message.broadcast_chunk(text)
         end
@@ -76,16 +83,27 @@ module Layered
       end
 
       def save_token_usage
+        timing = response_timing
         if @input_tokens == 0 && @output_tokens == 0
           estimated = TokenEstimator.estimate(@message.content)
           return unless estimated
 
-          @message.update!(output_tokens: estimated, tokens_estimated: true)
+          @message.update!(output_tokens: estimated, tokens_estimated: true, **timing)
         else
-          @message.update!(input_tokens: @input_tokens, output_tokens: @output_tokens)
+          @message.update!(input_tokens: @input_tokens, output_tokens: @output_tokens, **timing)
         end
 
         @message.conversation.update_token_totals!
+      end
+
+      def response_timing
+        return {} unless @started_at
+
+        now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        attrs = {}
+        attrs[:ttft_ms] = ((@first_token_at - @started_at) * 1000).round if @first_token_at
+        attrs[:response_ms] = ((now - @started_at) * 1000).round
+        attrs
       end
     end
   end

@@ -18,9 +18,9 @@
       <% end %>
     </div>
     <div class="l-ui-message__footer">
-      <% total_tokens = message.input_tokens.to_i + message.output_tokens.to_i %>
-      <% if message.model || total_tokens > 0 %>
-        <span class="l-ui-message__metadata"><%= [message.model&.name, total_tokens > 0 ? "#{message.tokens_estimated? ? "~" : ""}#{number_with_delimiter(total_tokens)} tokens" : nil].compact.join(" · ") %></span>
+      <% if message.model %>
+        <% title = message_metadata_title(message) %>
+        <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message.model.name %></span>
       <% end %>
       <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
     </div>

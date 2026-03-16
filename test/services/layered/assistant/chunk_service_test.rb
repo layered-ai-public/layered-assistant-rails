@@ -167,6 +167,50 @@ module Layered
           "Expected at most #{ChunkService::STOP_CHECK_INTERVAL} chunks before stop, got #{appended_count}"
       end
 
+      # Response timing
+
+      test "saves ttft_ms and response_ms on message_stop" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+        service.mark_started!
+
+        service.call({ "type" => "message_start", "message" => { "usage" => { "input_tokens" => 10 } } })
+        service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+        service.call({ "type" => "message_delta", "usage" => { "output_tokens" => 5 } })
+        service.call({ "type" => "message_stop" })
+
+        message.reload
+        assert_not_nil message.ttft_ms
+        assert_not_nil message.response_ms
+        assert message.ttft_ms >= 0
+        assert message.response_ms >= message.ttft_ms
+      end
+
+      test "does not set ttft_ms when no text chunks received" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+        service.mark_started!
+
+        service.call({ "type" => "message_stop" })
+
+        message.reload
+        assert_nil message.ttft_ms
+      end
+
+      test "timing works without mark_started" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+        service.call({ "type" => "message_delta", "usage" => { "output_tokens" => 5 } })
+        service.call({ "type" => "message_stop" })
+
+        message.reload
+        # Without mark_started!, timing fields should be nil
+        assert_nil message.ttft_ms
+        assert_nil message.response_ms
+      end
+
       test "does not mark tokens as estimated when API provides usage" do
         conversation = layered_assistant_conversations(:greeting)
         message = conversation.messages.create!(role: :assistant, content: nil)

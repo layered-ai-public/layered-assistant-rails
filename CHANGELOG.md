@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [0.1.2] - 2026-03-15
 
+- Response timing metrics (tok/s, TTFT) on assistant messages with tooltip display
+- Model, tokens, tok/s, and TTFT columns on the admin messages table
 - Fixed race condition where user message could display after assistant message due to out-of-order ActionCable broadcasts
 
 ## [0.1.1] - 2026-03-15
