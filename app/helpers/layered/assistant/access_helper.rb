@@ -31,11 +31,11 @@ module Layered
         private
 
         def method_missing(method, ...)
-          @context.send(method, ...)
+          @context.public_send(method, ...)
         end
 
         def respond_to_missing?(method, include_private = false)
-          @context.respond_to?(method, include_private)
+          @context.respond_to?(method, false)
         end
       end
 

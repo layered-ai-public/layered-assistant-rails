@@ -20,8 +20,8 @@ module Layered
           end
 
           @assistant_message = result[:assistant_message]
-          @models = result[:models]
-          @selected_model_id = result[:selected_model_id]
+          @models = Model.available
+          @selected_model_id = message_params[:model_id]
           @error = result[:error]
 
           respond_to do |format|
