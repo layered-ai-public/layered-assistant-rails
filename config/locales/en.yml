@@ -1,0 +1,5 @@
+en:
+  layered_assistant:
+    protocols:
+      anthropic: "Anthropic"
+      openai: "OpenAI"

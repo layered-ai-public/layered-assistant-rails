@@ -23,7 +23,7 @@
             <%= provider.name %>
           </td>
           <td class="l-ui-table__cell">
-            <%= Layered::Assistant::Provider.protocols[provider.protocol] %>
+            <%= I18n.t("layered_assistant.protocols.#{provider.protocol}") %>
           </td>
           <td class="l-ui-table__cell">
             <%= link_to provider.models_count, layered_assistant.provider_models_path(provider) %>

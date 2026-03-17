@@ -27,7 +27,7 @@
 
     <div class="l-ui-form__group">
       <%= render "layered_ui/shared/label", form: f, field: :protocol, required: true %>
-      <%= f.select :protocol, Layered::Assistant::Provider.protocols.map { |k, v| [v, k] }, { include_blank: "Select:" }, { class: "l-ui-select", data: { provider_template_target: "protocol" } } %>
+      <%= f.select :protocol, Layered::Assistant::Provider.protocols.keys.map { |k| [I18n.t("layered_assistant.protocols.#{k}"), k] }, { include_blank: "Select:" }, { class: "l-ui-select", data: { provider_template_target: "protocol" } } %>
       <%= render "layered_ui/shared/field_error", object: provider, field: :protocol %>
     </div>
 

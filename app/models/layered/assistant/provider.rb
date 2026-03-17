@@ -13,8 +13,8 @@ module Layered
 
       # Enums
       enum :protocol, {
-        anthropic: "Anthropic",
-        openai: "OpenAI"
+        anthropic: "anthropic",
+        openai: "openai"
       }
 
       # Encryption
