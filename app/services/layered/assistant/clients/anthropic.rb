@@ -8,7 +8,7 @@ module Layered
           parameters = {
             model: model,
             messages: formatted[:messages],
-            max_tokens: 4096,
+            max_tokens: 8192,
             stream: stream_proc
           }
           parameters[:system] = formatted[:system] if formatted[:system].present?
