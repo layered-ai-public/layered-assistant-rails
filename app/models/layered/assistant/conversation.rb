@@ -37,8 +37,18 @@ module Layered
           message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
           return false unless message
 
-          estimated = TokenEstimator.estimate(message.content) || 0
-          message.update!(stopped: true, output_tokens: estimated, tokens_estimated: true)
+          attrs = {
+            stopped: true,
+            output_tokens: TokenEstimator.estimate(message.content) || 0,
+            tokens_estimated: true
+          }
+
+          if message.input_tokens.nil?
+            prior_content = messages.where("created_at < ?", message.created_at).pluck(:content).compact.join(" ")
+            attrs[:input_tokens] = TokenEstimator.estimate(prior_content) || 0
+          end
+
+          message.update!(attrs)
           update_token_totals!
           message.broadcast_updated
           message.broadcast_response_complete
