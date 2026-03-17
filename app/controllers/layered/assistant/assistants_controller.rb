@@ -6,7 +6,7 @@ module Layered
 
       def index
         @page_title = "Assistants"
-        @pagy, @assistants = pagy(Assistant.by_name)
+        @pagy, @assistants = pagy(scoped(Assistant).by_name)
       end
 
       def new
@@ -44,7 +44,7 @@ module Layered
       private
 
       def set_assistant
-        @assistant = Assistant.find(params[:id])
+        @assistant = scoped(Assistant).find(params[:id])
       end
 
       def set_models

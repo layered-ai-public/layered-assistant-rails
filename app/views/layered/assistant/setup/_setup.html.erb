@@ -51,6 +51,62 @@ end</code></pre>
   &lt;%= link_to "Assistant", layered_assistant.root_path %&gt;
 &lt;% end %&gt;</code></pre>
 
+<h2 class="l-ui-utility--mt-xl">Record scoping</h2>
+<p class="l-ui-utility--mt-md">
+  By default, all records are visible to any authorised user. If your application is
+  multi-tenant or you need to restrict which records a user can see, configure a
+  <code>scope</code> block in the initialiser.
+</p>
+<p class="l-ui-utility--mt-md">
+  The block receives the model class, runs in controller context, and must return an
+  <code>ActiveRecord::Relation</code>. The following models are passed through the scope block:
+</p>
+
+<div class="l-ui-container--table l-ui-utility--mt-lg">
+  <table class="l-ui-table">
+    <caption class="l-ui-sr-only">Scopeable models reference</caption>
+    <thead class="l-ui-table__header">
+      <tr>
+        <th class="l-ui-table__header-cell" scope="col">Model</th>
+        <th class="l-ui-table__header-cell" scope="col">Description</th>
+      </tr>
+    </thead>
+    <tbody class="l-ui-table__body">
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Conversation</code></th>
+        <td class="l-ui-table__cell">User conversations (has polymorphic <code>owner</code>)</td>
+      </tr>
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Assistant</code></th>
+        <td class="l-ui-table__cell">Assistant configurations (has polymorphic <code>owner</code>)</td>
+      </tr>
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Provider</code></th>
+        <td class="l-ui-table__cell">API provider credentials (has polymorphic <code>owner</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h3 class="l-ui-utility--mt-lg">Scope all owned resources to the current user</h3>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.scope do |model_class|
+  model_class.where(owner: current_user)
+end</code></pre>
+
+<h3 class="l-ui-utility--mt-lg">Scope conversations only</h3>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.scope do |model_class|
+  if model_class == Layered::Assistant::Conversation
+    model_class.where(owner: current_user)
+  else
+    model_class.all
+  end
+end</code></pre>
+
+<p class="l-ui-utility--mt-md">
+  When no scope block is configured, queries are unscoped. Record-level access control
+  is the host application's responsibility; the scope block is the integration point for it.
+</p>
+
 <h2 class="l-ui-utility--mt-xl">Panel helpers</h2>
 <p class="l-ui-utility--mt-md">
   Two helpers are available to wire the <code>layered-ui</code> panel to the assistant engine.

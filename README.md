@@ -102,6 +102,40 @@ The `l_assistant_accessible?` helper evaluates the authorize block without side 
 <% end %>
 ```
 
+## Record scoping
+
+By default, all records are visible to any authorised user. If your application is multi-tenant or you need to restrict which records a user can see, configure a `scope` block in the initialiser.
+
+The block receives the model class, runs in controller context, and must return an `ActiveRecord::Relation`. The following models are passed through the scope block:
+
+| Model | Description |
+|---|---|
+| `Layered::Assistant::Conversation` | User conversations (has polymorphic `owner`) |
+| `Layered::Assistant::Assistant` | Assistant configurations (has polymorphic `owner`) |
+| `Layered::Assistant::Provider` | API provider credentials (has polymorphic `owner`) |
+
+### Scope all owned resources to the current user
+
+```ruby
+Layered::Assistant.scope do |model_class|
+  model_class.where(owner: current_user)
+end
+```
+
+### Scope conversations only
+
+```ruby
+Layered::Assistant.scope do |model_class|
+  if model_class == Layered::Assistant::Conversation
+    model_class.where(owner: current_user)
+  else
+    model_class.all
+  end
+end
+```
+
+When no scope block is configured, queries are unscoped. Record-level access control is the host application's responsibility; the scope block is the integration point for it.
+
 ## Panel helpers
 
 The engine provides two convenience helpers for wiring the layered-ui panel to the assistant. Use them inside `content_for` blocks in your application layout:

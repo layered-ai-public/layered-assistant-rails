@@ -42,7 +42,7 @@ module Layered
       private
 
       def set_conversation
-        @conversation = Conversation.find(params[:conversation_id])
+        @conversation = scoped(Conversation).find(params[:conversation_id])
       end
 
       def set_message
