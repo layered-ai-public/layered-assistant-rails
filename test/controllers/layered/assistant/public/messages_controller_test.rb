@@ -15,7 +15,7 @@ module Layered
         test "should create message using assistant default model" do
           assert_difference("Message.count", 2) do
             assert_enqueued_with(job: Messages::ResponseJob) do
-              post "/layered/assistant/public/conversations/#{@conversation.id}/messages",
+              post "/layered/assistant/public/conversations/#{@conversation.uid}/messages",
                 params: { message: { content: "Hello from public" } },
                 as: :turbo_stream
             end
@@ -31,7 +31,7 @@ module Layered
         end
 
         test "should respond with turbo_stream" do
-          post "/layered/assistant/public/conversations/#{@conversation.id}/messages",
+          post "/layered/assistant/public/conversations/#{@conversation.uid}/messages",
             params: { message: { content: "Test" } },
             as: :turbo_stream
 
@@ -42,7 +42,7 @@ module Layered
         test "ignores model_id from params and uses assistant default" do
           other_model = layered_assistant_models(:haiku)
 
-          post "/layered/assistant/public/conversations/#{@conversation.id}/messages",
+          post "/layered/assistant/public/conversations/#{@conversation.uid}/messages",
             params: { message: { content: "Test", model_id: other_model.id } },
             as: :turbo_stream
 
@@ -54,7 +54,7 @@ module Layered
           conversation = layered_assistant_conversations(:coding)
 
           assert_no_difference("Message.count") do
-            post "/layered/assistant/public/conversations/#{conversation.id}/messages",
+            post "/layered/assistant/public/conversations/#{conversation.uid}/messages",
               params: { message: { content: "Hello" } },
               as: :turbo_stream
           end

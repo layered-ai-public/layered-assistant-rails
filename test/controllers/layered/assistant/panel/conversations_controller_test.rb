@@ -14,7 +14,7 @@ module Layered
         test "should get show" do
           conversation = layered_assistant_conversations(:greeting)
 
-          get "/layered/assistant/panel/conversations/#{conversation.id}"
+          get "/layered/assistant/panel/conversations/#{conversation.uid}"
           assert_response :success
           assert_select "turbo-frame#assistant_panel"
           assert_select ".l-ui-conversation__container"
@@ -51,7 +51,7 @@ module Layered
             model: layered_assistant_models(:sonnet)
           )
 
-          patch "/layered/assistant/panel/conversations/#{conversation.id}/stop"
+          patch "/layered/assistant/panel/conversations/#{conversation.uid}/stop"
           assert_response :ok
 
           assistant_message.reload

@@ -12,7 +12,7 @@ module Layered
         test "should create message and enqueue ai response job" do
           assert_difference("Message.count", 2) do
             assert_enqueued_with(job: Messages::ResponseJob) do
-              post "/layered/assistant/panel/conversations/#{@conversation.id}/messages",
+              post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
                 params: { message: { content: "Hello from panel", model_id: @model.id } },
                 as: :turbo_stream
             end
@@ -28,7 +28,7 @@ module Layered
         end
 
         test "should respond with turbo_stream" do
-          post "/layered/assistant/panel/conversations/#{@conversation.id}/messages",
+          post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
             params: { message: { content: "Test", model_id: @model.id } },
             as: :turbo_stream
 

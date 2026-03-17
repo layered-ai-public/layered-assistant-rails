@@ -17,6 +17,10 @@ module Layered
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
       scope :by_created_at, -> { order(created_at: :desc) }
 
+      def to_param
+        uid
+      end
+
       # Name
       def update_token_totals!
         input = messages.sum(:input_tokens)

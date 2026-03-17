@@ -25,7 +25,7 @@ module Layered
           end
         end
 
-        get "/layered/assistant/conversations/#{conversation.id}"
+        get "/layered/assistant/conversations/#{conversation.uid}"
         assert_response :success
       end
 
@@ -41,7 +41,7 @@ module Layered
           end
         end
 
-        get "/layered/assistant/conversations/#{conversation.id}"
+        get "/layered/assistant/conversations/#{conversation.uid}"
         assert_response :not_found
       end
 

@@ -42,7 +42,7 @@ module Layered
         private
 
         def set_conversation
-          @conversation = scoped(Conversation).find(params[:id])
+          @conversation = scoped(Conversation).find_by!(uid: params[:id])
         end
 
         def set_assistants

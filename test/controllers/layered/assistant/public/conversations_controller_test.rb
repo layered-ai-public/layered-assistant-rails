@@ -33,7 +33,7 @@ module Layered
           post "/layered/assistant/public/conversations", params: { assistant_id: @assistant.id }
           conversation = Conversation.order(:id).last
 
-          get "/layered/assistant/public/conversations/#{conversation.id}"
+          get "/layered/assistant/public/conversations/#{conversation.uid}"
           assert_response :success
           assert_select "h1", text: conversation.name
         end
@@ -49,7 +49,7 @@ module Layered
             model: layered_assistant_models(:sonnet)
           )
 
-          patch "/layered/assistant/public/conversations/#{conversation.id}/stop"
+          patch "/layered/assistant/public/conversations/#{conversation.uid}/stop"
           assert_response :ok
 
           assistant_message.reload
@@ -58,7 +58,7 @@ module Layered
 
         test "show redirects to assistants when conversation not in session" do
           conversation = layered_assistant_conversations(:coding)
-          get "/layered/assistant/public/conversations/#{conversation.id}"
+          get "/layered/assistant/public/conversations/#{conversation.uid}"
           assert_redirected_to "/layered/assistant/public/assistants"
         end
       end

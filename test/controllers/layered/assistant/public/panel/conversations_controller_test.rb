@@ -67,7 +67,7 @@ module Layered
             post "/layered/assistant/public/panel/conversations", params: { assistant_id: @assistant.id }
             conversation = Conversation.order(:id).last
 
-            get "/layered/assistant/public/panel/conversations/#{conversation.id}"
+            get "/layered/assistant/public/panel/conversations/#{conversation.uid}"
             assert_response :success
             assert_select "turbo-frame#assistant_panel"
             assert_select ".l-ui-conversation__container"
@@ -84,7 +84,7 @@ module Layered
               model: layered_assistant_models(:sonnet)
             )
 
-            patch "/layered/assistant/public/panel/conversations/#{conversation.id}/stop"
+            patch "/layered/assistant/public/panel/conversations/#{conversation.uid}/stop"
             assert_response :ok
 
             assistant_message.reload
@@ -93,7 +93,7 @@ module Layered
 
           test "show redirects to panel lobby when conversation not in session" do
             conversation = layered_assistant_conversations(:coding)
-            get "/layered/assistant/public/panel/conversations/#{conversation.id}"
+            get "/layered/assistant/public/panel/conversations/#{conversation.uid}"
             assert_redirected_to "/layered/assistant/public/panel/conversations?assistant_id=#{conversation.assistant.id}"
           end
         end

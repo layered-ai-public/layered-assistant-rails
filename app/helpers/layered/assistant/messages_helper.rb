@@ -41,7 +41,7 @@ module Layered
           syntax_highlighter: nil
         ).to_html
 
-        sanitize(html, tags: ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES).html_safe
+        sanitize(html, tags: ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
       end
 
       private
