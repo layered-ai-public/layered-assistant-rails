@@ -7,7 +7,7 @@ module Layered
 
           client_options = {
             access_token: @api_key,
-            log_errors: ENV.fetch("LAYERED_ASSISTANT_LOG_ERRORS", "no") == "yes"
+            log_errors: Layered::Assistant.log_errors
           }
           if @provider.url.present?
             client_options[:uri_base] = @provider.url.sub(/\/\z/, "")
@@ -15,7 +15,7 @@ module Layered
           end
 
           ::OpenAI::Client.new(**client_options) do |f|
-            if ENV.fetch("LAYERED_ASSISTANT_LOG_ERRORS", "no") == "yes"
+            if Layered::Assistant.log_errors
               f.response :logger, Logger.new($stdout), bodies: true
             end
           end.chat(

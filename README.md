@@ -165,12 +165,18 @@ Both helpers accept keyword arguments that are forwarded as HTML attributes to t
 
 ## Configuration
 
-### Environment Variables
+Optional settings can be added to your initialiser (`config/initializers/layered_assistant.rb`):
 
-| Variable | Default | Description |
-|---|---|---|
-| `LAYERED_ASSISTANT_DANGEROUSLY_SKIP_DB_ENCRYPTION` | `nil` | Set to `"yes"` to skip Active Record Encryption on `Provider#secret`. Only for development/test environments without encryption keys configured |
-| `LAYERED_ASSISTANT_LOG_ERRORS` | `nil` | Set to `"yes"` to enable error logging from the AI API clients |
+```ruby
+# Log API errors to stdout (default: false)
+Layered::Assistant.log_errors = true
+
+# Disable Active Record Encryption on Provider#secret.
+# Only use this in development/test environments without encryption keys configured.
+Layered::Assistant.skip_db_encryption = true
+```
+
+Note: `skip_db_encryption` is read at class load time, so it must be set before `Layered::Assistant::Provider` is first loaded. A standard Rails initialiser satisfies this requirement.
 
 ## Demo
 

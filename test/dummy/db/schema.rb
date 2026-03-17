@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_15_232809) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_210626) do
   create_table "layered_assistant_assistants", force: :cascade do |t|
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false

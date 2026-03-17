@@ -12,6 +12,8 @@ module Layered
   module Assistant
     mattr_reader :authorize_block
     mattr_reader :scope_block
+    mattr_accessor :log_errors, default: false
+    mattr_accessor :skip_db_encryption, default: false
 
     def self.authorize(&block)
       @@authorize_block = block

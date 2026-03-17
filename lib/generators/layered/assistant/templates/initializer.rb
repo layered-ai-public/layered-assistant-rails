@@ -53,3 +53,7 @@
 #     model_class.all
 #   end
 # end
+
+# Optional settings (uncomment to enable):
+# Layered::Assistant.log_errors = true         # log API errors to stdout
+# Layered::Assistant.skip_db_encryption = true # skip encryption on Provider#secret (dev/test only)

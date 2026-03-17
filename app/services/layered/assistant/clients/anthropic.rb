@@ -15,7 +15,7 @@ module Layered
 
           ::Anthropic::Client.new(
             access_token: @api_key,
-            log_errors: ENV.fetch("LAYERED_ASSISTANT_LOG_ERRORS", "no") == "yes"
+            log_errors: Layered::Assistant.log_errors
           ).messages(parameters: parameters)
         end
       end

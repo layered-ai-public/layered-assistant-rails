@@ -18,7 +18,7 @@ module Layered
       }
 
       # Encryption
-      unless ENV["LAYERED_ASSISTANT_DANGEROUSLY_SKIP_DB_ENCRYPTION"] == "yes"
+      unless Layered::Assistant.skip_db_encryption
         encrypts :secret
       end
 
