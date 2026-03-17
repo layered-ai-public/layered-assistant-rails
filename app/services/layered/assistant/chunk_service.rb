@@ -33,7 +33,7 @@ module Layered
 
         if text
           @first_token_at ||= Process.clock_gettime(Process::CLOCK_MONOTONIC)
-          @message.update(content: (@message.content || "") + text)
+          @message.update!(content: (@message.content || "") + text)
           @message.broadcast_chunk(text)
         end
 
