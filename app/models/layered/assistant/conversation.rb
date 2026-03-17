@@ -33,11 +33,9 @@ module Layered
       end
 
       def stop_response!
-        message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
-        return false unless message
-
-        message.with_lock do
-          return false if message.stopped?
+        with_lock do
+          message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
+          return false unless message
 
           estimated = TokenEstimator.estimate(message.content) || 0
           message.update!(stopped: true, output_tokens: estimated, tokens_estimated: true)
