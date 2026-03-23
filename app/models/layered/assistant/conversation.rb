@@ -50,6 +50,7 @@ module Layered
 
           message.update!(attrs)
           update_token_totals!
+          message.reload
           message.broadcast_updated
           message.broadcast_response_complete
         end

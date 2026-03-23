@@ -24,7 +24,10 @@ module Layered
         @chunk_count += 1
         if @chunk_count % STOP_CHECK_INTERVAL == 0
           @stopped = @message.reload.stopped?
-          return if @stopped
+          if @stopped
+            save_timing_on_stop
+            return
+          end
         end
 
         Rails.logger.debug { "[ChunkService] #{chunk.inspect}" }
@@ -80,6 +83,14 @@ module Layered
             @output_tokens = usage["output_tokens"].to_i
           end
         end
+      end
+
+      def save_timing_on_stop
+        timing = response_timing
+        return if timing.empty?
+
+        @message.update!(timing)
+        @message.broadcast_updated
       end
 
       def save_token_usage

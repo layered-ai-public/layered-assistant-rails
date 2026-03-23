@@ -4,20 +4,48 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Fixed
+
+- Tok/s and TTFT now display for stopped responses
+
 ## [0.1.2] - 2026-03-15
+
+### Added
 
 - Response timing metrics (tok/s, TTFT) on assistant messages with tooltip display
 - Model, tokens, tok/s, and TTFT columns on the admin messages table
+
+### Changed
+
+- Move engine settings from ENV vars to the engine initializer
+- Provider protocols use lowercase names with I18n labels
+- Scope models to avoid name collisions
+- Increase Anthropic max_tokens (mandatory param) limit to 8192 to supporter newer models
+
+### Fixed
+
+- Serialise `stop_response!` at conversation level to close race condition on concurrent stop requests
+- Do not lose chunk if save fails during streaming
+- Handle token estimations for stopped messages
 - Fixed race condition where user message could display after assistant message due to out-of-order ActionCable broadcasts
+- Fix unnecessary DB query in public message endpoints
+- SessionConversations now use uid for lookups
 
 ## [0.1.1] - 2026-03-15
 
+### Added
+
 - Stop button to cancel an in-progress assistant response
+
+### Changed
+
 - Send button is disabled when the composer input is empty
 
 ## [0.1.0] - 2026-03-14
 
 Initial release.
+
+### Added
 
 - Multi-provider AI assistant engine for Rails 8+ with support for Anthropic, OpenAI, Mistral, and OpenAI-compatible local APIs (Ollama, LM Studio, etc.)
 - Streaming responses via Turbo Streams with token fade-in animation and chunked markdown rendering
