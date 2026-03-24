@@ -1,5 +1,5 @@
-# Seeds are for local development only - skip in test/CI environments
-return unless Rails.env.development?
+# Do not seed in test environment
+return if Rails.env.test?
 
 credentials = Rails.application.credentials
 
