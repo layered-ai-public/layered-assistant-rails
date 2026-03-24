@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Changed
+
+- Refactor `ChunkService` into `ChunkParser` (single protocol-aware parser) and `ResponseTimer` for cleaner separation of concerns
+
 ### Fixed
 
 - Tok/s and TTFT now display for stopped responses
