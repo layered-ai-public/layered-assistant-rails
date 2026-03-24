@@ -15,7 +15,8 @@ module Layered
 
           ::Anthropic::Client.new(
             access_token: @api_key,
-            log_errors: Layered::Assistant.log_errors
+            log_errors: Layered::Assistant.log_errors,
+            request_timeout: Layered::Assistant.api_request_timeout
           ).messages(parameters: parameters)
         end
       end

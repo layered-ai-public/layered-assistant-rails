@@ -107,6 +107,9 @@ export default class extends Controller {
   _resetRespondingTimeout() {
     if (!this.respondingValue) return
     clearTimeout(this._respondingTimeout)
-    this._respondingTimeout = setTimeout(() => { this.respondingValue = false }, 60000)
+    this._respondingTimeout = setTimeout(() => {
+      this.respondingValue = false
+      document.dispatchEvent(new CustomEvent("assistant:response-timeout"))
+    }, 30000)
   }
 }

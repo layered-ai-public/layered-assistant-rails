@@ -171,6 +171,10 @@ Optional settings can be added to your initialiser (`config/initializers/layered
 # Log API errors to stdout (default: false)
 Layered::Assistant.log_errors = true
 
+# Total timeout in seconds for API requests, including the full streaming response (default: 210).
+# Increase for models with high max_tokens limits or slow providers.
+Layered::Assistant.api_request_timeout = 210
+
 # Disable Active Record Encryption on Provider#secret.
 # Only use this in development/test environments without encryption keys configured.
 Layered::Assistant.skip_db_encryption = true

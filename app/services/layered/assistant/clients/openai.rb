@@ -7,7 +7,8 @@ module Layered
 
           client_options = {
             access_token: @api_key,
-            log_errors: Layered::Assistant.log_errors
+            log_errors: Layered::Assistant.log_errors,
+            request_timeout: Layered::Assistant.api_request_timeout
           }
           if @provider.url.present?
             client_options[:uri_base] = @provider.url.sub(/\/\z/, "")

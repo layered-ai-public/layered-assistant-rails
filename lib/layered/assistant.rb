@@ -13,6 +13,7 @@ module Layered
     mattr_reader :authorize_block
     mattr_reader :scope_block
     mattr_accessor :log_errors, default: false
+    mattr_accessor :api_request_timeout, default: 210
     mattr_accessor :skip_db_encryption, default: false
 
     def self.authorize(&block)
