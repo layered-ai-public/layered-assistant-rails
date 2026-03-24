@@ -46,7 +46,7 @@ module Layered
       private
 
       def set_provider
-        @provider = Provider.find(params[:provider_id])
+        @provider = scoped(Provider).find(params[:provider_id])
       end
 
       def set_model

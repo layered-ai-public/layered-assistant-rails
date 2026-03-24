@@ -13,12 +13,12 @@ module Layered
 
       # Enums
       enum :protocol, {
-        anthropic: "Anthropic",
-        openai: "OpenAI"
+        anthropic: "anthropic",
+        openai: "openai"
       }
 
       # Encryption
-      unless ENV["LAYERED_ASSISTANT_DANGEROUSLY_SKIP_DB_ENCRYPTION"] == "yes"
+      unless Layered::Assistant.skip_db_encryption
         encrypts :secret
       end
 

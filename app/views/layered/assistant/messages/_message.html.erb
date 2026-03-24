@@ -1,4 +1,4 @@
-<%= tag.div id: dom_id(message), class: "#{dom_id(message)} #{message.user? ? "l-ui-message--sent" : "l-ui-message"}" do %>
+<%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} #{message.user? ? "l-ui-message--sent" : "l-ui-message"}" do %>
   <div class="l-ui-message__bubble">
     <% unless message.user? %>
       <div class="l-ui-message__author"><%= message.role.capitalize %></div>
@@ -18,9 +18,9 @@
       <% end %>
     </div>
     <div class="l-ui-message__footer">
-      <% total_tokens = message.input_tokens.to_i + message.output_tokens.to_i %>
-      <% if message.model || total_tokens > 0 %>
-        <span class="l-ui-message__metadata"><%= [message.model&.name, total_tokens > 0 ? "#{message.tokens_estimated? ? "~" : ""}#{number_with_delimiter(total_tokens)} tokens" : nil].compact.join(" · ") %></span>
+      <% if message.model %>
+        <% title = message_metadata_title(message) %>
+        <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message.model.name %></span>
       <% end %>
       <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
     </div>

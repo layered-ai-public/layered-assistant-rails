@@ -22,7 +22,7 @@ module Layered
       belongs_to :model, optional: true, counter_cache: true
 
       # Scopes
-      scope :by_created_at, -> { order(created_at: :asc) }
+      scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
 
       # Broadcasting
       def broadcast_created

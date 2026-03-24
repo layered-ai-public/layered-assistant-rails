@@ -15,10 +15,7 @@ module Layered
         return { message: message } unless message.persisted?
 
         conversation.update_name_from_content!(content)
-        message.broadcast_created
 
-        models = Model.available
-        selected_model_id = model_id
         assistant_message = nil
         error = nil
 
@@ -28,8 +25,9 @@ module Layered
             content: nil,
             model_id: model_id
           )
-          assistant_message.broadcast_created
 
+          message.broadcast_created
+          assistant_message.broadcast_created
           Messages::ResponseJob.perform_later(assistant_message.id)
         rescue => e
           Rails.logger.error("Assistant response failed: #{e.message}")
@@ -39,8 +37,6 @@ module Layered
         {
           message: message,
           assistant_message: assistant_message,
-          models: models,
-          selected_model_id: selected_model_id,
           error: error
         }
       end

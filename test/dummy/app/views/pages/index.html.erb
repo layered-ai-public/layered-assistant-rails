@@ -75,3 +75,34 @@
 
 <h2 class="l-ui-utility--mt-xl">Setup</h2>
 <%= render "layered/assistant/setup/setup" %>
+
+<h2 class="l-ui-utility--mt-xl">Configuration</h2>
+<p class="l-ui-utility--mt-md">Optional settings for <code>config/initializers/layered_assistant.rb</code>:</p>
+
+<table class="l-ui-table l-ui-utility--mt-lg">
+  <caption class="l-ui-sr-only">Configuration options</caption>
+  <thead class="l-ui-table__header">
+    <tr>
+      <th scope="col" class="l-ui-table__header-cell">Option</th>
+      <th scope="col" class="l-ui-table__header-cell">Default</th>
+      <th scope="col" class="l-ui-table__header-cell">Description</th>
+    </tr>
+  </thead>
+  <tbody class="l-ui-table__body">
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>log_errors</code></th>
+      <td class="l-ui-table__cell"><code>false</code></td>
+      <td class="l-ui-table__cell">Log API errors to stdout.</td>
+    </tr>
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>api_request_timeout</code></th>
+      <td class="l-ui-table__cell"><code>210</code></td>
+      <td class="l-ui-table__cell">Total timeout in seconds for API requests, including the full streaming response. Increase for models with high max_tokens limits or slow providers.</td>
+    </tr>
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>skip_db_encryption</code></th>
+      <td class="l-ui-table__cell"><code>false</code></td>
+      <td class="l-ui-table__cell">Disable Active Record Encryption on <code>Provider#secret</code>. Development/test only.</td>
+    </tr>
+  </tbody>
+</table>

@@ -22,6 +22,7 @@ module Layered
           end
 
           begin
+            chunk_service.mark_started!
             ClientService.new.call(message: message, stream_proc: stream_proc)
           rescue => e
             Rails.logger.error("Response generation failed: #{e.message}")

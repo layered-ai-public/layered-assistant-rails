@@ -8,7 +8,7 @@ module Layered
 
       def index
         @page_title = "Messages"
-        @pagy, @messages = pagy(@conversation.messages.by_created_at)
+        @pagy, @messages = pagy(@conversation.messages.includes(:model).by_created_at)
       end
 
       def create
@@ -24,8 +24,8 @@ module Layered
         end
 
         @assistant_message = result[:assistant_message]
-        @models = result[:models]
-        @selected_model_id = result[:selected_model_id]
+        @models = Model.available
+        @selected_model_id = message_params[:model_id]
         @error = result[:error]
 
         respond_to do |format|
@@ -42,7 +42,7 @@ module Layered
       private
 
       def set_conversation
-        @conversation = Conversation.find(params[:conversation_id])
+        @conversation = scoped(Conversation).find_by!(uid: params[:conversation_id])
       end
 
       def set_message

@@ -32,7 +32,7 @@ module Layered
           def set_conversation
             @conversation = find_session_conversation(params[:conversation_id])
           rescue ActiveRecord::RecordNotFound
-            assistant = Conversation.find_by(id: params[:conversation_id])&.assistant
+            assistant = Conversation.find_by(uid: params[:conversation_id])&.assistant
             if assistant&.public?
               redirect_to layered_assistant.new_public_panel_conversation_path(assistant_id: assistant.id)
             else

@@ -1,4 +1,4 @@
-<%= form_with(model: provider, url: url, html: { class: "l-ui-form l-ui-utility--mt-2xl" }) do |f| %>
+<%= form_with(model: provider, url: url, html: { class: "l-ui-form" }) do |f| %>
   <%= render "layered_ui/shared/form_errors", item: provider %>
 
   <div data-controller="provider-template" data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>">
@@ -27,7 +27,7 @@
 
     <div class="l-ui-form__group">
       <%= render "layered_ui/shared/label", form: f, field: :protocol, required: true %>
-      <%= f.select :protocol, Layered::Assistant::Provider.protocols.map { |k, v| [v, k] }, { include_blank: "Select:" }, { class: "l-ui-select", data: { provider_template_target: "protocol" } } %>
+      <%= f.select :protocol, Layered::Assistant::Provider.protocols.keys.map { |k| [I18n.t("layered_assistant.protocols.#{k}"), k] }, { include_blank: "Select:" }, { class: "l-ui-select", data: { provider_template_target: "protocol" } } %>
       <%= render "layered_ui/shared/field_error", object: provider, field: :protocol %>
     </div>
 

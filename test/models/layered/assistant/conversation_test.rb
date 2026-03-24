@@ -81,6 +81,32 @@ module Layered
         assert_equal false, conversation.stop_response!
       end
 
+      test "stop_response! estimates input_tokens from prior messages when nil" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Stop Token Test", assistant: assistant)
+        conversation.messages.create!(role: :user, content: "Hello there")
+        assistant_message = conversation.messages.create!(role: :assistant, content: "Partial response", model: layered_assistant_models(:sonnet))
+
+        assert_nil assistant_message.input_tokens
+
+        conversation.stop_response!
+        assistant_message.reload
+
+        assert assistant_message.tokens_estimated?
+        assert_not_nil assistant_message.input_tokens
+        assert assistant_message.input_tokens > 0
+      end
+
+      test "stop_response! does not overwrite input_tokens when already set" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Stop Token Preserve", assistant: assistant)
+        assistant_message = conversation.messages.create!(role: :assistant, content: "Partial", input_tokens: 42, model: layered_assistant_models(:sonnet))
+
+        conversation.stop_response!
+
+        assert_equal 42, assistant_message.reload.input_tokens
+      end
+
       test "stop_response! is idempotent" do
         assistant = layered_assistant_assistants(:general)
         conversation = Conversation.create!(name: "Idempotent", assistant: assistant)

@@ -8,14 +8,15 @@ module Layered
           parameters = {
             model: model,
             messages: formatted[:messages],
-            max_tokens: 4096,
+            max_tokens: 8192,
             stream: stream_proc
           }
           parameters[:system] = formatted[:system] if formatted[:system].present?
 
           ::Anthropic::Client.new(
             access_token: @api_key,
-            log_errors: ENV.fetch("LAYERED_ASSISTANT_LOG_ERRORS", "no") == "yes"
+            log_errors: Layered::Assistant.log_errors,
+            request_timeout: Layered::Assistant.api_request_timeout
           ).messages(parameters: parameters)
         end
       end

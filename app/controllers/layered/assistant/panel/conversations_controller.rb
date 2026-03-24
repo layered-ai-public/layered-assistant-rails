@@ -42,15 +42,15 @@ module Layered
         private
 
         def set_conversation
-          @conversation = Conversation.find(params[:id])
+          @conversation = scoped(Conversation).find_by!(uid: params[:id])
         end
 
         def set_assistants
-          @assistants = Assistant.by_name
+          @assistants = scoped(Assistant).by_name
         end
 
         def set_conversations
-          scope = Conversation.by_created_at
+          scope = scoped(Conversation).by_created_at
           scope = scope.where(assistant_id: params[:assistant_id]) if params[:assistant_id].present?
           @conversations = scope.limit(20)
         end

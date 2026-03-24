@@ -20,6 +20,18 @@ module Layered
 
         instance_exec(&block)
       end
+
+      def scoped(model_class)
+        block = Layered::Assistant.scope_block
+        return model_class.all unless block
+
+        result = instance_exec(model_class, &block)
+        unless result.is_a?(ActiveRecord::Relation)
+          raise ArgumentError,
+            "Layered::Assistant.scope must return an ActiveRecord::Relation, got #{result.class}"
+        end
+        result
+      end
     end
   end
 end

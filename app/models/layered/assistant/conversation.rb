@@ -17,6 +17,10 @@ module Layered
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
       scope :by_created_at, -> { order(created_at: :desc) }
 
+      def to_param
+        uid
+      end
+
       # Name
       def update_token_totals!
         input = messages.sum(:input_tokens)
@@ -29,15 +33,24 @@ module Layered
       end
 
       def stop_response!
-        message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
-        return false unless message
+        with_lock do
+          message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
+          return false unless message
 
-        message.with_lock do
-          return false if message.stopped?
+          attrs = {
+            stopped: true,
+            output_tokens: TokenEstimator.estimate(message.content) || 0,
+            tokens_estimated: true
+          }
 
-          estimated = TokenEstimator.estimate(message.content) || 0
-          message.update!(stopped: true, output_tokens: estimated, tokens_estimated: true)
+          if message.input_tokens.nil?
+            prior_content = messages.where("created_at < ?", message.created_at).pluck(:content).compact.join(" ")
+            attrs[:input_tokens] = TokenEstimator.estimate(prior_content) || 0
+          end
+
+          message.update!(attrs)
           update_token_totals!
+          message.reload
           message.broadcast_updated
           message.broadcast_response_complete
         end

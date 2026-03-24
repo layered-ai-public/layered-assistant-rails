@@ -102,6 +102,40 @@ The `l_assistant_accessible?` helper evaluates the authorize block without side 
 <% end %>
 ```
 
+## Record scoping
+
+By default, all records are visible to any authorised user. If your application is multi-tenant or you need to restrict which records a user can see, configure a `scope` block in the initialiser.
+
+The block receives the model class, runs in controller context, and must return an `ActiveRecord::Relation`. The following models are passed through the scope block:
+
+| Model | Description |
+|---|---|
+| `Layered::Assistant::Conversation` | User conversations (has polymorphic `owner`) |
+| `Layered::Assistant::Assistant` | Assistant configurations (has polymorphic `owner`) |
+| `Layered::Assistant::Provider` | API provider credentials (has polymorphic `owner`) |
+
+### Scope all owned resources to the current user
+
+```ruby
+Layered::Assistant.scope do |model_class|
+  model_class.where(owner: current_user)
+end
+```
+
+### Scope conversations only
+
+```ruby
+Layered::Assistant.scope do |model_class|
+  if model_class == Layered::Assistant::Conversation
+    model_class.where(owner: current_user)
+  else
+    model_class.all
+  end
+end
+```
+
+When no scope block is configured, queries are unscoped. Record-level access control is the host application's responsibility; the scope block is the integration point for it.
+
 ## Panel helpers
 
 The engine provides two convenience helpers for wiring the layered-ui panel to the assistant. Use them inside `content_for` blocks in your application layout:
@@ -131,12 +165,22 @@ Both helpers accept keyword arguments that are forwarded as HTML attributes to t
 
 ## Configuration
 
-### Environment Variables
+Optional settings can be added to your initialiser (`config/initializers/layered_assistant.rb`):
 
-| Variable | Default | Description |
-|---|---|---|
-| `LAYERED_ASSISTANT_DANGEROUSLY_SKIP_DB_ENCRYPTION` | `nil` | Set to `"yes"` to skip Active Record Encryption on `Provider#secret`. Only for development/test environments without encryption keys configured |
-| `LAYERED_ASSISTANT_LOG_ERRORS` | `nil` | Set to `"yes"` to enable error logging from the AI API clients |
+```ruby
+# Log API errors to stdout (default: false)
+Layered::Assistant.log_errors = true
+
+# Total timeout in seconds for API requests, including the full streaming response (default: 210).
+# Increase for models with high max_tokens limits or slow providers.
+Layered::Assistant.api_request_timeout = 210
+
+# Disable Active Record Encryption on Provider#secret.
+# Only use this in development/test environments without encryption keys configured.
+Layered::Assistant.skip_db_encryption = true
+```
+
+Note: `skip_db_encryption` is read at class load time, so it must be set before `Layered::Assistant::Provider` is first loaded. A standard Rails initialiser satisfies this requirement.
 
 ## Demo
 

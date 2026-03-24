@@ -36,7 +36,7 @@ module Layered
           def set_conversation
             @conversation = find_session_conversation(params[:id])
           rescue ActiveRecord::RecordNotFound
-            assistant = Conversation.find_by(id: params[:id])&.assistant
+            assistant = Conversation.find_by(uid: params[:id])&.assistant
             if assistant&.public?
               redirect_to layered_assistant.public_panel_conversations_path(assistant_id: assistant.id)
             else
@@ -46,9 +46,9 @@ module Layered
 
           def set_session_conversations
             assistant_id = @conversation&.assistant_id || @assistant&.id
-            @conversations = if session_conversation_ids.any?
+            @conversations = if session_conversation_uids.any?
               scope = Conversation.joins(:assistant).merge(Assistant.publicly_available)
-                .where(id: session_conversation_ids)
+                .where(uid: session_conversation_uids)
                 .by_created_at
               scope = scope.where(assistant_id: assistant_id) if assistant_id
               scope.limit(20)

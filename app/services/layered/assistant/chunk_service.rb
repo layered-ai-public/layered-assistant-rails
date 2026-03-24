@@ -3,13 +3,19 @@ module Layered
     class ChunkService
       STOP_CHECK_INTERVAL = 25
 
-      def initialize(message, provider:)
+      def initialize(message, provider:, started_at: nil)
         @message = message
-        @provider = provider
+        @parser = ChunkParser.new(provider.protocol)
+        @timer = ResponseTimer.new
+        @timer.start! if started_at
         @input_tokens = 0
         @output_tokens = 0
         @chunk_count = 0
         @stopped = false
+      end
+
+      def mark_started!
+        @timer.start!
       end
 
       def call(chunk)
@@ -18,19 +24,28 @@ module Layered
         @chunk_count += 1
         if @chunk_count % STOP_CHECK_INTERVAL == 0
           @stopped = @message.reload.stopped?
-          return if @stopped
+          if @stopped
+            attrs = @timer.timing_attrs
+            unless attrs.empty?
+              @message.update!(attrs)
+              @message.broadcast_updated
+            end
+            return
+          end
         end
 
         Rails.logger.debug { "[ChunkService] #{chunk.inspect}" }
-        text = extract_text(chunk)
-        extract_usage(chunk)
+        text = @parser.text(chunk)
+        @input_tokens  = @parser.input_tokens(chunk)  || @input_tokens
+        @output_tokens = @parser.output_tokens(chunk) || @output_tokens
 
         if text
-          @message.update(content: (@message.content || "") + text)
+          @timer.record_first_token!
+          @message.update!(content: (@message.content || "") + text)
           @message.broadcast_chunk(text)
         end
 
-        if chunk_finished?(chunk) || usage_chunk?(chunk)
+        if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
           save_token_usage
           @message.broadcast_updated
         end
@@ -38,51 +53,15 @@ module Layered
 
       private
 
-      def extract_text(chunk)
-        text = if @provider.protocol == "openai"
-          chunk.dig("choices", 0, "delta", "content")
-        else
-          chunk.dig("delta", "text") if chunk["type"] == "content_block_delta"
-        end
-        text unless text.nil? || text.empty?
-      end
-
-      def chunk_finished?(chunk)
-        if @provider.protocol == "openai"
-          chunk.dig("choices", 0, "finish_reason").present?
-        else
-          chunk["type"] == "message_stop"
-        end
-      end
-
-      def usage_chunk?(chunk)
-        @provider.protocol == "openai" && chunk["usage"].present? && chunk.dig("choices")&.empty?
-      end
-
-      def extract_usage(chunk)
-        if @provider.protocol == "openai"
-          if (usage = chunk["usage"])
-            @input_tokens = usage["prompt_tokens"].to_i
-            @output_tokens = usage["completion_tokens"].to_i
-          end
-        else
-          if chunk["type"] == "message_start" && (usage = chunk.dig("message", "usage"))
-            @input_tokens = usage["input_tokens"].to_i
-          end
-          if chunk["type"] == "message_delta" && (usage = chunk["usage"])
-            @output_tokens = usage["output_tokens"].to_i
-          end
-        end
-      end
-
       def save_token_usage
+        timing = @timer.timing_attrs
         if @input_tokens == 0 && @output_tokens == 0
           estimated = TokenEstimator.estimate(@message.content)
           return unless estimated
 
-          @message.update!(output_tokens: estimated, tokens_estimated: true)
+          @message.update!(output_tokens: estimated, tokens_estimated: true, **timing)
         else
-          @message.update!(input_tokens: @input_tokens, output_tokens: @output_tokens)
+          @message.update!(input_tokens: @input_tokens, output_tokens: @output_tokens, **timing)
         end
 
         @message.conversation.update_token_totals!

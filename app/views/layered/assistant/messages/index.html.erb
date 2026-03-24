@@ -10,7 +10,10 @@
       <tr>
         <th scope="col" class="l-ui-table__header-cell">Role</th>
         <th scope="col" class="l-ui-table__header-cell">Content</th>
+        <th scope="col" class="l-ui-table__header-cell">Model</th>
         <th scope="col" class="l-ui-table__header-cell">Tokens</th>
+        <th scope="col" class="l-ui-table__header-cell">Tok/s</th>
+        <th scope="col" class="l-ui-table__header-cell">TTFT</th>
         <th scope="col" class="l-ui-table__header-cell">Created</th>
         <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
       </tr>
@@ -26,8 +29,22 @@
             <%= truncate(message.content, length: 100) %>
           </td>
           <td class="l-ui-table__cell">
+            <%= message.model&.name %>
+          </td>
+          <td class="l-ui-table__cell">
             <% total = message.input_tokens.to_i + message.output_tokens.to_i %>
-            <%= number_with_delimiter(total) || 0 %>
+            <% if total > 0 %>
+              <% prefix = message.tokens_estimated? ? "~" : "" %>
+              <%= "#{prefix}#{number_with_delimiter(total)}" %>
+            <% end %>
+          </td>
+          <td class="l-ui-table__cell">
+            <% if message.output_tokens.to_i > 0 && message.response_ms.to_i >= Layered::Assistant::MessagesHelper::MIN_RESPONSE_MS_FOR_TPS %>
+              <%= (message.output_tokens * 1000.0 / message.response_ms).round(1) %>
+            <% end %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= "#{message.ttft_ms}ms" if message.ttft_ms %>
           </td>
           <td class="l-ui-table__cell">
             <%= message.created_at.to_fs(:short) %>

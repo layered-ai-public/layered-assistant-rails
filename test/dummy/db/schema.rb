@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_15_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_210626) do
   create_table "layered_assistant_assistants", force: :cascade do |t|
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -55,9 +55,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_15_000000) do
     t.bigint "input_tokens"
     t.integer "model_id"
     t.bigint "output_tokens"
+    t.integer "response_ms"
     t.string "role", default: "system", null: false
     t.boolean "stopped", default: false, null: false
     t.boolean "tokens_estimated", default: false, null: false
+    t.integer "ttft_ms"
     t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["conversation_id"], name: "index_layered_assistant_messages_on_conversation_id"

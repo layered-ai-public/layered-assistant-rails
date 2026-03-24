@@ -6,41 +6,40 @@ module Layered
 
         private
 
-        def session_conversation_ids
-          session[:layered_assistant_conversation_ids] ||= []
+        def session_conversation_uids
+          session[:layered_assistant_conversation_uids] ||= []
         end
 
         MAX_SESSION_CONVERSATIONS = 50
 
         def add_conversation_to_session(conversation)
-          ids = session_conversation_ids
-          ids << conversation.id unless ids.include?(conversation.id)
-          ids.shift while ids.size > MAX_SESSION_CONVERSATIONS
+          uids = session_conversation_uids
+          uids << conversation.uid unless uids.include?(conversation.uid)
+          uids.shift while uids.size > MAX_SESSION_CONVERSATIONS
         end
 
-        def find_session_conversation(id)
-          id = id.to_i
-          unless session_conversation_ids.include?(id)
+        def find_session_conversation(uid)
+          unless session_conversation_uids.include?(uid)
             raise ActiveRecord::RecordNotFound, "Conversation not found in session"
           end
 
-          Conversation.joins(:assistant).merge(Assistant.publicly_available).find(id)
+          Conversation.joins(:assistant).merge(Assistant.publicly_available).find_by!(uid: uid)
         rescue ActiveRecord::RecordNotFound
-          remove_conversation_from_session(id)
+          remove_conversation_from_session(uid)
           raise
         end
 
-        def remove_conversation_from_session(id)
-          session_conversation_ids.delete(id.to_i)
+        def remove_conversation_from_session(uid)
+          session_conversation_uids.delete(uid)
         end
 
         def existing_session_conversation_for(assistant)
-          return nil if session_conversation_ids.empty?
+          return nil if session_conversation_uids.empty?
 
           Conversation
             .joins(:assistant)
             .merge(Assistant.publicly_available)
-            .where(id: session_conversation_ids, assistant: assistant)
+            .where(uid: session_conversation_uids, assistant: assistant)
             .order(created_at: :desc)
             .first
         end
