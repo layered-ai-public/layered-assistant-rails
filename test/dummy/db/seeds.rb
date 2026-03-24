@@ -103,24 +103,18 @@ if mistral_key.present?
 end
 
 # Assistants
+compound = Layered::Assistant::Model.find_by(identifier: "groq/compound")
 sonnet = Layered::Assistant::Model.find_by(identifier: "claude-sonnet-4-6")
-haiku = Layered::Assistant::Model.find_by(identifier: "claude-haiku-4-5")
 fallback = Layered::Assistant::Model.first
 
 general = Layered::Assistant::Assistant.find_or_create_by!(name: "General assistant") do |a|
   a.description = "A general-purpose assistant for everyday tasks."
   a.system_prompt = "You are a helpful assistant. Answer questions clearly and concisely."
-  a.default_model = haiku || fallback
+  a.default_model = compound || sonnet || fallback
   a.public = true
 end
 # Ensure public is set even when the record already existed (find_or_create_by! only runs the block on create)
 general.update!(public: true)
-
-Layered::Assistant::Assistant.find_or_create_by!(name: "Coding assistant") do |a|
-  a.description = "An assistant specialising in programming help."
-  a.system_prompt = "You are an expert programmer. Help the user write clean, well-tested code. Explain your reasoning step by step."
-  a.default_model = sonnet || fallback
-end
 
 # User
 user = User.find_or_create_by!(email: "test.user@example.com") do |u|
