@@ -1,3 +1,7 @@
+<% if controller_path.start_with?("layered/assistant") %>
+  <% content_for :l_ui_body_class do %>l-ui-body--always-show-navigation<% end %>
+<% end %>
+
 <% content_for :l_ui_navigation_items do %>
   <%= render "layouts/layered/assistant/host_navigation" %>
   <% if l_assistant_accessible? %>
