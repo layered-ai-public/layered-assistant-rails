@@ -20,6 +20,14 @@ module Layered
 
         def show
           @messages = @conversation.messages.includes(:model).by_created_at
+          @conversations = if session_conversation_uids.any?
+            Conversation.joins(:assistant).merge(Assistant.publicly_available)
+              .where(uid: session_conversation_uids, assistant: @conversation.assistant)
+              .by_created_at
+              .limit(20)
+          else
+            Conversation.none
+          end
         end
 
         private

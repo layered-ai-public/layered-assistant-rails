@@ -35,7 +35,7 @@ module Layered
 
           get "/layered/assistant/public/conversations/#{conversation.uid}"
           assert_response :success
-          assert_select "h1", text: conversation.name
+          assert_select "select.l-ui-select"
         end
 
         test "stop marks assistant message as stopped" do

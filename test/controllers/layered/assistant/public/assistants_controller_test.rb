@@ -23,8 +23,10 @@ module Layered
         test "should show public assistant" do
           assistant = layered_assistant_assistants(:coding)
           get "/layered/assistant/public/assistants/#{assistant.id}"
+          assert_response :redirect
+          follow_redirect!
           assert_response :success
-          assert_select "h1", text: assistant.name
+          assert_select "select.l-ui-select"
         end
 
         test "should not show private assistant" do
