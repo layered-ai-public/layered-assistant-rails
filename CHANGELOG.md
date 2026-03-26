@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-03-26
+
+### Added
+
+- Conversation select dropdown on the full-screen public conversation page, allowing guest users to switch between or start new conversations
+- Signed-out navigation includes a link to the public assistants listing
+
+### Changed
+
+- Pin navigation as a persistent sidebar on desktop in the backend layout, using the new `l-ui-body--always-show-navigation` modifier from `layered-ui-rails`
+- Public assistant show page immediately starts a new conversation and opens it full-screen
+- Public conversation show page renders full-screen (no header, no panel, no pinned navigation)
+
 ## [0.1.2] - 2026-03-24
 
 ### Added

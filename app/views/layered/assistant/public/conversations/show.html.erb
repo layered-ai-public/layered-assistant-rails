@@ -1,9 +1,17 @@
 <%= turbo_stream_from @conversation %>
 
 <div class="l-ui-conversation__container">
-  <div class="l-ui-container--spread">
-    <h1><%= @conversation.name %></h1>
-    <%= link_to "Back", layered_assistant.public_assistant_path(@conversation.assistant), class: "l-ui-button--outline" %>
+  <div class="l-ui-form__group l-ui-utility--mt-0">
+    <div class="l-ui-select-wrapper l-ui-utility--mt-0">
+      <select class="l-ui-select l-ui-utility--mt-0" aria-label="Select conversation"
+              data-controller="conversation-select"
+              data-action="change->conversation-select#navigate">
+        <option value="<%= layered_assistant.public_assistant_path(@conversation.assistant) %>">+ New</option>
+        <% @conversations.each do |c| %>
+          <option value="<%= layered_assistant.public_conversation_path(c) %>" <%= "selected" if c.id == @conversation.id %>><%= c.name %></option>
+        <% end %>
+      </select>
+    </div>
   </div>
 
   <div class="l-ui-conversation__messages" data-controller="messages">
