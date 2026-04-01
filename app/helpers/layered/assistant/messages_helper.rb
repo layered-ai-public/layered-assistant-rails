@@ -35,8 +35,11 @@ module Layered
       def render_message_content(message)
         return if message.content.blank?
 
+        markdown = unwrap_markdown_fence(message.content)
+        markdown = ensure_blank_line_before_tables(markdown)
+
         html = Kramdown::Document.new(
-          unwrap_markdown_fence(message.content),
+          markdown,
           input: "GFM",
           syntax_highlighter: nil
         ).to_html
@@ -46,12 +49,21 @@ module Layered
 
       private
 
+      # Some LLMs wrap their entire response in a ```markdown fence.
+      # Strip it so Kramdown processes the inner content directly.
       def unwrap_markdown_fence(content)
         if content.start_with?("```markdown\n") && content.end_with?("\n```")
           content.delete_prefix("```markdown\n").delete_suffix("\n```")
         else
           content
         end
+      end
+
+      # Kramdown GFM requires a blank line before a table, but LLMs often
+      # place tables directly after headings or paragraphs. Insert one
+      # where missing so that Kramdown recognises the table syntax.
+      def ensure_blank_line_before_tables(text)
+        text.gsub(/([^\n])\n(\|[^\n]+\|\s*\n\|[\s:|-]+\|\s*\n)/, "\\1\n\n\\2")
       end
     end
   end

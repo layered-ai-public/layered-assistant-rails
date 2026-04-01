@@ -1,21 +1,27 @@
+// Incremental markdown rendering for streamed assistant messages.
+//
+// The server broadcasts raw text chunks via a custom Turbo Stream action
+// (append_chunk). This module accumulates those chunks, parses the markdown
+// with marked, and patches the DOM. To keep fade-in animations stable, a
+// full re-render only happens when the block structure changes; otherwise
+// only the last block is patched in place. Unclosed code fences are held
+// back until their closing marker arrives. When the stream ends, Turbo
+// replaces the element with server-rendered HTML, correcting any
+// incremental artefacts.
+
 import "@hotwired/turbo-rails"
 import { marked } from "marked"
 
-// Configure marked for GFM (matching server-side Kramdown GFM input)
 marked.use({
   gfm: true,
   breaks: false,
   renderer: {
-    html: () => "" // Strip raw HTML blocks to match server-side sanitisation
+    html: () => "" // Strip raw HTML to match server-side sanitisation
   }
 })
 
-// Per-element state stored off-DOM
-const renderTimers = new WeakMap()
 const rawContent = new WeakMap()
-
-// Threshold (in chars) of unsettled content before re-showing the indicator
-const UNSETTLED_THRESHOLD = 200
+const renderedBlockCount = new WeakMap()
 
 const TYPING_INDICATOR_HTML =
   '<div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">' +
@@ -24,85 +30,67 @@ const TYPING_INDICATOR_HTML =
     '<span class="l-ui-typing-indicator__dot"></span>' +
   '</div>'
 
-// Find the boundary between complete markdown blocks (safe to parse) and
-// the in-progress tail that is still being streamed. We split at the last
-// blank line, but never inside an unclosed code fence.
-function findBlockBoundary(text) {
-  const lines = text.split("\n")
+// Returns text up to (but not including) any trailing unclosed code fence.
+// marked can't produce valid output for a half-open fence, so we hold it
+// back until the closing marker arrives.
+function stripUnclosedFence(text) {
   let fenceMarker = null
-  let boundary = 0
+  let fenceStart = 0
   let pos = 0
 
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trimStart()
+  for (const line of text.split("\n")) {
+    const trimmed = line.trimStart()
     if (!fenceMarker && (trimmed.startsWith("```") || trimmed.startsWith("~~~"))) {
       fenceMarker = trimmed.slice(0, 3)
+      fenceStart = pos
     } else if (fenceMarker && trimmed.startsWith(fenceMarker) && /^[`~]+\s*$/.test(trimmed)) {
       fenceMarker = null
     }
-
-    pos += lines[i].length + 1
-
-    if (!fenceMarker && lines[i] === "" && i > 0) {
-      boundary = pos
-    }
+    pos += line.length + 1
   }
 
-  return boundary
+  return fenceMarker ? text.substring(0, fenceStart) : text
 }
 
-// Append newly settled markdown blocks to the target element. Only the
-// portion between the previous boundary and the current one is parsed and
-// inserted, so existing DOM nodes stay intact and there is no flicker.
-// Turbo replaces the entire element with server-rendered HTML when the
-// stream completes, correcting any incremental rendering artefacts.
-function renderMarkdown(target) {
+
+function render(target) {
   const raw = rawContent.get(target) || ""
   if (!raw) return
 
-  const boundary = findBlockBoundary(raw)
-  // No settled blocks yet - the server-rendered typing indicator is still
-  // in the DOM, so there's nothing to do until a blank line arrives.
-  if (boundary === 0) return
+  const safe = stripUnclosedFence(raw)
+  const html = safe ? marked.parse(safe) : ""
 
-  const previousBoundary = parseInt(target.dataset.settledBoundary || "0", 10)
+  const temp = document.createElement("div")
+  temp.innerHTML = html
 
-  if (boundary > previousBoundary) {
-    target.dataset.settledBoundary = boundary
+  const prevCount = renderedBlockCount.get(target) || 0
+  const newCount = temp.children.length
+  const lastTarget = target.children[newCount - 1]
+  const lastTemp = temp.children[newCount - 1]
+  const tagMatch = lastTarget?.tagName === lastTemp?.tagName
 
-    // Remove typing indicator before appending new content
-    target.querySelector(".l-ui-typing-indicator")?.remove()
-
-    // Parse and append only the new settled portion
-    const prevCount = target.children.length
-    target.insertAdjacentHTML("beforeend", marked.parse(raw.substring(previousBoundary, boundary)))
-
-    // Stagger fade-in on newly appended blocks
+  if (newCount !== prevCount) {
+    // Block count changed - full re-render, fade only new blocks
+    target.innerHTML = html
     for (let i = prevCount; i < target.children.length; i++) {
-      target.children[i].style.animationDelay = `${(i - prevCount) * 120}ms`
       target.children[i].classList.add("l-ui-token-fade")
     }
+    renderedBlockCount.set(target, target.children.length)
+  } else if (newCount > 0 && tagMatch) {
+    // Same count, same tag - patch the last block in place so earlier
+    // nodes (and their fade-in transitions) are preserved
+    target.querySelector(".l-ui-typing-indicator")?.remove()
+    lastTarget.innerHTML = lastTemp.innerHTML
+  } else if (newCount > 0) {
+    // Same count but tag changed (e.g. <p> became <table>) - full
+    // re-render needed since we can't patch across element types
+    target.innerHTML = html
+    renderedBlockCount.set(target, target.children.length)
   }
 
-  // Show typing indicator when there's a large unsettled tail, so the user
-  // knows content is still arriving (e.g. a long code block before the
-  // closing fence). The indicator is removed automatically when the boundary
-  // next advances (above).
-  const tail = raw.length - boundary
-  if (tail >= UNSETTLED_THRESHOLD && !target.querySelector(".l-ui-typing-indicator")) {
+  if (safe.length < raw.length && !target.querySelector(".l-ui-typing-indicator")) {
     target.insertAdjacentHTML("beforeend", TYPING_INDICATOR_HTML)
   }
-}
-
-function scheduleRender(target) {
-  const existing = renderTimers.get(target)
-  if (existing) cancelAnimationFrame(existing)
-
-  const id = requestAnimationFrame(() => {
-    renderTimers.delete(target)
-    renderMarkdown(target)
-  })
-  renderTimers.set(target, id)
 }
 
 Turbo.StreamActions.enable_composer = function () {
@@ -115,19 +103,14 @@ Turbo.StreamActions.append_chunk = function () {
   this.targetElements.forEach((target) => {
     const text = this.templateContent.textContent || ""
 
-    // Initialise on first chunk
     if (!rawContent.has(target)) {
       target.classList.add("l-ui-markdown")
       rawContent.set(target, "")
     }
 
-    // Accumulate raw markdown off-DOM
     rawContent.set(target, rawContent.get(target) + text)
-
-    // Schedule debounced render
-    scheduleRender(target)
+    render(target)
   })
 
-  // Notify the composer so it can reset its safety timeout
   document.dispatchEvent(new CustomEvent("assistant:chunk-received"))
 }

@@ -96,6 +96,14 @@ module Layered
         assert_includes result, "<td>Alice</td>"
       end
 
+      test "renders tables immediately after headings" do
+        markdown = "## Results\n| Name | Age |\n|------|-----|\n| Alice | 30 |"
+        message = build_message(role: :assistant, content: markdown)
+        result = render_message_content(message)
+        assert_includes result, "<table>"
+        assert_includes result, "<th>Name</th>"
+      end
+
       test "renders horizontal rules" do
         message = build_message(role: :assistant, content: "Above\n\n---\n\nBelow")
         result = render_message_content(message)
