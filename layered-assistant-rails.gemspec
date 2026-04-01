@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ruby-openai", "~> 7.0"
   spec.add_dependency "kramdown", "~> 2.4"
   spec.add_dependency "kramdown-parser-gfm", "~> 1.1"
-  spec.add_dependency "layered-ui-rails", "~> 0.1.4"
+  spec.add_dependency "layered-ui-rails", "~> 0.2.0"
   spec.add_development_dependency "propshaft", "~> 1.0"
   spec.add_development_dependency "tailwindcss-rails", "~> 4.0"
   spec.add_development_dependency "importmap-rails", "~> 2.0"
