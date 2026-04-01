@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-01
+
+### Changed
+
+- Bump dependency on `layered-ui-rails` to `~> 0.2.1`
+- `layered-ui-rails 0.2.1` adds `tailwindcss-rails (~> 4.0)` as a transitive dependency
+
 ## [0.1.3] - 2026-03-26
 
 ### Added

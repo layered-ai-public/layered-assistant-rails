@@ -1,10 +1,11 @@
-require "positioning"
-require "pagy"
 require "anthropic"
-require "openai"
 require "kramdown"
 require "kramdown-parser-gfm"
 require "layered-ui-rails"
+require "openai"
+require "pagy"
+require "positioning"
+
 require "layered/assistant/version"
 require "layered/assistant/engine"
 

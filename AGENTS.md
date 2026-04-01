@@ -53,6 +53,7 @@ It has its own `AGENTS.md` file — inspect it for context on the apps's convent
 
 ## Conventions
 
+- CRITICAL: Try to keep your solutions simple and clean
 - Use "layered-assistant-rails" not "Layered Assistant Rails" when referring to the project
 - Use normal dashes '-' not long ones '—'
 - Locale: Favour en-GB (British English), unless terms are defined by technical standards (e.g. LICENSE, COLOR).
