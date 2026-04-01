@@ -22,6 +22,7 @@ marked.use({
 
 const rawContent = new WeakMap()
 const renderedBlockCount = new WeakMap()
+const pendingRender = new WeakMap()
 
 const TYPING_INDICATOR_HTML =
   '<div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">' +
@@ -110,7 +111,13 @@ Turbo.StreamActions.append_chunk = function () {
     }
 
     rawContent.set(target, rawContent.get(target) + text)
-    render(target)
+
+    if (!pendingRender.has(target)) {
+      pendingRender.set(target, requestAnimationFrame(() => {
+        pendingRender.delete(target)
+        render(target)
+      }))
+    }
   })
 
   document.dispatchEvent(new CustomEvent("assistant:chunk-received"))
