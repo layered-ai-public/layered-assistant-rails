@@ -52,7 +52,6 @@ function stripUnclosedFence(text) {
   return fenceMarker ? text.substring(0, fenceStart) : text
 }
 
-
 function render(target) {
   const raw = rawContent.get(target) || ""
   if (!raw) return
@@ -62,6 +61,9 @@ function render(target) {
 
   const temp = document.createElement("div")
   temp.innerHTML = html
+
+  // Remove typing indicator before comparing so it doesn't skew child indices
+  target.querySelector(".l-ui-typing-indicator")?.remove()
 
   const prevCount = renderedBlockCount.get(target) || 0
   const newCount = temp.children.length
@@ -79,7 +81,6 @@ function render(target) {
   } else if (newCount > 0 && tagMatch) {
     // Same count, same tag - patch the last block in place so earlier
     // nodes (and their fade-in transitions) are preserved
-    target.querySelector(".l-ui-typing-indicator")?.remove()
     lastTarget.innerHTML = lastTemp.innerHTML
   } else if (newCount > 0) {
     // Same count but tag changed (e.g. <p> became <table>) - full
