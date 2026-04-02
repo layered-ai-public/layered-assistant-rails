@@ -18,6 +18,6 @@
       </button>
     </div>
 
-    <%= render "layered/assistant/public/panel/messages/composer", conversation: @conversation %>
+    <%= render "layered/assistant/public/panel/messages/composer", conversation: @conversation, responding: @conversation.responding? %>
   </div>
 <% end %>

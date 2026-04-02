@@ -53,6 +53,37 @@ module Layered
         assert_equal 85, conversation.token_estimate
       end
 
+      test "responding? returns true when assistant message has no output_tokens" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Responding", assistant: assistant)
+        conversation.messages.create!(role: :assistant, content: nil, model: layered_assistant_models(:sonnet))
+
+        assert conversation.responding?
+      end
+
+      test "responding? returns false when assistant message has output_tokens" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Done", assistant: assistant)
+        conversation.messages.create!(role: :assistant, content: "Done", output_tokens: 10, model: layered_assistant_models(:sonnet))
+
+        assert_not conversation.responding?
+      end
+
+      test "responding? returns false when assistant message is stopped" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Stopped", assistant: assistant)
+        conversation.messages.create!(role: :assistant, content: nil, stopped: true, output_tokens: 5, model: layered_assistant_models(:sonnet))
+
+        assert_not conversation.responding?
+      end
+
+      test "responding? returns false when no assistant messages exist" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Empty", assistant: assistant)
+
+        assert_not conversation.responding?
+      end
+
       test "stop_response! marks latest assistant message as stopped" do
         conversation = layered_assistant_conversations(:greeting)
         assistant_message = conversation.messages.create!(role: :assistant, content: "Partial", model: layered_assistant_models(:sonnet))

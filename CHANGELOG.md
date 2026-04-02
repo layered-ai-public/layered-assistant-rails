@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Fixed
 
+- Composer now shows the stop button instead of a disabled send button when the page is refreshed during an in-flight response
 - Public conversation page now sets the HTML page title
 - Kramdown no longer drops tables that immediately follow headings (missing blank line)
 
