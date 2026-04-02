@@ -14,6 +14,7 @@ module Layered
         @chunk_count = 0
         @stopped = false
         @last_broadcast_at = 0
+        @broadcast_pending = false
       end
 
       def mark_started!
@@ -49,7 +50,7 @@ module Layered
 
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
           save_token_usage
-          @message.broadcast_streaming_content if @message.content.present?
+          @message.broadcast_streaming_content if @broadcast_pending
           @message.broadcast_updated
         end
       end
@@ -58,9 +59,13 @@ module Layered
 
       def broadcast_throttled
         now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
-        return if now - @last_broadcast_at < BROADCAST_INTERVAL_MS
+        if now - @last_broadcast_at < BROADCAST_INTERVAL_MS
+          @broadcast_pending = true
+          return
+        end
 
         @last_broadcast_at = now
+        @broadcast_pending = false
         @message.broadcast_streaming_content
       end
 
