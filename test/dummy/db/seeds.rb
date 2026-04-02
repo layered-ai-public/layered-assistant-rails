@@ -103,18 +103,43 @@ if mistral_key.present?
 end
 
 # Assistants
-compound = Layered::Assistant::Model.find_by(identifier: "groq/compound")
-sonnet = Layered::Assistant::Model.find_by(identifier: "claude-sonnet-4-6")
-fallback = Layered::Assistant::Model.first
+#
+# Create a public assistant for each seeded model so every model is
+# immediately usable in the dummy app.
+assistant_models = {
+  claude_haiku_4_6:               "Claude Haiku 4.6",
+  claude_sonnet_4_6:              "Claude Sonnet 4.6",
+  claude_opus_4_6:                "Claude 4.6",
+  gpt_5_4_fast:                   "OpenAI GPT 5.4 (Fast)",
+  gpt_5_4:                        "OpenAI GPT 5.4",
+  gemini_2_5_flash_lite:          "Google Gemini 2.5 (Flash Lite)",
+  gemini_2_5_flash:               "Google Gemini 2.5 (Flash)",
+  gemini_2_5_pro:                 "Google Gemini 2.5 (Pro)",
+  gemini_3_1_pro_preview:         "Google Gemini 3.1 (Pro)",
+  x_ai_grok_4_fast:               "X.ai Grok 4 (Fast)",
+  x_ai_grok_4:                    "X.ai Grok 4",
+  meta_llama_llama_4_scout_17b_16e_instruct:      "Meta Llama 4 Scout",
+  meta_llama_llama_4_maverick_17b_128e_instruct:  "Meta Llama 4 Maverick",
+  qwen_qwen3_32b:                 "Alibaba Qwen 3 32B",
+  moonshotai_kimi_k2_instruct_0905: "Moonshot Kimi K2.5",
+  mistral_small_2506:             "Mistral Small 2506",
+  mistral_medium_2508:            "Mistral Medium 2508",
+  mistral_large_2512:             "Mistral Large 2512",
+  groq_compound:                  "Groq Compound"
+}
 
-general = Layered::Assistant::Assistant.find_or_create_by!(name: "General assistant") do |a|
-  a.description = "A general-purpose assistant for everyday tasks."
-  a.system_prompt = "You are a helpful assistant. Answer questions clearly and concisely."
-  a.default_model = compound || sonnet || fallback
-  a.public = true
+assistant_models.each do |identifier, name|
+  model = Layered::Assistant::Model.find_by(identifier: identifier)
+  next unless model
+
+  assistant = Layered::Assistant::Assistant.find_or_create_by!(name: name) do |a|
+    a.description = "Assistant powered by #{name}."
+    a.system_prompt = "You are a helpful assistant. Answer questions clearly and concisely."
+    a.default_model = model
+    a.public = true
+  end
+  assistant.update!(public: true, default_model: model)
 end
-# Ensure public is set even when the record already existed (find_or_create_by! only runs the block on create)
-general.update!(public: true)
 
 # User
 user = User.find_or_create_by!(email: "test.user@example.com") do |u|
