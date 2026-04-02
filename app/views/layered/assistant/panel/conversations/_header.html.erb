@@ -12,7 +12,7 @@
           <% if assistant_conversations.any? %>
             <optgroup label="<%= assistant.name %>">
               <% assistant_conversations.each do |c| %>
-                <option value="<%= layered_assistant.panel_conversation_path(c) %>" <%= "selected" if selected == layered_assistant.panel_conversation_path(c) %>><%= c.name %></option>
+                <option value="<%= layered_assistant.panel_conversation_path(c) %>" <%= "selected" if selected == layered_assistant.panel_conversation_path(c) %> class="<%= dom_id(c) %>_name"><%= c.name %></option>
               <% end %>
             </optgroup>
           <% end %>

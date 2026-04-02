@@ -19,6 +19,7 @@ module Layered
         end
 
         def show
+          @page_title = @conversation.name
           @messages = @conversation.messages.includes(:model).by_created_at
           @conversations = if session_conversation_uids.any?
             Conversation.joins(:assistant).merge(Assistant.publicly_available)

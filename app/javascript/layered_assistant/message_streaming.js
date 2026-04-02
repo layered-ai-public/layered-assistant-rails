@@ -76,3 +76,9 @@ Turbo.StreamActions.render_content = function () {
 
   document.dispatchEvent(new CustomEvent("assistant:chunk-received"))
 }
+
+Turbo.StreamActions.update_conversation_name = function () {
+  const name = this.getAttribute("name")
+  this.targetElements.forEach((el) => { el.textContent = name })
+  document.title = name
+}

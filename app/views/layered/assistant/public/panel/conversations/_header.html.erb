@@ -8,7 +8,7 @@
         <option value="<%= layered_assistant.public_panel_conversations_path(assistant_id: assistant.id) %>" <%= "selected" if selected == :index %>>Conversations</option>
         <option value="new" <%= "selected" if selected == :new %>>+ New</option>
         <% conversations.each do |c| %>
-          <option value="<%= layered_assistant.public_panel_conversation_path(c) %>" <%= "selected" if selected == c.id %>><%= c.name %></option>
+          <option value="<%= layered_assistant.public_panel_conversation_path(c) %>" <%= "selected" if selected == c.id %> class="<%= dom_id(c) %>_name"><%= c.name %></option>
         <% end %>
       </select>
     </div>

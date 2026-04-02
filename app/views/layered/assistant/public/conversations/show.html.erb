@@ -8,7 +8,7 @@
               data-action="change->conversation-select#navigate">
         <option value="<%= layered_assistant.public_assistant_path(@conversation.assistant) %>">+ New</option>
         <% @conversations.each do |c| %>
-          <option value="<%= layered_assistant.public_conversation_path(c) %>" <%= "selected" if c.id == @conversation.id %>><%= c.name %></option>
+          <option value="<%= layered_assistant.public_conversation_path(c) %>" <%= "selected" if c.id == @conversation.id %> class="<%= dom_id(c) %>_name"><%= c.name %></option>
         <% end %>
       </select>
     </div>

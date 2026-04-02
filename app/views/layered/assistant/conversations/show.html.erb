@@ -2,7 +2,7 @@
 
 <div class="l-ui-conversation__container">
   <div class="l-ui-container--spread">
-    <h1><%= @conversation.name %></h1>
+    <h1 class="<%= dom_id(@conversation) %>_name"><%= @conversation.name %></h1>
     <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
   </div>
 

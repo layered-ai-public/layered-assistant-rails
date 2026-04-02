@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Added
+
+- Page title and conversation select update dynamically when a conversation is named after the first message
+
 ### Changed
 
 - Streaming preview now renders markdown server-side with Kramdown, eliminating parser drift between preview and final output
@@ -12,6 +16,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Fixed
 
+- Public conversation page now sets the HTML page title
 - Kramdown no longer drops tables that immediately follow headings (missing blank line)
 
 ## [0.2.0] - 2026-04-01
