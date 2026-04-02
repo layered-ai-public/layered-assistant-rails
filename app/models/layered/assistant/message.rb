@@ -45,11 +45,25 @@ module Layered
           targets: ".#{dom_id(conversation)}_composer"
       end
 
-      def broadcast_chunk(text)
+      def broadcast_streaming_content
+        rendered = helpers.render_streaming_markdown(content)
+        html = rendered[:html]
+
+        if rendered[:has_unclosed_fence]
+          html += helpers.tag.div(
+            helpers.tag.span(class: "l-ui-typing-indicator__dot") +
+            helpers.tag.span(class: "l-ui-typing-indicator__dot") +
+            helpers.tag.span(class: "l-ui-typing-indicator__dot"),
+            class: "l-ui-typing-indicator",
+            role: "status",
+            "aria-label": "Assistant is typing"
+          )
+        end
+
         broadcast_action_to conversation,
-          action: :append_chunk,
+          action: :render_content,
           targets: ".#{dom_id(self)}_body",
-          content: helpers.content_tag(:span, text, class: "l-ui-token-fade")
+          content: html
       end
 
       private

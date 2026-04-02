@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Changed
+
+- Streaming preview now renders markdown server-side with Kramdown, eliminating parser drift between preview and final output
+- Removed client-side `marked` dependency - the server is the single markdown authority
+- Throttle streaming broadcasts to once per 25ms to limit server-side Kramdown re-parses
+
 ### Fixed
 
-- Streamed markdown tables now render during streaming and survive the server-side replacement
 - Kramdown no longer drops tables that immediately follow headings (missing blank line)
 
 ## [0.2.0] - 2026-04-01

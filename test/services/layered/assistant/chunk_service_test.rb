@@ -48,8 +48,8 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @anthropic_provider)
 
-        # broadcast_chunk is called for text deltas (not broadcast_updated)
-        assert_respond_to message, :broadcast_chunk
+        # broadcast_streaming_content is called for text deltas (not broadcast_updated)
+        assert_respond_to message, :broadcast_streaming_content
         service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hello" } })
       end
 
@@ -93,8 +93,8 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        # broadcast_chunk is called for text deltas (not broadcast_updated)
-        assert_respond_to message, :broadcast_chunk
+        # broadcast_streaming_content is called for text deltas (not broadcast_updated)
+        assert_respond_to message, :broadcast_streaming_content
         service.call({ "choices" => [{ "delta" => { "content" => "Hello" } }] })
       end
 

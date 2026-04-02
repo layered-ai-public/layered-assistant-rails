@@ -35,7 +35,27 @@ module Layered
       def render_message_content(message)
         return if message.content.blank?
 
-        markdown = unwrap_markdown_fence(message.content)
+        render_markdown(message.content)
+      end
+
+      # Renders accumulated content for streaming, holding back any
+      # trailing unclosed code fence that Kramdown can't parse correctly.
+      # Returns { html:, has_unclosed_fence: } so the caller can decide
+      # whether to show a typing indicator.
+      def render_streaming_markdown(content)
+        return { html: "", has_unclosed_fence: false } if content.blank?
+
+        safe = strip_unclosed_fence(content)
+        {
+          html: safe.present? ? render_markdown(safe) : "",
+          has_unclosed_fence: safe.length < content.length
+        }
+      end
+
+      private
+
+      def render_markdown(content)
+        markdown = unwrap_markdown_fence(content)
         markdown = ensure_blank_line_before_tables(markdown)
 
         html = Kramdown::Document.new(
@@ -46,8 +66,6 @@ module Layered
 
         sanitize(html, tags: ALLOWED_TAGS, attributes: ALLOWED_ATTRIBUTES)
       end
-
-      private
 
       # Some LLMs wrap their entire response in a ```markdown fence.
       # Strip it so Kramdown processes the inner content directly.
@@ -64,6 +82,28 @@ module Layered
       # where missing so that Kramdown recognises the table syntax.
       def ensure_blank_line_before_tables(text)
         text.gsub(/([^\n])\n(\|[^\n]+\|\s*\n\|[\s:|-]+\|\s*\n)/, "\\1\n\n\\2")
+      end
+
+      # Returns text up to (but not including) any trailing unclosed code
+      # fence. Kramdown can't produce valid output for a half-open fence,
+      # so we hold it back until the closing marker arrives.
+      def strip_unclosed_fence(text)
+        fence_marker = nil
+        fence_start = 0
+        pos = 0
+
+        text.each_line do |line|
+          trimmed = line.lstrip
+          if fence_marker.nil? && (trimmed.start_with?("```") || trimmed.start_with?("~~~"))
+            fence_marker = trimmed[0, 3]
+            fence_start = pos
+          elsif fence_marker && trimmed.start_with?(fence_marker) && trimmed.match?(/\A[`~]+\s*\z/)
+            fence_marker = nil
+          end
+          pos += line.length
+        end
+
+        fence_marker ? text[0, fence_start] : text
       end
     end
   end

@@ -2,6 +2,7 @@ module Layered
   module Assistant
     class ChunkService
       STOP_CHECK_INTERVAL = 25
+      BROADCAST_INTERVAL_MS = 25
 
       def initialize(message, provider:, started_at: nil)
         @message = message
@@ -12,6 +13,7 @@ module Layered
         @output_tokens = 0
         @chunk_count = 0
         @stopped = false
+        @last_broadcast_at = 0
       end
 
       def mark_started!
@@ -42,7 +44,7 @@ module Layered
         if text
           @timer.record_first_token!
           @message.update!(content: (@message.content || "") + text)
-          @message.broadcast_chunk(text)
+          broadcast_throttled
         end
 
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
@@ -52,6 +54,14 @@ module Layered
       end
 
       private
+
+      def broadcast_throttled
+        now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)
+        return if now - @last_broadcast_at < BROADCAST_INTERVAL_MS
+
+        @last_broadcast_at = now
+        @message.broadcast_streaming_content
+      end
 
       def save_token_usage
         timing = @timer.timing_attrs
