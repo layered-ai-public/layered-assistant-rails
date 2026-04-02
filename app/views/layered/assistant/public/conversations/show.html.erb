@@ -28,5 +28,5 @@
     </button>
   </div>
 
-  <%= render "layered/assistant/public/messages/composer", conversation: @conversation %>
+  <%= render "layered/assistant/public/messages/composer", conversation: @conversation, responding: @conversation.responding? %>
 </div>

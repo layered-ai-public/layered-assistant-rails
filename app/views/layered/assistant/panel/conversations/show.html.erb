@@ -19,6 +19,6 @@
       </button>
     </div>
 
-    <%= render "layered/assistant/panel/messages/composer", conversation: @conversation, models: @models, selected_model_id: @selected_model_id %>
+    <%= render "layered/assistant/panel/messages/composer", conversation: @conversation, models: @models, selected_model_id: @selected_model_id, responding: @conversation.responding? %>
   </div>
 <% end %>

@@ -32,6 +32,10 @@ module Layered
         "New conversation"
       end
 
+      def responding?
+        messages.where(role: :assistant, stopped: false, output_tokens: nil).exists?
+      end
+
       def stop_response!
         with_lock do
           message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
