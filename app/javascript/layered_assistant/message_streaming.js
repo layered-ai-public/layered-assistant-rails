@@ -1,108 +1,45 @@
+// Incremental markdown rendering for streamed assistant messages.
+//
+// The server broadcasts pre-rendered HTML via a custom Turbo Stream action
+// (render_content). This module reconciles the DOM block by block -
+// patching unchanged blocks in place so fade-in animations aren't
+// interrupted. Both streaming preview and final output use the same
+// server-side Kramdown pipeline, eliminating parser drift.
+
 import "@hotwired/turbo-rails"
-import { marked } from "marked"
 
-// Configure marked for GFM (matching server-side Kramdown GFM input)
-marked.use({
-  gfm: true,
-  breaks: false,
-  renderer: {
-    html: () => "" // Strip raw HTML blocks to match server-side sanitisation
+const pendingHtml = new WeakMap()
+const pendingRender = new WeakMap()
+
+function reconcile(target, html) {
+  const temp = document.createElement("div")
+  temp.innerHTML = html
+
+  // Snapshot temp.children since moves will mutate the live HTMLCollection
+  const newBlocks = [...temp.children]
+
+  // Trim excess blocks from previous render
+  while (target.children.length > newBlocks.length) {
+    target.lastElementChild.remove()
   }
-})
 
-// Per-element state stored off-DOM
-const renderTimers = new WeakMap()
-const rawContent = new WeakMap()
-
-// Threshold (in chars) of unsettled content before re-showing the indicator
-const UNSETTLED_THRESHOLD = 200
-
-const TYPING_INDICATOR_HTML =
-  '<div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">' +
-    '<span class="l-ui-typing-indicator__dot"></span>' +
-    '<span class="l-ui-typing-indicator__dot"></span>' +
-    '<span class="l-ui-typing-indicator__dot"></span>' +
-  '</div>'
-
-// Find the boundary between complete markdown blocks (safe to parse) and
-// the in-progress tail that is still being streamed. We split at the last
-// blank line, but never inside an unclosed code fence.
-function findBlockBoundary(text) {
-  const lines = text.split("\n")
-  let fenceMarker = null
-  let boundary = 0
-  let pos = 0
-
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trimStart()
-    if (!fenceMarker && (trimmed.startsWith("```") || trimmed.startsWith("~~~"))) {
-      fenceMarker = trimmed.slice(0, 3)
-    } else if (fenceMarker && trimmed.startsWith(fenceMarker) && /^[`~]+\s*$/.test(trimmed)) {
-      fenceMarker = null
-    }
-
-    pos += lines[i].length + 1
-
-    if (!fenceMarker && lines[i] === "" && i > 0) {
-      boundary = pos
+  // Reconcile block by block - preserves existing DOM nodes (and their
+  // running fade-in animations) wherever possible
+  for (let i = 0; i < newBlocks.length; i++) {
+    if (i < target.children.length && target.children[i].tagName === newBlocks[i].tagName) {
+      // Same tag - patch content in place
+      if (target.children[i].innerHTML !== newBlocks[i].innerHTML) {
+        target.children[i].innerHTML = newBlocks[i].innerHTML
+      }
+    } else if (i < target.children.length) {
+      // Tag changed (e.g. <p> became <table>) - replace node
+      target.children[i].replaceWith(newBlocks[i])
+    } else {
+      // New block - append with fade
+      newBlocks[i].classList.add("l-ui-token-fade")
+      target.appendChild(newBlocks[i])
     }
   }
-
-  return boundary
-}
-
-// Append newly settled markdown blocks to the target element. Only the
-// portion between the previous boundary and the current one is parsed and
-// inserted, so existing DOM nodes stay intact and there is no flicker.
-// Turbo replaces the entire element with server-rendered HTML when the
-// stream completes, correcting any incremental rendering artefacts.
-function renderMarkdown(target) {
-  const raw = rawContent.get(target) || ""
-  if (!raw) return
-
-  const boundary = findBlockBoundary(raw)
-  // No settled blocks yet - the server-rendered typing indicator is still
-  // in the DOM, so there's nothing to do until a blank line arrives.
-  if (boundary === 0) return
-
-  const previousBoundary = parseInt(target.dataset.settledBoundary || "0", 10)
-
-  if (boundary > previousBoundary) {
-    target.dataset.settledBoundary = boundary
-
-    // Remove typing indicator before appending new content
-    target.querySelector(".l-ui-typing-indicator")?.remove()
-
-    // Parse and append only the new settled portion
-    const prevCount = target.children.length
-    target.insertAdjacentHTML("beforeend", marked.parse(raw.substring(previousBoundary, boundary)))
-
-    // Stagger fade-in on newly appended blocks
-    for (let i = prevCount; i < target.children.length; i++) {
-      target.children[i].style.animationDelay = `${(i - prevCount) * 120}ms`
-      target.children[i].classList.add("l-ui-token-fade")
-    }
-  }
-
-  // Show typing indicator when there's a large unsettled tail, so the user
-  // knows content is still arriving (e.g. a long code block before the
-  // closing fence). The indicator is removed automatically when the boundary
-  // next advances (above).
-  const tail = raw.length - boundary
-  if (tail >= UNSETTLED_THRESHOLD && !target.querySelector(".l-ui-typing-indicator")) {
-    target.insertAdjacentHTML("beforeend", TYPING_INDICATOR_HTML)
-  }
-}
-
-function scheduleRender(target) {
-  const existing = renderTimers.get(target)
-  if (existing) cancelAnimationFrame(existing)
-
-  const id = requestAnimationFrame(() => {
-    renderTimers.delete(target)
-    renderMarkdown(target)
-  })
-  renderTimers.set(target, id)
 }
 
 Turbo.StreamActions.enable_composer = function () {
@@ -111,23 +48,31 @@ Turbo.StreamActions.enable_composer = function () {
   })
 }
 
-Turbo.StreamActions.append_chunk = function () {
+Turbo.StreamActions.render_content = function () {
   this.targetElements.forEach((target) => {
-    const text = this.templateContent.textContent || ""
-
-    // Initialise on first chunk
-    if (!rawContent.has(target)) {
+    if (!target.classList.contains("l-ui-markdown")) {
       target.classList.add("l-ui-markdown")
-      rawContent.set(target, "")
     }
 
-    // Accumulate raw markdown off-DOM
-    rawContent.set(target, rawContent.get(target) + text)
+    const html = this.templateContent
 
-    // Schedule debounced render
-    scheduleRender(target)
+    // Always store the latest HTML so the requestAnimationFrame callback
+    // uses the newest version - convert DocumentFragment to HTML string
+    const div = document.createElement("div")
+    div.append(html.cloneNode(true))
+    pendingHtml.set(target, div.innerHTML)
+
+    if (!pendingRender.has(target)) {
+      pendingRender.set(target, requestAnimationFrame(() => {
+        pendingRender.delete(target)
+        const latestHtml = pendingHtml.get(target)
+        if (latestHtml != null) {
+          reconcile(target, latestHtml)
+          pendingHtml.delete(target)
+        }
+      }))
+    }
   })
 
-  // Notify the composer so it can reset its safety timeout
   document.dispatchEvent(new CustomEvent("assistant:chunk-received"))
 }

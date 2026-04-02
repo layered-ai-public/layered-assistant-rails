@@ -96,6 +96,22 @@ module Layered
         assert_includes result, "<td>Alice</td>"
       end
 
+      test "renders tables immediately after headings" do
+        markdown = "## Results\n| Name | Age |\n|------|-----|\n| Alice | 30 |"
+        message = build_message(role: :assistant, content: markdown)
+        result = render_message_content(message)
+        assert_includes result, "<table>"
+        assert_includes result, "<th>Name</th>"
+      end
+
+      test "renders tables immediately after paragraphs" do
+        markdown = "Here are the results:\n| Name | Age |\n|------|-----|\n| Alice | 30 |"
+        message = build_message(role: :assistant, content: markdown)
+        result = render_message_content(message)
+        assert_includes result, "<table>"
+        assert_includes result, "<th>Name</th>"
+      end
+
       test "renders horizontal rules" do
         message = build_message(role: :assistant, content: "Above\n\n---\n\nBelow")
         result = render_message_content(message)
@@ -246,6 +262,52 @@ module Layered
       test "returns nil for nil content" do
         message = build_message(role: :assistant, content: nil)
         assert_nil render_message_content(message)
+      end
+
+      # --- Streaming markdown ---
+
+      test "streaming renders completed markdown" do
+        result = render_streaming_markdown("Hello **world**")
+        assert_includes result[:html], "<strong>world</strong>"
+        assert_equal false, result[:has_unclosed_fence]
+      end
+
+      test "streaming holds back unclosed code fence" do
+        result = render_streaming_markdown("Some text\n\n```ruby\nputs 'hello'")
+        assert_not_includes result[:html], "puts"
+        assert_equal true, result[:has_unclosed_fence]
+      end
+
+      test "streaming renders closed code fence" do
+        result = render_streaming_markdown("```ruby\nputs 'hello'\n```")
+        assert_includes result[:html], "puts 'hello'"
+        assert_equal false, result[:has_unclosed_fence]
+      end
+
+      test "streaming returns empty html for blank content" do
+        result = render_streaming_markdown("")
+        assert_equal "", result[:html]
+        assert_equal false, result[:has_unclosed_fence]
+      end
+
+      test "streaming renders content before unclosed fence" do
+        result = render_streaming_markdown("# Title\n\nParagraph\n\n```js\nconst x")
+        assert_includes result[:html], "<h1"
+        assert_includes result[:html], "Paragraph"
+        assert_not_includes result[:html], "const x"
+        assert_equal true, result[:has_unclosed_fence]
+      end
+
+      test "streaming holds back unclosed tilde fence" do
+        result = render_streaming_markdown("Text\n\n~~~\ncode here")
+        assert_not_includes result[:html], "code here"
+        assert_equal true, result[:has_unclosed_fence]
+      end
+
+      test "streaming does not close 4-backtick fence with 3 backticks" do
+        result = render_streaming_markdown("Text\n\n````ruby\ncode\n```\nmore code")
+        assert_not_includes result[:html], "code"
+        assert_equal true, result[:has_unclosed_fence]
       end
     end
   end

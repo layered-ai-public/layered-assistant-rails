@@ -6,4 +6,3 @@ pin "layered_assistant/messages_controller", to: "layered_assistant/messages_con
 pin "layered_assistant/panel_controller", to: "layered_assistant/panel_controller.js"
 pin "layered_assistant/panel_nav_controller", to: "layered_assistant/panel_nav_controller.js"
 pin "layered_assistant/provider_template_controller", to: "layered_assistant/provider_template_controller.js"
-pin "marked", to: "layered_assistant/vendor/marked.esm.js"
