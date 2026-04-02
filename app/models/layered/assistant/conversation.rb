@@ -67,6 +67,8 @@ module Layered
         broadcast_name_updated(old_name)
       end
 
+      private
+
       def broadcast_name_updated(old_name)
         css_class = "#{ActionView::RecordIdentifier.dom_id(self)}_name"
         Turbo::StreamsChannel.broadcast_action_to(
