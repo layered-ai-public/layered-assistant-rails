@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Changed
 
+- Rewrite Claude Code review action prompt with severity-based output format and stricter diff scoping
 - Streaming preview now renders markdown server-side with Kramdown, eliminating parser drift between preview and final output
 - Removed client-side `marked` dependency - the server is the single markdown authority
 - Throttle streaming broadcasts to once per 25ms to limit server-side Kramdown re-parses
