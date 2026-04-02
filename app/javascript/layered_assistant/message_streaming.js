@@ -81,7 +81,8 @@ Turbo.StreamActions.update_conversation_name = function () {
   const name = this.getAttribute("name")
   const oldName = this.getAttribute("old-name")
   this.targetElements.forEach((el) => { el.textContent = name })
-  if (oldName && document.title.startsWith(oldName)) {
-    document.title = name + document.title.slice(oldName.length)
+  if (oldName && document.title.includes(oldName)) {
+    const i = document.title.indexOf(oldName)
+    document.title = document.title.slice(0, i) + name + document.title.slice(i + oldName.length)
   }
 }
