@@ -303,6 +303,12 @@ module Layered
         assert_not_includes result[:html], "code here"
         assert_equal true, result[:has_unclosed_fence]
       end
+
+      test "streaming does not close 4-backtick fence with 3 backticks" do
+        result = render_streaming_markdown("Text\n\n````ruby\ncode\n```\nmore code")
+        assert_not_includes result[:html], "code"
+        assert_equal true, result[:has_unclosed_fence]
+      end
     end
   end
 end

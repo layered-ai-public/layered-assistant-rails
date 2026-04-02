@@ -18,7 +18,7 @@ function reconcile(target, html) {
   // Snapshot temp.children since moves will mutate the live HTMLCollection
   const newBlocks = [...temp.children]
 
-  // Trim excess blocks (but skip the typing indicator)
+  // Trim excess blocks from previous render
   while (target.children.length > newBlocks.length) {
     target.lastElementChild.remove()
   }

@@ -49,6 +49,7 @@ module Layered
 
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
           save_token_usage
+          @message.broadcast_streaming_content if @message.content.present?
           @message.broadcast_updated
         end
       end

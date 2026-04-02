@@ -94,10 +94,10 @@ module Layered
 
         text.each_line do |line|
           trimmed = line.lstrip
-          if fence_marker.nil? && (trimmed.start_with?("```") || trimmed.start_with?("~~~"))
-            fence_marker = trimmed[0, 3]
+          if fence_marker.nil? && (match = trimmed.match(/\A(`{3,}|~{3,})/))
+            fence_marker = match[1]
             fence_start = pos
-          elsif fence_marker && trimmed.start_with?(fence_marker) && trimmed.match?(/\A[`~]+\s*\z/)
+          elsif fence_marker && trimmed.match?(/\A#{Regexp.escape(fence_marker[0])}{#{fence_marker.length},}\s*\z/)
             fence_marker = nil
           end
           pos += line.length
