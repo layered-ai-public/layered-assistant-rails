@@ -4,14 +4,20 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Added
+
+- Page title and conversation select update dynamically when a conversation is named after the first message
+
 ### Changed
 
+- Rewrite Claude Code review action prompt with severity-based output format and stricter diff scoping
 - Streaming preview now renders markdown server-side with Kramdown, eliminating parser drift between preview and final output
 - Removed client-side `marked` dependency - the server is the single markdown authority
 - Throttle streaming broadcasts to once per 25ms to limit server-side Kramdown re-parses
 
 ### Fixed
 
+- Public conversation page now sets the HTML page title
 - Kramdown no longer drops tables that immediately follow headings (missing blank line)
 
 ## [0.2.0] - 2026-04-01
