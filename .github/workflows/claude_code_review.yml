@@ -38,13 +38,16 @@ jobs:
 
             Rules:
             - Do NOT write or modify any files in the repository.
+            - If a CLAUDE.md or AGENTS.md file exists, read it for repository-specific guidance.
             - Only review the changed lines and their immediate visible context in the diff.
-            - Do not infer behaviour from files or code not shown.
+            - Do not infer behaviour from files or code not in the diff or codebase.
             - Do not comment on unchanged code.
             - Do not be pedantic. Focus on issues that meaningfully impact correctness, safety, or maintainability.
             - Keep suggestions minimal, actionable, and safe.
             - Avoid generic best-practice advice unless directly relevant to the change.
             - If uncertain, state uncertainty rather than guessing.
+            - Provide a complete review in a single pass. Include all relevant issues you can identify to avoid requiring multiple review cycles.
+            - Do not hold back lower-severity issues if they are still actionable and relevant.
 
             Context access:
             - Use git to obtain the PR diff against the base branch (e.g. `git diff origin/${{ github.base_ref }}...HEAD`). If unavailable, determine the correct base via git.
