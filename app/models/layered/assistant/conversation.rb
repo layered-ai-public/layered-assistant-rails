@@ -1,9 +1,6 @@
 module Layered
   module Assistant
     class Conversation < ApplicationRecord
-      # Includes
-      include ActionView::RecordIdentifier
-
       # UID
       has_secure_token :uid
 
@@ -65,16 +62,18 @@ module Layered
         return unless name == self.class.default_name
         return if content.blank?
 
+        old_name = name
         update!(name: content.truncate(60))
-        broadcast_name_updated
+        broadcast_name_updated(old_name)
       end
 
-      def broadcast_name_updated
+      def broadcast_name_updated(old_name)
+        css_class = "#{ActionView::RecordIdentifier.dom_id(self)}_name"
         Turbo::StreamsChannel.broadcast_action_to(
           self,
           action: :update_conversation_name,
-          targets: ".#{dom_id(self)}_name",
-          attributes: { name: name }
+          targets: ".#{css_class}",
+          attributes: { name: name, "old-name": old_name }
         )
       end
     end

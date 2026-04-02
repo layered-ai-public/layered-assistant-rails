@@ -79,6 +79,9 @@ Turbo.StreamActions.render_content = function () {
 
 Turbo.StreamActions.update_conversation_name = function () {
   const name = this.getAttribute("name")
+  const oldName = this.getAttribute("old-name")
   this.targetElements.forEach((el) => { el.textContent = name })
-  document.title = name
+  if (oldName && document.title.includes(oldName)) {
+    document.title = document.title.replace(oldName, name)
+  }
 }
