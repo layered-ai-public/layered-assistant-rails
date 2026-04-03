@@ -2,11 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.2.1] - 2026-04-03
 
 ### Added
 
 - Page title and conversation select update dynamically when a conversation is named after the first message
+
+### Maintenance
+
+- Update dummy app gems
 
 ### Changed
 
