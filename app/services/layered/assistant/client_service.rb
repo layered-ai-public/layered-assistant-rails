@@ -4,7 +4,7 @@ module Layered
       def call(message:, stream_proc:)
         provider = message.model.provider
         client = Clients::Base.for(provider)
-        system_prompt = message.conversation.assistant.system_prompt
+        system_prompt = SystemPromptService.new.call(assistant: message.conversation.assistant)
 
         client.chat(
           messages: message.conversation.messages,
