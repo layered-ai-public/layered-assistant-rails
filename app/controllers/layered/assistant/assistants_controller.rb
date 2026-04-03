@@ -3,6 +3,7 @@ module Layered
     class AssistantsController < ApplicationController
       before_action :set_assistant, only: [:edit, :update, :destroy]
       before_action :set_models, only: [:new, :create, :edit, :update]
+      before_action :set_personas, only: [:new, :create, :edit, :update]
 
       def index
         @page_title = "Assistants"
@@ -52,8 +53,12 @@ module Layered
         @models = Model.available
       end
 
+      def set_personas
+        @personas = scoped(Persona).by_name
+      end
+
       def assistant_params
-        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :public)
+        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public)
       end
     end
   end
