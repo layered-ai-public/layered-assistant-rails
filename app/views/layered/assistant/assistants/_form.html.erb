@@ -20,6 +20,12 @@
   </div>
 
   <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :persona_id, name: "Persona", required: false %>
+    <%= f.select :persona_id, @personas.map { |p| [p.name, p.id] }, { include_blank: "None" }, class: "l-ui-select" %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :persona_id %>
+  </div>
+
+  <div class="l-ui-form__group">
     <%= render "layered_ui/shared/label", form: f, field: :default_model_id, name: "Default model", required: false %>
     <%= f.select :default_model_id, @models.map { |m| ["#{m.provider.name} - #{m.name}", m.id] }, { include_blank: "None" }, class: "l-ui-select" %>
     <%= render "layered_ui/shared/field_error", object: assistant, field: :default_model_id %>
