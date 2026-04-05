@@ -1,5 +1,5 @@
 # This migration comes from layered_assistant (originally 20260317000000)
-class NormaliseProviderProtocolValues < ActiveRecord::Migration[8.1]
+class NormaliseProviderProtocolValues < ActiveRecord::Migration[8.0]
   def up
     execute "UPDATE layered_assistant_providers SET protocol = 'anthropic' WHERE protocol = 'Anthropic'"
     execute "UPDATE layered_assistant_providers SET protocol = 'openai' WHERE protocol = 'OpenAI'"

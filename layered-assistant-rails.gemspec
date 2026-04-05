@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
 
   # Files
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
-    Dir["{app,config,data,db,lib}/**/*", "LICENSE", "Rakefile", "README.md", "AGENTS.md"]
+    Dir["{app,config,data,db,lib}/**/*", "LICENSE", "NOTICE", "Rakefile", "README.md", "AGENTS.md"]
   end
   spec.require_paths = ["lib"]
 
@@ -56,7 +56,7 @@ Gem::Specification.new do |spec|
       • Copy the layered assistant CSS to your host app at app/assets/tailwind/layered_assistant.css
         • This approach ensures the CSS is processed with your host app's Tailwind configuration
       • Add an import statement to your app/assets/tailwind/application.css
-      • Add `import "layered_assistant"` to your app/javascript/application.js (just after `import "@hotwired/turbo-rails"`, if present)
+      • Add `import "layered_assistant"` to your app/javascript/application.js (just after `import "layered_ui"`, which must already be present)
       • Copy engine migrations to your app's db/migrate/
 
     If these imports already exist, they will not be duplicated.

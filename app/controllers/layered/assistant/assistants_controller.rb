@@ -16,6 +16,7 @@ module Layered
 
       def create
         @assistant = Assistant.new(assistant_params)
+        @assistant.owner = l_ui_current_user
 
         if @assistant.save
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."

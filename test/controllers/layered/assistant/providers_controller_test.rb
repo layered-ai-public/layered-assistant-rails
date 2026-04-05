@@ -31,6 +31,7 @@ module Layered
 
         provider = Provider.last
         assert_equal "sk-secret-key", provider.secret
+        assert_equal users(:one), provider.owner
       end
 
       test "should not create provider with invalid params" do

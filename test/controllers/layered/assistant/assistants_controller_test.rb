@@ -22,6 +22,9 @@ module Layered
 
         assert_redirected_to "/layered/assistant/assistants"
         assert_equal "Assistant was successfully created.", flash[:notice]
+
+        assistant = Assistant.order(:id).last
+        assert_equal users(:one), assistant.owner
       end
 
       test "should create public assistant" do

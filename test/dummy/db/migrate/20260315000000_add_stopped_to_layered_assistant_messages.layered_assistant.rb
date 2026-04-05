@@ -1,4 +1,4 @@
-class AddStoppedToLayeredAssistantMessages < ActiveRecord::Migration[8.1]
+class AddStoppedToLayeredAssistantMessages < ActiveRecord::Migration[8.0]
   def change
     add_column :layered_assistant_messages, :stopped, :boolean, default: false, null: false
   end
