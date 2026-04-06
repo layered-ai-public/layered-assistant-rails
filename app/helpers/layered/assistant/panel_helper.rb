@@ -18,8 +18,8 @@ module Layered
       # Any extra keyword arguments are forwarded to the respective
       # +turbo_frame_tag+ call as HTML attributes.
 
-      def layered_assistant_panel_header(**options)
-        turbo_frame_tag "assistant_panel_header", **options
+      def layered_assistant_panel_header(**options, &block)
+        turbo_frame_tag "assistant_panel_header", **options, &block
       end
 
       def layered_assistant_panel_body(**options)

@@ -1,5 +1,5 @@
 # This migration comes from layered_assistant (originally 20260312000000)
-class CreateLayeredAssistantTables < ActiveRecord::Migration[8.1]
+class CreateLayeredAssistantTables < ActiveRecord::Migration[8.0]
   def change
     create_table :layered_assistant_providers, if_not_exists: true do |t|
       t.references :owner, polymorphic: true

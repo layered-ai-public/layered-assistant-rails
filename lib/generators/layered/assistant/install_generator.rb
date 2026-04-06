@@ -12,8 +12,8 @@ module Layered
           application_css = "app/assets/tailwind/application.css"
           application_js = "app/javascript/application.js"
 
-          css_ok = File.exist?(application_css) && File.read(application_css).include?('@import "./layered_ui"')
-          js_ok = File.exist?(application_js) && File.read(application_js).include?('import "layered_ui"')
+          css_ok = File.exist?(application_css) && File.read(application_css).match?(%r{@import\s+['"]\.?/?layered_ui['"]})
+          js_ok = File.exist?(application_js) && File.read(application_js).match?(%r{import\s+['"]layered_ui['"]})
 
           unless css_ok && js_ok
             say "layered-ui-rails is not installed yet - installing now...", :yellow
@@ -46,10 +46,10 @@ module Layered
           content = File.read(application_css)
           import_line = '@import "./layered_assistant";'
 
-          return if content.include?(import_line)
+          return if content.match?(%r{@import\s+['"]\.?/?layered_assistant['"]})
 
           # Insert after the layered_ui import (which must already be present)
-          inject_into_file application_css, "\n#{import_line}", after: '@import "./layered_ui";'
+          inject_into_file application_css, "\n#{import_line}", after: %r{@import\s+['"]\.?/?layered_ui['"];?}
           say "Added import to #{application_css}", :green
         end
 
@@ -61,10 +61,10 @@ module Layered
           content = File.read(application_js)
           import_line = 'import "layered_assistant"'
 
-          return if content.include?(import_line)
+          return if content.match?(%r{import\s+['"]layered_assistant['"]})
 
           # Insert after the layered_ui import (which must already be present)
-          inject_into_file application_js, "\n#{import_line}", after: 'import "layered_ui"'
+          inject_into_file application_js, "\n#{import_line}", after: %r{import\s+['"]layered_ui['"];?}
           say "Added import to #{application_js}", :green
         end
 

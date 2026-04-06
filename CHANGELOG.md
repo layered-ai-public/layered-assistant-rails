@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Generator tests for install and migrations generators covering CSS/JS injection, idempotency, quote tolerance, initialiser creation, route mounting, migration copying, and sequential timestamps
+- Regression tests for owner assignment on assistant and provider create
+- Regression tests for out-of-scope `assistant_id` rejection on conversation create (both full-page and panel paths)
+
+### Changed
+
+- Narrow Rails compatibility claim to >= 8.0 across README, gemspec, and CLAUDE.md; pin engine migrations to `Migration[8.0]` for consistency
+- Install generator uses regex matching for import detection and injection, tolerating single/double quotes, optional `./` prefix, and optional semicolons
+- Migrations generator uses `destination_root` instead of absolute `Rails.root` paths, enabling proper test framework support
+- Include `NOTICE` in packaged gem files for Apache-2.0 compliance
+
+### Fixed
+
+- CI badge image URL in README now points to layered-assistant-rails (was layered-ui-rails)
+- Setup page now documents the `api_request_timeout` configuration option
+- Post-install message correctly states JS import is placed after `layered_ui` (was `@hotwired/turbo-rails`)
+- Panel header helper now forwards blocks, fixing the "Assistant" fallback text for public users and eliminating the "block may be ignored" runtime warning
+
 ## [0.2.1] - 2026-04-03
 
 ### Added

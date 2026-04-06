@@ -6,14 +6,15 @@ module Layered
 
         def copy_migrations
           engine_migrations_path = Layered::Assistant::Engine.root.join("db/migrate")
-          app_migrations_path = Rails.root.join("db/migrate")
+          app_migrations_dir = "db/migrate"
 
           unless engine_migrations_path.exist?
             say "No migrations found in layered-assistant-rails.", :yellow
             return
           end
 
-          existing_migrations = Dir[app_migrations_path.join("*.rb")].map { |f| migration_name(File.basename(f)) }
+          app_migrations_path = File.join(destination_root, app_migrations_dir)
+          existing_migrations = Dir[File.join(app_migrations_path, "*.rb")].map { |f| migration_name(File.basename(f)) }
 
           timestamp = Time.now.utc.strftime("%Y%m%d%H%M%S").to_i
 
@@ -26,10 +27,9 @@ module Layered
               next
             end
 
-            destination = app_migrations_path.join("#{timestamp}_#{name}.layered_assistant.rb")
             content = "# This migration comes from layered_assistant (originally #{basename.split("_").first})\n" + File.read(source)
 
-            create_file destination, content
+            create_file "#{app_migrations_dir}/#{timestamp}_#{name}.layered_assistant.rb", content
             timestamp += 1
           end
         end
