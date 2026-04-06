@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. This projec
 ### Changed
 
 - Snapshot assistant instructions as a system message when a conversation is created, decoupling conversations from later prompt edits
+- Bump dependency on `layered-ui-rails` to `~> 0.2.3`
 
 ## [0.2.2] - 2026-04-06
 
