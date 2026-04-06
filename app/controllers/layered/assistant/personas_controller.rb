@@ -40,7 +40,7 @@ module Layered
         if @persona.destroy
           redirect_to layered_assistant.personas_path, notice: "Persona was successfully deleted."
         else
-          redirect_to layered_assistant.personas_path, alert: "Persona could not be deleted because it is assigned to assistants."
+          redirect_to layered_assistant.personas_path, alert: "Persona could not be deleted: #{@persona.errors.full_messages.to_sentence}."
         end
       rescue ActiveRecord::InvalidForeignKey
         redirect_to layered_assistant.personas_path, alert: "Persona could not be deleted because it is assigned to assistants."
