@@ -32,7 +32,9 @@ module Layered
       end
 
       def update
-        @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
+        if assistant_params.key?(:persona_id)
+          @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
+        end
 
         if @assistant.update(assistant_params.except(:persona_id))
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
