@@ -102,20 +102,77 @@ if mistral_key.present?
   Layered::Assistant::Models::CreateService.new(mistral).call
 end
 
+# Personas
+personas_data = [
+  {
+    name: "Friendly",
+    description: "Warm and approachable tone, like chatting with a helpful colleague.",
+    instructions: "You are warm, approachable, and conversational. Use a friendly, encouraging tone - like a colleague who genuinely wants to help. Keep things clear and easy to follow. It's fine to be lighthearted, but stay focused on being useful."
+  },
+  {
+    name: "Formal",
+    description: "Professional and precise tone suited to business communication.",
+    instructions: "You are professional, precise, and measured. Use clear, well-structured language appropriate for business communication. Avoid colloquialisms and filler. Be thorough but concise - every sentence should earn its place."
+  },
+  {
+    name: "Direct",
+    description: "Straight to the point with minimal preamble.",
+    instructions: "You are blunt and efficient. Lead with the answer, skip the preamble. Use short sentences. If something needs caveating, do it briefly. Don't soften your language unnecessarily - be honest and clear. Respect the reader's time above all else."
+  },
+  {
+    name: "Encouraging",
+    description: "Supportive and patient tone that builds confidence.",
+    instructions: "You are patient, supportive, and positive. Acknowledge effort and progress. When explaining something complex, break it into manageable steps and reassure the reader along the way. Frame challenges as opportunities. Your goal is to leave people feeling more capable than when they started."
+  },
+  {
+    name: "Curious",
+    description: "Exploratory tone that asks questions and considers angles.",
+    instructions: "You are thoughtful and inquisitive. Rather than jumping to conclusions, explore the question from multiple angles. Ask clarifying questions when it would help. Think out loud a little - show your reasoning. You're comfortable saying 'it depends' and explaining why."
+  }
+]
+
+personas = personas_data.map do |attrs|
+  Layered::Assistant::Persona.find_or_create_by!(name: attrs[:name]) do |p|
+    p.description = attrs[:description]
+    p.instructions = attrs[:instructions]
+  end
+end
+
 # Assistants
 #
-# Create a public assistant for each seeded model so every model is
-# immediately usable in the dummy app.
+# Create an assistant for each seeded model. Only Anthropic models are public.
 Layered::Assistant::Model.find_each do |model|
   name = "#{model.provider.name} - #{model.name}"
+  is_public = model.provider.protocol == "anthropic"
 
   assistant = Layered::Assistant::Assistant.find_or_create_by!(name: name) do |a|
     a.description = "Assistant powered by #{model.name}."
     a.instructions = "You are a helpful assistant. Answer questions clearly and concisely."
     a.default_model = model
-    a.public = true
+    a.public = is_public
   end
-  assistant.update!(public: true, default_model: model)
+  assistant.update!(public: is_public, default_model: model)
+end
+
+# Persona assistants
+#
+# If Sonnet 4.6 is available, create a public assistant for each persona, using Sonnet as the default model.
+sonnet = Layered::Assistant::Model.find_by(identifier: "claude-sonnet-4-6")
+
+if sonnet
+  personas.each do |persona|
+    name = persona.name
+
+    assistant = Layered::Assistant::Assistant.find_or_create_by!(name: name) do |a|
+      a.description = persona.description
+      a.default_model = sonnet
+      a.persona = persona
+      a.public = true
+    end
+    assistant.update!(persona: persona, default_model: sonnet, public: true)
+  end
+else
+  Rails.logger.warn "No Sonnet model found - skipping persona assistants"
 end
 
 # User

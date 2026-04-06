@@ -2,7 +2,15 @@ module Layered
   module Assistant
     class SystemPromptService
       def call(assistant:)
-        [assistant.persona&.instructions, assistant.instructions].compact_blank.join("\n\n").presence
+        parts = []
+
+        if assistant.persona&.instructions.present?
+          parts << "# Persona\n\n#{assistant.persona.instructions}"
+        end
+
+        parts << assistant.instructions if assistant.instructions.present?
+
+        parts.join("\n\n").presence
       end
     end
   end

@@ -57,7 +57,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.bigint "input_tokens"
     t.integer "model_id"
     t.bigint "output_tokens"
-    t.text "reasoning"
     t.integer "response_ms"
     t.string "role", default: "system", null: false
     t.boolean "stopped", default: false, null: false
@@ -74,7 +73,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.bigint "assistants_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.boolean "enabled", default: true, null: false
-    t.boolean "extended_thinking", default: false, null: false
     t.string "identifier", null: false
     t.bigint "messages_count", default: 0, null: false
     t.string "name", null: false

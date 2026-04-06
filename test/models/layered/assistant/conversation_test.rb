@@ -150,7 +150,7 @@ module Layered
       end
 
       test "creates system message from assistant instructions on create" do
-        assistant = layered_assistant_assistants(:general)
+        assistant = layered_assistant_assistants(:coding)
         conversation = Conversation.create!(name: "Snapshot test", assistant: assistant)
 
         system_message = conversation.messages.find_by(role: :system)
@@ -158,8 +158,18 @@ module Layered
         assert_equal assistant.instructions, system_message.content
       end
 
-      test "system message is not affected by later changes to assistant instructions" do
+      test "creates system message combining persona and assistant instructions" do
         assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Persona test", assistant: assistant)
+
+        system_message = conversation.messages.find_by(role: :system)
+        assert_not_nil system_message
+        expected = "# Persona\n\n#{assistant.persona.instructions}\n\n#{assistant.instructions}"
+        assert_equal expected, system_message.content
+      end
+
+      test "system message is not affected by later changes to assistant instructions" do
+        assistant = layered_assistant_assistants(:coding)
         conversation = Conversation.create!(name: "Frozen prompt", assistant: assistant)
         original_instructions = assistant.instructions
 
@@ -168,8 +178,8 @@ module Layered
         assert_equal original_instructions, system_message.content
       end
 
-      test "does not create system message when assistant has no instructions" do
-        assistant = layered_assistant_assistants(:general)
+      test "does not create system message when assistant has no instructions and no persona" do
+        assistant = layered_assistant_assistants(:coding)
         assistant.update!(instructions: nil)
         conversation = Conversation.create!(name: "No prompt", assistant: assistant)
 

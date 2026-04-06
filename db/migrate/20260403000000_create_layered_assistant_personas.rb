@@ -1,4 +1,4 @@
-class CreateLayeredAssistantPersonas < ActiveRecord::Migration[8.1]
+class CreateLayeredAssistantPersonas < ActiveRecord::Migration[8.0]
   def change
     create_table :layered_assistant_personas, if_not_exists: true do |t|
       t.string :uid, null: false, index: { unique: true }
