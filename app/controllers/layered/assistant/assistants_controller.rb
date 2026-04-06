@@ -16,8 +16,9 @@ module Layered
       end
 
       def create
-        @assistant = Assistant.new(assistant_params)
+        @assistant = Assistant.new(assistant_params.except(:persona_id))
         @assistant.owner = l_ui_current_user
+        @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
 
         if @assistant.save
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."
@@ -31,7 +32,9 @@ module Layered
       end
 
       def update
-        if @assistant.update(assistant_params)
+        @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
+
+        if @assistant.update(assistant_params.except(:persona_id))
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
         else
           render :edit, status: :unprocessable_entity

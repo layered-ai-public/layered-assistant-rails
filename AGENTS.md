@@ -39,6 +39,10 @@ You can run the tests with: `bundle exec rake test`
 - Tables prefixed `layered_assistant_`
 - Models inherit from `Layered::Assistant::ApplicationRecord`
 
+### Ownership and scoping
+
+Ownership is enforced at the controller layer via `scoped()`, not with model validations. When a controller action accepts a foreign key for a scoped model (e.g. `persona_id`, `assistant_id`), look up the record through `scoped(Model).find(params[:id])` so that out-of-scope IDs return 404. Do not add model-level validations that duplicate this scoping logic.
+
 ### Generators
 
 Verify dependencies before modifying host app files. Use `inject_into_file` for safe insertion. Check for existing imports to ensure idempotency.
