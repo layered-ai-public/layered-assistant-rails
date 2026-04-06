@@ -6,7 +6,6 @@
 
     <div class="l-ui-conversation__messages" data-controller="messages">
       <div id="panel_<%= dom_id(@conversation) %>_messages" class="<%= dom_id(@conversation) %>_messages l-ui-conversation" aria-live="polite" data-messages-target="list">
-        <%= render "layered/assistant/messages/system_prompt", conversation: @conversation %>
         <%= render partial: "layered/assistant/messages/message", collection: @messages, as: :message %>
       </div>
 

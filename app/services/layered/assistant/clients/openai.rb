@@ -2,8 +2,8 @@ module Layered
   module Assistant
     module Clients
       class OpenAI < Base
-        def chat(messages:, model:, stream_proc:, system_prompt: nil)
-          formatted = MessagesService.new.format(messages, provider: @provider, system_prompt: system_prompt)
+        def chat(messages:, model:, stream_proc:)
+          formatted = MessagesService.new.format(messages, provider: @provider)
 
           client_options = {
             access_token: @api_key,
