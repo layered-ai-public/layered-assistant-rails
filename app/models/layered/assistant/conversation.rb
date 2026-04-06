@@ -77,9 +77,9 @@ module Layered
       private
 
       def create_system_message
-        return if assistant&.system_prompt.blank?
+        return if assistant.instructions.blank?
 
-        messages.create!(role: :system, content: assistant.system_prompt)
+        messages.create!(role: :system, content: assistant.instructions)
       end
 
       def broadcast_name_updated(old_name)

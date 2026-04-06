@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-04-06
+
+### Breaking
+
+- Rename `assistant.system_prompt` column to `assistant.instructions` - existing data is not migrated as the gem is pre-release
+
+### Changed
+
+- Snapshot assistant instructions as a system message when a conversation is created, decoupling conversations from later prompt edits
+
 ## [0.2.2] - 2026-04-06
 
 ### Added

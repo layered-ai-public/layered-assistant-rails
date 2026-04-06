@@ -17,7 +17,7 @@ module Layered
 
       test "should create assistant with valid params" do
         assert_difference("Assistant.count", 1) do
-          post "/layered/assistant/assistants", params: { assistant: { name: "New Assistant", description: "A test assistant", system_prompt: "Be helpful." } }
+          post "/layered/assistant/assistants", params: { assistant: { name: "New Assistant", description: "A test assistant", instructions: "Be helpful." } }
         end
 
         assert_redirected_to "/layered/assistant/assistants"

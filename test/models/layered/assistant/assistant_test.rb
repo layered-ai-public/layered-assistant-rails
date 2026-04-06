@@ -13,7 +13,7 @@ module Layered
         assistant = Assistant.new(name: "Test")
         assert assistant.valid?
         assert_nil assistant.description
-        assert_nil assistant.system_prompt
+        assert_nil assistant.instructions
         assert_nil assistant.default_model_id
       end
 

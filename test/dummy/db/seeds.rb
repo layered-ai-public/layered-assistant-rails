@@ -111,7 +111,7 @@ Layered::Assistant::Model.find_each do |model|
 
   assistant = Layered::Assistant::Assistant.find_or_create_by!(name: name) do |a|
     a.description = "Assistant powered by #{model.name}."
-    a.system_prompt = "You are a helpful assistant. Answer questions clearly and concisely."
+    a.instructions = "You are a helpful assistant. Answer questions clearly and concisely."
     a.default_model = model
     a.public = true
   end
