@@ -15,6 +15,7 @@ module Layered
 
       def create
         @persona = Persona.new(persona_params)
+        @persona.owner = l_ui_current_user
 
         if @persona.save
           redirect_to layered_assistant.personas_path, notice: "Persona was successfully created."
