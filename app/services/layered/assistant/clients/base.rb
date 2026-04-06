@@ -9,7 +9,7 @@ module Layered
           raise StandardError, "API key is not set for provider #{provider.name}" if @api_key.blank?
         end
 
-        def chat(messages:, model:, stream_proc:, system_prompt: nil)
+        def chat(messages:, model:, stream_proc:)
           raise NotImplementedError
         end
 

@@ -10,17 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_17_210626) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
   create_table "layered_assistant_assistants", force: :cascade do |t|
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "default_model_id"
     t.text "description"
+    t.text "instructions"
     t.string "name", null: false
     t.integer "owner_id"
     t.string "owner_type"
     t.boolean "public", default: false, null: false
-    t.text "system_prompt"
     t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["default_model_id"], name: "index_layered_assistant_assistants_on_default_model_id"

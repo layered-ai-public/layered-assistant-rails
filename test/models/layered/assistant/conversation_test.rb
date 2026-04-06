@@ -149,6 +149,33 @@ module Layered
         assert_equal false, conversation.stop_response!
       end
 
+      test "creates system message from assistant instructions on create" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Snapshot test", assistant: assistant)
+
+        system_message = conversation.messages.find_by(role: :system)
+        assert_not_nil system_message
+        assert_equal assistant.instructions, system_message.content
+      end
+
+      test "system message is not affected by later changes to assistant instructions" do
+        assistant = layered_assistant_assistants(:general)
+        conversation = Conversation.create!(name: "Frozen prompt", assistant: assistant)
+        original_instructions = assistant.instructions
+
+        assistant.update!(instructions: "Completely different instructions")
+        system_message = conversation.messages.find_by(role: :system)
+        assert_equal original_instructions, system_message.content
+      end
+
+      test "does not create system message when assistant has no instructions" do
+        assistant = layered_assistant_assistants(:general)
+        assistant.update!(instructions: nil)
+        conversation = Conversation.create!(name: "No prompt", assistant: assistant)
+
+        assert_nil conversation.messages.find_by(role: :system)
+      end
+
       test "update_token_totals! treats nil tokens as zero" do
         assistant = layered_assistant_assistants(:general)
         conversation = Conversation.create!(name: "Token Test Nil", assistant: assistant)

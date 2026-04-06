@@ -2,7 +2,7 @@ general:
   uid: ast_general_fixture_001
   name: General assistant
   description: A general-purpose assistant for everyday tasks.
-  system_prompt: You are a helpful assistant.
+  instructions: You are a helpful assistant.
   default_model: sonnet
   public: true
 
@@ -10,7 +10,7 @@ coding:
   uid: ast_coding_fixture_002
   name: Coding assistant
   description: An assistant specialising in programming help.
-  system_prompt: You are an expert programmer. Help the user write clean, well-tested code.
+  instructions: You are an expert programmer. Help the user write clean, well-tested code.
   default_model: sonnet
   public: true
 
@@ -18,4 +18,4 @@ private:
   uid: ast_private_fixture_003
   name: Private assistant
   description: A private assistant for internal use.
-  system_prompt: You are a private assistant.
+  instructions: You are a private assistant.

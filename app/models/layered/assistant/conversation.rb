@@ -10,6 +10,9 @@ module Layered
       belongs_to :subject, polymorphic: true, optional: true
       has_many :messages, dependent: :destroy
 
+      # Callbacks
+      after_create :create_system_message
+
       # Validations
       validates :name, presence: true
 
@@ -72,6 +75,12 @@ module Layered
       end
 
       private
+
+      def create_system_message
+        return if assistant.instructions.blank?
+
+        messages.create!(role: :system, content: assistant.instructions)
+      end
 
       def broadcast_name_updated(old_name)
         css_class = "#{ActionView::RecordIdentifier.dom_id(self)}_name"

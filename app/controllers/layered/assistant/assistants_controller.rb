@@ -53,7 +53,7 @@ module Layered
       end
 
       def assistant_params
-        params.require(:assistant).permit(:name, :description, :system_prompt, :default_model_id, :public)
+        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :public)
       end
     end
   end

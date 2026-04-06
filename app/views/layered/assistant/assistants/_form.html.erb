@@ -14,9 +14,9 @@
   </div>
 
   <div class="l-ui-form__group">
-    <%= render "layered_ui/shared/label", form: f, field: :system_prompt, name: "System prompt", required: false %>
-    <%= f.text_area :system_prompt, class: "l-ui-form__field", rows: 5 %>
-    <%= render "layered_ui/shared/field_error", object: assistant, field: :system_prompt %>
+    <%= render "layered_ui/shared/label", form: f, field: :instructions, required: false %>
+    <%= f.text_area :instructions, class: "l-ui-form__field", rows: 5 %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :instructions %>
   </div>
 
   <div class="l-ui-form__group">

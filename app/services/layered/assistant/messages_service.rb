@@ -1,21 +1,20 @@
 module Layered
   module Assistant
     class MessagesService
-      def format(messages, provider: nil, system_prompt: nil)
+      def format(messages, provider: nil)
         protocol = provider&.protocol
 
         if protocol == "openai"
-          format_openai(messages, system_prompt: system_prompt)
+          format_openai(messages)
         else
-          format_anthropic(messages, system_prompt: system_prompt)
+          format_anthropic(messages)
         end
       end
 
       private
 
-      def format_anthropic(messages, system_prompt: nil)
+      def format_anthropic(messages)
         system_messages = []
-        system_messages << system_prompt if system_prompt.present?
         regular_messages = []
 
         messages.by_created_at.each do |message|
@@ -35,9 +34,8 @@ module Layered
         result
       end
 
-      def format_openai(messages, system_prompt: nil)
+      def format_openai(messages)
         formatted = []
-        formatted << { role: "system", content: system_prompt } if system_prompt.present?
 
         messages.by_created_at.each do |message|
           case message.role

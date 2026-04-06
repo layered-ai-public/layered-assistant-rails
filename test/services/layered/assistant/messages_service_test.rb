@@ -46,15 +46,10 @@ module Layered
         assert_nil result[:system]
       end
 
-      test "prepends system_prompt to Anthropic system messages" do
-        @conversation.messages.create!(role: :system, content: "Be concise.")
+      test "handles single system message for Anthropic" do
+        @conversation.messages.create!(role: :system, content: "You are a helpful assistant.")
 
-        result = @service.format(@conversation.messages, system_prompt: "You are a helpful assistant.")
-        assert_equal "You are a helpful assistant.\n\nBe concise.", result[:system]
-      end
-
-      test "uses system_prompt alone when no system messages for Anthropic" do
-        result = @service.format(@conversation.messages, system_prompt: "You are a helpful assistant.")
+        result = @service.format(@conversation.messages)
         assert_equal "You are a helpful assistant.", result[:system]
       end
 
@@ -91,21 +86,11 @@ module Layered
         assert_nil result[:system]
       end
 
-      test "prepends system_prompt as first message for OpenAI" do
+      test "handles single system message for OpenAI" do
         provider = layered_assistant_providers(:openai)
-        @conversation.messages.create!(role: :system, content: "Be concise.", created_at: 10.minutes.ago)
+        @conversation.messages.create!(role: :system, content: "You are a helpful assistant.", created_at: 10.minutes.ago)
 
-        result = @service.format(@conversation.messages, provider: provider, system_prompt: "You are a helpful assistant.")
-
-        system_messages = result[:messages].select { |m| m[:role] == "system" }
-        assert_equal 2, system_messages.size
-        assert_equal "You are a helpful assistant.", system_messages.first[:content]
-        assert_equal "Be concise.", system_messages.second[:content]
-      end
-
-      test "uses system_prompt alone when no system messages for OpenAI" do
-        provider = layered_assistant_providers(:openai)
-        result = @service.format(@conversation.messages, provider: provider, system_prompt: "You are a helpful assistant.")
+        result = @service.format(@conversation.messages, provider: provider)
 
         system_messages = result[:messages].select { |m| m[:role] == "system" }
         assert_equal 1, system_messages.size
