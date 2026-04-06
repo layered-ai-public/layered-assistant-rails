@@ -5,7 +5,7 @@ module Layered
         parts = []
 
         if assistant.persona&.instructions.present?
-          parts << "# Persona\n\n#{assistant.persona.instructions}"
+          parts << "**Persona**\n\n#{assistant.persona.instructions}"
         end
 
         parts << assistant.instructions if assistant.instructions.present?

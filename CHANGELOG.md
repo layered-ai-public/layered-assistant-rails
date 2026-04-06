@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Persona model with full CRUD, assistant binding, and system prompt composition - personas provide reusable personality/behaviour instructions that can be assigned to assistants
+
 ## [0.3.0] - 2026-04-06
 
 ### Breaking

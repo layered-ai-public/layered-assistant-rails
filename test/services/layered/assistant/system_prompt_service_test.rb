@@ -20,14 +20,14 @@ module Layered
       test "returns persona instructions with heading when no assistant instructions" do
         persona = layered_assistant_personas(:friendly)
         assistant = Assistant.new(name: "Test", persona: persona)
-        assert_equal "# Persona\n\n#{persona.instructions}", @service.call(assistant: assistant)
+        assert_equal "**Persona**\n\n#{persona.instructions}", @service.call(assistant: assistant)
       end
 
       test "prepends persona instructions with heading to assistant instructions" do
         persona = layered_assistant_personas(:friendly)
         assistant = Assistant.new(name: "Test", persona: persona, instructions: "Be concise.")
         result = @service.call(assistant: assistant)
-        assert_equal "# Persona\n\n#{persona.instructions}\n\nBe concise.", result
+        assert_equal "**Persona**\n\n#{persona.instructions}\n\nBe concise.", result
       end
 
       test "ignores persona with blank instructions" do
