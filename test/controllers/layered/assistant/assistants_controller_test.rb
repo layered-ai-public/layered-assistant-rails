@@ -83,6 +83,41 @@ module Layered
         assert_select ".l-ui-form__errors"
       end
 
+      test "should reject out-of-scope persona_id on create" do
+        persona = layered_assistant_personas(:friendly)
+        persona.update!(owner: nil)
+
+        Layered::Assistant.scope do |model_class|
+          model_class.where(owner: l_ui_current_user)
+        end
+
+        assert_no_difference("Assistant.count") do
+          post "/layered/assistant/assistants", params: { assistant: { name: "Sneaky", persona_id: persona.id } }
+        end
+
+        assert_response :not_found
+      ensure
+        Layered::Assistant.class_variable_set(:@@scope_block, nil)
+      end
+
+      test "should reject out-of-scope persona_id on update" do
+        assistant = layered_assistant_assistants(:general)
+        persona = layered_assistant_personas(:formal)
+        persona.update!(owner: nil)
+
+        Layered::Assistant.scope do |model_class|
+          model_class.where(owner: l_ui_current_user)
+        end
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { persona_id: persona.id } }
+        assert_response :not_found
+
+        assistant.reload
+        assert_not_equal persona, assistant.persona
+      ensure
+        Layered::Assistant.class_variable_set(:@@scope_block, nil)
+      end
+
       test "should destroy assistant" do
         assistant = Assistant.create!(name: "Disposable")
 

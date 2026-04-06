@@ -20,11 +20,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.string "name", null: false
     t.integer "owner_id"
     t.string "owner_type"
+    t.integer "persona_id"
     t.boolean "public", default: false, null: false
     t.string "uid", null: false
     t.datetime "updated_at", null: false
     t.index ["default_model_id"], name: "index_layered_assistant_assistants_on_default_model_id"
     t.index ["owner_type", "owner_id"], name: "index_layered_assistant_assistants_on_owner"
+    t.index ["persona_id"], name: "index_layered_assistant_assistants_on_persona_id"
     t.index ["uid"], name: "index_layered_assistant_assistants_on_uid", unique: true
   end
 
@@ -80,6 +82,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.index ["provider_id"], name: "index_layered_assistant_models_on_provider_id"
   end
 
+  create_table "layered_assistant_personas", force: :cascade do |t|
+    t.bigint "assistants_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.text "instructions"
+    t.string "name", null: false
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_layered_assistant_personas_on_owner"
+    t.index ["uid"], name: "index_layered_assistant_personas_on_uid", unique: true
+  end
+
   create_table "layered_assistant_providers", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "enabled", default: true, null: false
@@ -123,6 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
   end
 
   add_foreign_key "layered_assistant_assistants", "layered_assistant_models", column: "default_model_id"
+  add_foreign_key "layered_assistant_assistants", "layered_assistant_personas", column: "persona_id"
   add_foreign_key "layered_assistant_conversations", "layered_assistant_assistants", column: "assistant_id"
   add_foreign_key "layered_assistant_messages", "layered_assistant_conversations", column: "conversation_id"
   add_foreign_key "layered_assistant_messages", "layered_assistant_models", column: "model_id"

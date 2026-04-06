@@ -7,6 +7,7 @@ module Layered
       # Associations
       belongs_to :owner, polymorphic: true, optional: true
       belongs_to :default_model, class_name: "Layered::Assistant::Model", optional: true, counter_cache: :assistants_count
+      belongs_to :persona, optional: true, counter_cache: :assistants_count
       has_many :conversations, dependent: :destroy
 
       # Validations

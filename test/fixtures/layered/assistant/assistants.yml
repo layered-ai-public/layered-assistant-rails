@@ -4,6 +4,7 @@ general:
   description: A general-purpose assistant for everyday tasks.
   instructions: You are a helpful assistant.
   default_model: sonnet
+  persona: friendly
   public: true
 
 coding:

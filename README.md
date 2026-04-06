@@ -106,13 +106,7 @@ The `l_assistant_accessible?` helper evaluates the authorize block without side 
 
 By default, all records are visible to any authorised user. If your application is multi-tenant or you need to restrict which records a user can see, configure a `scope` block in the initialiser.
 
-The block receives the model class, runs in controller context, and must return an `ActiveRecord::Relation`. The following models are passed through the scope block:
-
-| Model | Description |
-|---|---|
-| `Layered::Assistant::Conversation` | User conversations (has polymorphic `owner`) |
-| `Layered::Assistant::Assistant` | Assistant configurations (has polymorphic `owner`) |
-| `Layered::Assistant::Provider` | API provider credentials (has polymorphic `owner`) |
+The block receives the model class, runs in controller context, and must return an `ActiveRecord::Relation`. All engine models with a polymorphic `owner` association are passed through the scope block.
 
 ### Scope all owned resources to the current user
 

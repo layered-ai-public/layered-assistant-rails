@@ -33,10 +33,8 @@
 # have access to current_user and other helpers. Return an ActiveRecord
 # relation (e.g. model_class.where(...) or model_class.all).
 #
-# Models passed through the scope block:
-#   - Layered::Assistant::Conversation (has polymorphic owner)
-#   - Layered::Assistant::Assistant    (has polymorphic owner)
-#   - Layered::Assistant::Provider     (has polymorphic owner)
+# All engine models with a polymorphic owner association are passed through
+# the scope block.
 #
 # Scope all owned resources to the current user:
 #
