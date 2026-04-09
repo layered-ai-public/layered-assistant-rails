@@ -9,11 +9,16 @@ module Layered
         assert_includes persona.errors[:name], "can't be blank"
       end
 
-      test "allows optional fields to be blank" do
-        persona = Persona.new(name: "Test")
+      test "validates instructions presence" do
+        persona = Persona.new(name: "Test", instructions: nil)
+        assert_not persona.valid?
+        assert_includes persona.errors[:instructions], "can't be blank"
+      end
+
+      test "allows description to be blank" do
+        persona = Persona.new(name: "Test", instructions: "Be helpful.")
         assert persona.valid?
         assert_nil persona.description
-        assert_nil persona.instructions
       end
 
       test "has many assistants" do

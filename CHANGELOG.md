@@ -2,11 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.1] - 2026-04-09
 
 ### Added
 
 - Persona model with full CRUD, assistant binding, and system prompt composition - personas provide reusable personality/behaviour instructions that can be assigned to assistants
+
+### Changed
+
+- Bump `layered-ui-rails` to 0.2.4
 
 ## [0.3.0] - 2026-04-06
 

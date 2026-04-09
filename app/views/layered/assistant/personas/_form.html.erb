@@ -14,8 +14,9 @@
   </div>
 
   <div class="l-ui-form__group">
-    <%= render "layered_ui/shared/label", form: f, field: :instructions, required: false %>
+    <%= render "layered_ui/shared/label", form: f, field: :instructions, required: true %>
     <%= f.text_area :instructions, class: "l-ui-form__field", rows: 5 %>
+    <p class="l-ui-form__hint">Shape the personality and tone of conversations, used alongside the assistant's own instructions. e.g. "Reply in British English with a formal tone"</p>
     <%= render "layered_ui/shared/field_error", object: persona, field: :instructions %>
   </div>
 

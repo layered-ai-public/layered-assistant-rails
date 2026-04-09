@@ -29,12 +29,6 @@ module Layered
         result = @service.call(assistant: assistant)
         assert_equal "**Persona**\n\n#{persona.instructions}\n\nBe concise.", result
       end
-
-      test "ignores persona with blank instructions" do
-        persona = layered_assistant_personas(:empty)
-        assistant = Assistant.new(name: "Test", persona: persona, instructions: "Be helpful.")
-        assert_equal "Be helpful.", @service.call(assistant: assistant)
-      end
     end
   end
 end

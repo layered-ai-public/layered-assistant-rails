@@ -13,3 +13,4 @@ formal:
 empty:
   uid: per_empty_fixture_003
   name: Empty persona
+  instructions: A minimal persona with no assistants.

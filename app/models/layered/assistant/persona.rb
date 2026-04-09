@@ -10,6 +10,7 @@ module Layered
 
       # Validations
       validates :name, presence: true
+      validates :instructions, presence: true
 
       # Scopes
       scope :by_name, -> { order(name: :asc, created_at: :desc) }

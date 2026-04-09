@@ -62,7 +62,7 @@ module Layered
       end
 
       test "should destroy persona without assistants" do
-        persona = Persona.create!(name: "Disposable")
+        persona = Persona.create!(name: "Disposable", instructions: "Temporary.")
 
         assert_difference("Persona.count", -1) do
           delete "/layered/assistant/personas/#{persona.id}"
