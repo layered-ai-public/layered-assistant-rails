@@ -4,10 +4,11 @@ module Layered
       before_action :set_assistant, only: [:edit, :update, :destroy]
       before_action :set_models, only: [:new, :create, :edit, :update]
       before_action :set_personas, only: [:new, :create, :edit, :update]
+      before_action :set_skills, only: [:new, :create, :edit, :update]
 
       def index
         @page_title = "Assistants"
-        @pagy, @assistants = pagy(scoped(Assistant).by_name)
+        @pagy, @assistants = pagy(scoped(Assistant).includes(:persona).by_name)
       end
 
       def new
@@ -16,11 +17,12 @@ module Layered
       end
 
       def create
-        @assistant = Assistant.new(assistant_params.except(:persona_id))
+        @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
         @assistant.owner = l_ui_current_user
         @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
 
         if @assistant.save
+          assign_skills
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."
         else
           render :new, status: :unprocessable_entity
@@ -36,7 +38,8 @@ module Layered
           @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
         end
 
-        if @assistant.update(assistant_params.except(:persona_id))
+        if @assistant.update(assistant_params.except(:persona_id, :skill_ids))
+          assign_skills
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
         else
           render :edit, status: :unprocessable_entity
@@ -62,8 +65,19 @@ module Layered
         @personas = scoped(Persona).by_name
       end
 
+      def set_skills
+        @skills = scoped(Skill).by_name
+      end
+
+      def assign_skills
+        if assistant_params.key?(:skill_ids)
+          skill_ids = Array(assistant_params[:skill_ids]).compact_blank
+          @assistant.skills = scoped(Skill).where(id: skill_ids)
+        end
+      end
+
       def assistant_params
-        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public)
+        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public, skill_ids: [])
       end
     end
   end

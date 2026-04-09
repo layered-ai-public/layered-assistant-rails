@@ -5,7 +5,14 @@ module Layered
         parts = []
 
         if assistant.persona&.instructions.present?
-          parts << "**Persona**\n\n#{assistant.persona.instructions}"
+          parts << "## Persona\n\n#{assistant.persona.instructions}"
+        end
+
+        skill_sections = assistant.skills.filter_map do |s|
+          "### #{s.name}\n\n#{s.instructions}" if s.instructions.present?
+        end
+        if skill_sections.any?
+          parts << "## Skills\n\n#{skill_sections.join("\n\n---\n\n")}"
         end
 
         parts << assistant.instructions if assistant.instructions.present?

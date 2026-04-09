@@ -14,6 +14,12 @@
   </div>
 
   <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :default_model_id, name: "Default model", required: false %>
+    <%= f.select :default_model_id, @models.map { |m| ["#{m.provider.name} - #{m.name}", m.id] }, { include_blank: "None" }, class: "l-ui-select" %>
+    <%= render "layered_ui/shared/field_error", object: assistant, field: :default_model_id %>
+  </div>
+
+  <div class="l-ui-form__group">
     <%= render "layered_ui/shared/label", form: f, field: :instructions, required: false %>
     <%= f.text_area :instructions, class: "l-ui-form__field", rows: 5 %>
     <%= render "layered_ui/shared/field_error", object: assistant, field: :instructions %>
@@ -25,11 +31,18 @@
     <%= render "layered_ui/shared/field_error", object: assistant, field: :persona_id %>
   </div>
 
-  <div class="l-ui-form__group">
-    <%= render "layered_ui/shared/label", form: f, field: :default_model_id, name: "Default model", required: false %>
-    <%= f.select :default_model_id, @models.map { |m| ["#{m.provider.name} - #{m.name}", m.id] }, { include_blank: "None" }, class: "l-ui-select" %>
-    <%= render "layered_ui/shared/field_error", object: assistant, field: :default_model_id %>
-  </div>
+  <% if @skills.any? %>
+    <fieldset class="l-ui-form__group">
+      <legend class="l-ui-label">Skills</legend>
+      <%= hidden_field_tag "assistant[skill_ids][]", "" %>
+      <% @skills.each do |skill| %>
+        <div class="l-ui-container--checkbox">
+          <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}" }, skill.id, nil %>
+          <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-label--checkbox"><%= skill.name %></label>
+        </div>
+      <% end %>
+    </fieldset>
+  <% end %>
 
   <label class="l-ui-switch l-ui-utility--mt-xl">
     <%= f.check_box :public, class: "l-ui-switch__input", role: "switch" %>

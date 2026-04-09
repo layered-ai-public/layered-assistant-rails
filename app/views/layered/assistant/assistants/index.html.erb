@@ -11,6 +11,8 @@
         <th scope="col" class="l-ui-table__header-cell">Name</th>
         <th scope="col" class="l-ui-table__header-cell">Description</th>
         <th scope="col" class="l-ui-table__header-cell">Default model</th>
+        <th scope="col" class="l-ui-table__header-cell">Persona</th>
+        <th scope="col" class="l-ui-table__header-cell">Skills</th>
         <th scope="col" class="l-ui-table__header-cell">Conversations</th>
         <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
       </tr>
@@ -27,6 +29,12 @@
           </td>
           <td class="l-ui-table__cell">
             <%= assistant.default_model&.name %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= assistant.persona&.name || "None" %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= assistant.assistant_skills_count %>
           </td>
           <td class="l-ui-table__cell">
             <%= link_to assistant.conversations_count, layered_assistant.assistant_conversations_path(assistant) %>
