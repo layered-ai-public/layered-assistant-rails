@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.3.2] - 2026-04-09
+
+### Added
+
+- Skill model with full CRUD, assistant binding, and system prompt composition - skills provide reusable passive instruction blocks that can be assigned to assistants and are included in the system prompt
+
+### Changed
+
+- Bump `layered-ui-rails` to 0.2.5
+
 ## [0.3.1] - 2026-04-09
 
 ### Added
