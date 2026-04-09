@@ -164,7 +164,11 @@ module Layered
 
         system_message = conversation.messages.find_by(role: :system)
         assert_not_nil system_message
-        expected = "**Persona**\n\n#{assistant.persona.instructions}\n\n#{assistant.instructions}"
+        skill_instructions = assistant.skills.filter_map { |s| s.instructions.presence }
+        parts = ["**Persona**\n\n#{assistant.persona.instructions}"]
+        parts << "**Skills**\n\n#{skill_instructions.join("\n\n")}" if skill_instructions.any?
+        parts << assistant.instructions
+        expected = parts.join("\n\n")
         assert_equal expected, system_message.content
       end
 

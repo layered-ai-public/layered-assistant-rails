@@ -1,0 +1,30 @@
+<%= form_with(model: skill, url: url, html: { class: "l-ui-form" }) do |f| %>
+  <%= render "layered_ui/shared/form_errors", item: skill %>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :name, required: true %>
+    <%= f.text_field :name, class: "l-ui-form__field" %>
+    <%= render "layered_ui/shared/field_error", object: skill, field: :name %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :description, required: false %>
+    <%= f.text_area :description, class: "l-ui-form__field", rows: 3 %>
+    <%= render "layered_ui/shared/field_error", object: skill, field: :description %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :instructions, required: false %>
+    <%= f.text_area :instructions, class: "l-ui-form__field", rows: 5 %>
+    <%= render "layered_ui/shared/field_error", object: skill, field: :instructions %>
+  </div>
+
+  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+    <% if skill.persisted? %>
+      <%= link_to "Delete", layered_assistant.skill_path(skill), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <%= f.submit skill.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+  </div>
+<% end %>

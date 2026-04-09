@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_06_203857) do
+  create_table "layered_assistant_assistant_skills", force: :cascade do |t|
+    t.integer "assistant_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "position"
+    t.integer "skill_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assistant_id", "skill_id"], name: "idx_assistant_skills_on_assistant_and_skill", unique: true
+    t.index ["assistant_id"], name: "index_layered_assistant_assistant_skills_on_assistant_id"
+    t.index ["skill_id"], name: "index_layered_assistant_assistant_skills_on_skill_id"
+  end
+
   create_table "layered_assistant_assistants", force: :cascade do |t|
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false
@@ -111,6 +122,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.index ["owner_type", "owner_id"], name: "index_layered_assistant_providers_on_owner"
   end
 
+  create_table "layered_assistant_skills", force: :cascade do |t|
+    t.bigint "assistants_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.text "instructions"
+    t.string "name", null: false
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_layered_assistant_skills_on_owner"
+    t.index ["uid"], name: "index_layered_assistant_skills_on_uid", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
@@ -138,6 +163,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_143656) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "layered_assistant_assistant_skills", "layered_assistant_assistants", column: "assistant_id"
+  add_foreign_key "layered_assistant_assistant_skills", "layered_assistant_skills", column: "skill_id"
   add_foreign_key "layered_assistant_assistants", "layered_assistant_models", column: "default_model_id"
   add_foreign_key "layered_assistant_assistants", "layered_assistant_personas", column: "persona_id"
   add_foreign_key "layered_assistant_conversations", "layered_assistant_assistants", column: "assistant_id"
