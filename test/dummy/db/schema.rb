@@ -14,7 +14,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_203857) do
   create_table "layered_assistant_assistant_skills", force: :cascade do |t|
     t.integer "assistant_id", null: false
     t.datetime "created_at", null: false
-    t.integer "position"
     t.integer "skill_id", null: false
     t.datetime "updated_at", null: false
     t.index ["assistant_id", "skill_id"], name: "idx_assistant_skills_on_assistant_and_skill", unique: true
@@ -23,6 +22,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_06_203857) do
   end
 
   create_table "layered_assistant_assistants", force: :cascade do |t|
+    t.bigint "assistant_skills_count", default: 0, null: false
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "default_model_id"

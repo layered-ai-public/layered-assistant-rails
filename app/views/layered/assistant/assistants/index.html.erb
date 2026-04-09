@@ -34,7 +34,7 @@
             <%= assistant.persona&.name || "None" %>
           </td>
           <td class="l-ui-table__cell">
-            <%= assistant.skills.size %>
+            <%= assistant.assistant_skills_count %>
           </td>
           <td class="l-ui-table__cell">
             <%= link_to assistant.conversations_count, layered_assistant.assistant_conversations_path(assistant) %>
