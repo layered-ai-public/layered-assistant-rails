@@ -20,9 +20,9 @@ module Layered
         @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
         @assistant.owner = l_ui_current_user
         @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
-        assign_skills
 
         if @assistant.save
+          assign_skills
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."
         else
           render :new, status: :unprocessable_entity

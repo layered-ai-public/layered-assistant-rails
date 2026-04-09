@@ -8,7 +8,7 @@ module Layered
           parts << "## Persona\n\n#{assistant.persona.instructions}"
         end
 
-        if assistant.skills.any?
+        if assistant.assistant_skills_count.positive?
           skill_sections = assistant.skills.filter_map do |s|
             "### #{s.name}\n\n#{s.instructions}" if s.instructions.present?
           end

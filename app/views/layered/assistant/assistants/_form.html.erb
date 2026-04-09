@@ -34,6 +34,7 @@
   <% if @skills.any? %>
     <fieldset class="l-ui-form__group">
       <legend class="l-ui-label">Skills</legend>
+      <%= hidden_field_tag "assistant[skill_ids][]", "" %>
       <% @skills.each do |skill| %>
         <div class="l-ui-container--checkbox">
           <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}" }, skill.id, nil %>
