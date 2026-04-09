@@ -8,7 +8,7 @@ module Layered
 
       def index
         @page_title = "Assistants"
-        @pagy, @assistants = pagy(scoped(Assistant).includes(:persona, :skills).by_name)
+        @pagy, @assistants = pagy(scoped(Assistant).includes(:persona).by_name)
       end
 
       def new
@@ -38,9 +38,8 @@ module Layered
           @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
         end
 
-        assign_skills
-
         if @assistant.update(assistant_params.except(:persona_id, :skill_ids))
+          assign_skills
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
         else
           render :edit, status: :unprocessable_entity
