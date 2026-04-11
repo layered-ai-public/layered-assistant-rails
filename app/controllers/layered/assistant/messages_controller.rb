@@ -8,7 +8,7 @@ module Layered
 
       def index
         @page_title = "Messages"
-        @pagy, @messages = pagy(@conversation.messages.includes(:model).by_created_at)
+        @pagy, @messages = pagy(@conversation.messages.visible.includes(:model).by_created_at)
       end
 
       def create

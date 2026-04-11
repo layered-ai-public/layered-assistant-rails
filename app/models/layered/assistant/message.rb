@@ -11,11 +11,12 @@ module Layered
       enum :role, {
         system: "system",
         assistant: "assistant",
-        user: "user"
+        user: "user",
+        tool: "tool"
       }
 
       # Validations
-      validates :content, presence: true, unless: :assistant?
+      validates :content, presence: true, unless: -> { assistant? || tool? }
 
       # Associations
       belongs_to :conversation, counter_cache: true
@@ -23,6 +24,7 @@ module Layered
 
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
+      scope :visible, -> { where(role: [ :user, :assistant ]) }
 
       # Broadcasting
       def broadcast_created

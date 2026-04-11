@@ -13,7 +13,7 @@ module Layered
         end
 
         def show
-          @messages = @conversation.messages.includes(:model).by_created_at
+          @messages = @conversation.messages.visible.includes(:model).by_created_at
           @models = Model.available
           @selected_model_id = @messages.last&.model_id || @conversation.assistant.default_model_id || @models.first&.id
         end

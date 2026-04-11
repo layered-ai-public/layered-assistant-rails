@@ -58,3 +58,30 @@ end
 Layered::Assistant.log_errors = true                # log API errors to stdout
 Layered::Assistant.api_request_timeout = 210        # total API timeout in seconds, including full streaming response (default: 210)
 # Layered::Assistant.skip_db_encryption = true      # skip encryption on Provider#secret (dev/test only)
+
+# Tool definitions - return an array of tools available to the assistant.
+Layered::Assistant.tools do |assistant|
+  [
+    {
+      name: "greet",
+      description: "Greet a person by name. Use this tool whenever the user asks you to say hello or greet someone.",
+      input_schema: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "The name of the person to greet" }
+        },
+        required: [ "name" ]
+      }
+    }
+  ]
+end
+
+# Tool execution - handle tool calls from the LLM.
+Layered::Assistant.execute_tool do |name, input, context|
+  case name
+  when "greet"
+    "Hello, #{input['name']}! Welcome to layered-assistant-rails."
+  else
+    "Unknown tool: #{name}"
+  end
+end

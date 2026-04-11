@@ -41,6 +41,30 @@ module Layered
           chunk.dig("usage", "output_tokens")&.to_i
         end
       end
+
+      # Returns a tool event hash or nil.
+      # Possible events:
+      #   { type: :start, id: "toolu_...", name: "tool_name" }
+      #   { type: :delta, json: "partial_json_string" }
+      #   { type: :block_stop } (end of any content block - caller tracks whether it's a tool block)
+      def tool_event(chunk)
+        return nil if @openai
+
+        case chunk["type"]
+        when "content_block_start"
+          block = chunk["content_block"]
+          if block && block["type"] == "tool_use"
+            { type: :start, id: block["id"], name: block["name"] }
+          end
+        when "content_block_delta"
+          delta = chunk["delta"]
+          if delta && delta["type"] == "input_json_delta"
+            { type: :delta, json: delta["partial_json"] || "" }
+          end
+        when "content_block_stop"
+          { type: :block_stop }
+        end
+      end
     end
   end
 end

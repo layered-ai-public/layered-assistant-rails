@@ -1,3 +1,6 @@
+<% if message.tool? || (message.assistant? && message.content.blank? && message.tool_calls.present?) %>
+  <div id="<%= dom_id(message) %>" class="<%= dom_id(message) %>" hidden></div>
+<% else %>
 <%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} #{message.user? ? "l-ui-message--sent" : "l-ui-message"}" do %>
   <div class="l-ui-message__bubble">
     <% unless message.user? %>
@@ -25,4 +28,5 @@
       <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
     </div>
   </div>
+<% end %>
 <% end %>

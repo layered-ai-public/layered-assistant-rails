@@ -4,6 +4,8 @@ module Layered
       STOP_CHECK_INTERVAL = 25
       BROADCAST_INTERVAL_MS = 25
 
+      attr_reader :accumulated_tool_calls
+
       def initialize(message, provider:, started_at: nil)
         @message = message
         @parser = ChunkParser.new(provider.protocol)
@@ -15,6 +17,8 @@ module Layered
         @stopped = false
         @last_broadcast_at = 0
         @broadcast_pending = false
+        @accumulated_tool_calls = []
+        @current_tool_call = nil
       end
 
       def mark_started!
@@ -48,6 +52,8 @@ module Layered
           broadcast_throttled
         end
 
+        handle_tool_event(@parser.tool_event(chunk))
+
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
           save_token_usage
           @message.broadcast_streaming_content if @broadcast_pending
@@ -56,6 +62,27 @@ module Layered
       end
 
       private
+
+      def handle_tool_event(event)
+        return unless event
+
+        case event[:type]
+        when :start
+          @current_tool_call = { id: event[:id], name: event[:name], input_json: "" }
+        when :delta
+          @current_tool_call[:input_json] << event[:json] if @current_tool_call
+        when :block_stop
+          if @current_tool_call
+            input = @current_tool_call[:input_json].present? ? JSON.parse(@current_tool_call[:input_json]) : {}
+            @accumulated_tool_calls << {
+              "id" => @current_tool_call[:id],
+              "name" => @current_tool_call[:name],
+              "input" => input
+            }
+            @current_tool_call = nil
+          end
+        end
+      end
 
       def broadcast_throttled
         now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :millisecond)

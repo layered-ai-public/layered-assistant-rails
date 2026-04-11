@@ -1,10 +1,18 @@
 PATH
+  remote: ../layered-ui-rails
+  specs:
+    layered-ui-rails (0.3.0)
+      concurrent-ruby (>= 1.0)
+      rails (~> 8.0)
+      tailwindcss-rails (~> 4.0)
+
+PATH
   remote: .
   specs:
     layered-assistant-rails (0.3.2)
       kramdown (~> 2.4)
       kramdown-parser-gfm (~> 1.1)
-      layered-ui-rails (~> 0.2.1)
+      layered-ui-rails (~> 0.3.0)
       pagy (~> 43.2)
       positioning (~> 0.4)
       rails (~> 8.0)
@@ -146,9 +154,6 @@ GEM
       rexml (>= 3.4.4)
     kramdown-parser-gfm (1.1.0)
       kramdown (~> 2.0)
-    layered-ui-rails (0.2.5)
-      rails (~> 8.0)
-      tailwindcss-rails (~> 4.0)
     logger (1.7.0)
     loofah (2.25.1)
       crass (~> 1.0.2)
@@ -341,6 +346,7 @@ DEPENDENCIES
   honeybadger (~> 6.5)
   importmap-rails (~> 2.0)
   layered-assistant-rails!
+  layered-ui-rails!
   openssl (~> 4.0)
   propshaft (~> 1.0)
   puma (~> 7.0)
