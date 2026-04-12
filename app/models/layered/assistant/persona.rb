@@ -1,27 +1,6 @@
 module Layered
   module Assistant
     class Persona < ApplicationRecord
-      include Layered::ManagedResource::Resource
-
-      def self.l_managed_resource_columns
-        [
-          { attribute: :name, primary: true },
-          { attribute: :instructions, label: "Instructions" },
-          { attribute: :created_at, label: "Created" }
-        ]
-      end
-
-      def self.l_managed_resource_fields
-        [
-          { attribute: :name, required: true },
-          { attribute: :instructions, required: true, as: :text }
-        ]
-      end
-
-      def self.l_managed_resource_search_fields
-        [:name, :instructions]
-      end
-
       # UID
       has_secure_token :uid
 
