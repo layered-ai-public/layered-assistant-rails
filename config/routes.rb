@@ -1,7 +1,9 @@
 Layered::Assistant::Engine.routes.draw do
   root "setup#index"
-  resources :personas, except: [:show]
-  resources :skills, except: [:show]
+
+  l_managed_resources :personas
+  l_managed_resources :skills
+
   resources :assistants, except: [:show] do
     resources :conversations, only: [:index]
   end

@@ -1,6 +1,8 @@
+<% engine_path = layered_assistant.root_path.chomp('/') %>
+<% in_engine = request.path.start_with?(engine_path) %>
 <% if controller_path == "layered/assistant/public/conversations" && action_name == "show" %>
   <% content_for :l_ui_body_class do %>l-ui-body--hide-header<% end %>
-<% elsif controller_path.start_with?("layered/assistant") %>
+<% elsif in_engine %>
   <% content_for :l_ui_body_class do %>l-ui-body--always-show-navigation<% end %>
 <% end %>
 
@@ -9,8 +11,8 @@
   <% if l_assistant_accessible? %>
     <%= l_ui_navigation_item "Setup", layered_assistant.root_path %>
     <%= l_ui_navigation_item "Providers", layered_assistant.providers_path %>
-    <%= l_ui_navigation_item "Personas", layered_assistant.personas_path %>
-    <%= l_ui_navigation_item "Skills", layered_assistant.skills_path %>
+    <%= l_ui_navigation_item "Personas", layered_assistant.managed_personas_path %>
+    <%= l_ui_navigation_item "Skills", layered_assistant.managed_skills_path %>
     <%= l_ui_navigation_item "Assistants", layered_assistant.assistants_path %>
     <%= l_ui_navigation_item "Conversations", layered_assistant.conversations_path %>
   <% else %>
