@@ -1,4 +1,4 @@
-class PersonaResource < Layered::ManagedResource::Base
+class PersonaResource < LayeredAssistantResource
   model Layered::Assistant::Persona
 
   columns [
@@ -8,22 +8,9 @@ class PersonaResource < Layered::ManagedResource::Base
   ]
 
   fields [
-    { attribute: :name, required: true },
-    { attribute: :instructions, required: true, as: :text }
+    { attribute: :name },
+    { attribute: :instructions, as: :text }
   ]
 
   search_fields [:name, :instructions]
-
-  def self.scope(controller)
-    block = Layered::Assistant.scope_block
-    return model.all unless block
-
-    controller.instance_exec(model, &block)
-  end
-
-  def self.build_record(controller)
-    record = scope(controller).build
-    record.owner = controller.send(:current_user) if controller.respond_to?(:current_user, true)
-    record
-  end
 end

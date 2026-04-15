@@ -3,7 +3,7 @@ PATH
   specs:
     layered-managed-resource-rails (0.1.0)
       concurrent-ruby (>= 1.0)
-      layered-ui-rails (~> 0.3)
+      layered-ui-rails (~> 0.4)
       pagy (~> 43.2)
       rails (~> 8.0)
       ransack (~> 4.0)
@@ -11,7 +11,7 @@ PATH
 PATH
   remote: ../layered-ui-rails
   specs:
-    layered-ui-rails (0.3.0)
+    layered-ui-rails (0.4.0)
       rails (~> 8.0)
       tailwindcss-rails (~> 4.0)
 
