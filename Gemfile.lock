@@ -1,8 +1,7 @@
 PATH
   remote: ../layered-ui-rails
   specs:
-    layered-ui-rails (0.3.0)
-      concurrent-ruby (>= 1.0)
+    layered-ui-rails (0.4.0)
       rails (~> 8.0)
       tailwindcss-rails (~> 4.0)
 
@@ -12,7 +11,7 @@ PATH
     layered-assistant-rails (0.3.2)
       kramdown (~> 2.4)
       kramdown-parser-gfm (~> 1.1)
-      layered-ui-rails (~> 0.3.0)
+      layered-ui-rails (~> 0.4.0)
       pagy (~> 43.2)
       positioning (~> 0.4)
       rails (~> 8.0)
@@ -198,7 +197,6 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.2-x86_64-linux-musl)
       racc (~> 1.4)
-    openssl (4.0.1)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
     pagy (43.4.4)
@@ -347,7 +345,6 @@ DEPENDENCIES
   importmap-rails (~> 2.0)
   layered-assistant-rails!
   layered-ui-rails!
-  openssl (~> 4.0)
   propshaft (~> 1.0)
   puma (~> 7.0)
   solid_cable (~> 3.0)

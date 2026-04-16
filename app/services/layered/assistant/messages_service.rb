@@ -66,7 +66,14 @@ module Layered
             formatted << { role: "user", content: message.content }
           when "assistant"
             next if message.content.blank? && message.tool_calls.blank?
-            formatted << { role: "assistant", content: message.content }
+            entry = { role: "assistant", content: message.content }
+            if message.tool_calls.present?
+              parsed = message.tool_calls.is_a?(String) ? JSON.parse(message.tool_calls) : message.tool_calls
+              entry[:tool_calls] = parsed.map do |tc|
+                { id: tc["id"], type: "function", function: { name: tc["name"], arguments: (tc["input"] || {}).to_json } }
+              end
+            end
+            formatted << entry
           when "tool"
             formatted << { role: "tool", tool_call_id: message.tool_call_id, content: message.content || "" }
           end

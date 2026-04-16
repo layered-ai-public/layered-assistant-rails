@@ -68,12 +68,17 @@ module Layered
 
         case event[:type]
         when :start
-          @current_tool_call = { id: event[:id], name: event[:name], input_json: "" }
+          @current_tool_call = { id: event[:id], name: event[:name], input_json: +"" }
         when :delta
           @current_tool_call[:input_json] << event[:json] if @current_tool_call
         when :block_stop
           if @current_tool_call
-            input = @current_tool_call[:input_json].present? ? JSON.parse(@current_tool_call[:input_json]) : {}
+            input = begin
+              @current_tool_call[:input_json].present? ? JSON.parse(@current_tool_call[:input_json]) : {}
+            rescue JSON::ParserError => e
+              Rails.logger.error("Failed to parse tool call input for #{@current_tool_call[:name]}: #{e.message}")
+              {}
+            end
             @accumulated_tool_calls << {
               "id" => @current_tool_call[:id],
               "name" => @current_tool_call[:name],
