@@ -22,12 +22,6 @@ module Layered
             stream_options: { include_usage: true }
           }
 
-          if tools.present?
-            parameters[:tools] = tools.map do |t|
-              { type: "function", function: { name: t[:name], description: t[:description], parameters: t[:input_schema] } }
-            end
-          end
-
           ::OpenAI::Client.new(**client_options) do |f|
             if Layered::Assistant.log_errors
               f.response :logger, Logger.new($stdout), bodies: true
