@@ -58,29 +58,36 @@ end
 Layered::Assistant.log_errors = true                # log API errors to stdout
 Layered::Assistant.api_request_timeout = 210        # total API timeout in seconds, including full streaming response (default: 210)
 # Layered::Assistant.skip_db_encryption = true      # skip encryption on Provider#secret (dev/test only)
+# Layered::Assistant.tool_execution_timeout = 30    # per-tool timeout in seconds (default: 30, nil to disable)
 
 # Tool definitions - return an array of tools available to the assistant.
 Layered::Assistant.tools do |assistant|
   [
     {
-      name: "greet",
-      description: "Greet a person by name. Use this tool whenever the user asks you to say hello or greet someone.",
+      name: "get_weather",
+      description: "Get the current weather for a location. Use this tool whenever the user asks about the weather or temperature.",
       input_schema: {
         type: "object",
         properties: {
-          name: { type: "string", description: "The name of the person to greet" }
+          latitude: { type: "number", description: "Latitude of the location" },
+          longitude: { type: "number", description: "Longitude of the location" }
         },
-        required: [ "name" ]
+        required: [ "latitude", "longitude" ]
       }
     }
   ]
 end
 
 # Tool execution - handle tool calls from the LLM.
+# context is a hash with keys :assistant, :conversation, and :message.
 Layered::Assistant.execute_tool do |name, input, context|
   case name
-  when "greet"
-    "Hello, #{input['name']}! Welcome to layered-assistant-rails."
+  when "get_weather"
+    require "net/http"
+    uri = URI("https://api.open-meteo.com/v1/forecast?latitude=#{input['latitude']}&longitude=#{input['longitude']}&current=temperature_2m,wind_speed_10m")
+    response = JSON.parse(Net::HTTP.get(uri))
+    current = response["current"]
+    "Temperature: #{current['temperature_2m']}°C, Wind: #{current['wind_speed_10m']} km/h"
   else
     "Unknown tool: #{name}"
   end

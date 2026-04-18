@@ -62,12 +62,14 @@ module Layered
 
               # Execute each tool and record the result as a tool-role message
               pending.each do |tc|
-                result = execute_tool(tc["name"], tc["input"], message: message)
-                @conversation.messages.create!(
+                result = execute_tool(tc["name"], tc["input"],
+                  assistant: @assistant, conversation: @conversation, message: message)
+                tool_message = @conversation.messages.create!(
                   role: :tool,
                   content: result.to_s,
                   tool_call_id: tc["id"]
                 )
+                tool_message.broadcast_created
               end
 
               # Start a new assistant message for the next LLM turn
@@ -77,7 +79,7 @@ module Layered
               )
               message.broadcast_created
             end
-          rescue => e
+          rescue StandardError => e
             Rails.logger.error("Response generation failed: #{e.message}")
             existing = message.reload.content
             error_note = "Something went wrong while generating a response."
@@ -99,14 +101,21 @@ module Layered
           tools.presence
         end
 
-        # Delegates tool execution to the host app's configured block.
-        # Returns a user-friendly error string on failure rather than raising,
-        # so the LLM can see the error and recover in its next turn.
         def execute_tool(name, input, context)
           return "No tool handler configured." unless Layered::Assistant.execute_tool_block
 
-          Layered::Assistant.execute_tool_block.call(name, input, context)
-        rescue => e
+          timeout = Layered::Assistant.tool_execution_timeout
+          if timeout && timeout > 0
+            Timeout.timeout(timeout) do
+              Layered::Assistant.execute_tool_block.call(name, input, context)
+            end
+          else
+            Layered::Assistant.execute_tool_block.call(name, input, context)
+          end
+        rescue Timeout::Error
+          Rails.logger.error("Tool execution timed out for #{name} after #{timeout}s")
+          "Tool execution timed out after #{timeout}s."
+        rescue StandardError => e
           Rails.logger.error("Tool execution failed for #{name}: #{e.message}")
           "Tool execution failed: #{e.message}"
         end

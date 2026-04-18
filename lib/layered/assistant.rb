@@ -18,6 +18,7 @@ module Layered
     mattr_accessor :log_errors, default: false
     mattr_accessor :api_request_timeout, default: 210
     mattr_accessor :skip_db_encryption, default: false
+    mattr_accessor :tool_execution_timeout, default: 30
 
     def self.authorize(&block)
       @@authorize_block = block
@@ -34,7 +35,8 @@ module Layered
     end
 
     # Execute a tool call. Receives tool name (String), input (Hash), and a context hash
-    # containing :assistant, :conversation, and :message. Must return a String result.
+    # with keys :assistant, :conversation, and :message. Must return a String result.
+    # Each call is wrapped in a Timeout (default 30s, configure via tool_execution_timeout).
     def self.execute_tool(&block)
       @@execute_tool_block = block
     end

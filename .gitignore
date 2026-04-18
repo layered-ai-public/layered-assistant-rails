@@ -39,3 +39,6 @@ test/dummy/config/credentials/*.key
 
 # Ignore Kamal secrets.
 test/dummy/.kamal/secrets
+
+# Ignore .vscode directory
+.vscode/

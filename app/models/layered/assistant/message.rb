@@ -24,7 +24,7 @@ module Layered
 
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
-      scope :visible, -> { where(role: [ :user, :assistant ]) }
+      scope :visible, -> { where(role: [ :user, :assistant, :tool ]) }
 
       # Broadcasting
       def broadcast_created

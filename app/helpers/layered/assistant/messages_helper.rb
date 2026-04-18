@@ -17,6 +17,24 @@ module Layered
 
       MIN_RESPONSE_MS_FOR_TPS = 100
 
+      def tool_call_for(message)
+        return unless message.tool? && message.tool_call_id.present?
+
+        assistant_message = message.conversation.messages
+          .where(role: :assistant)
+          .where.not(tool_calls: [nil, ""])
+          .where("created_at <= ?", message.created_at)
+          .order(created_at: :desc)
+          .first
+
+        return unless assistant_message
+
+        calls = assistant_message.tool_calls.is_a?(String) ? JSON.parse(assistant_message.tool_calls) : assistant_message.tool_calls
+        calls.find { |tc| tc["id"] == message.tool_call_id }
+      rescue JSON::ParserError
+        nil
+      end
+
       def message_metadata_title(message)
         total_tokens = message.input_tokens.to_i + message.output_tokens.to_i
         parts = []
