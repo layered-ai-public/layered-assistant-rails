@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_09_212232) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_19_093156) do
   create_table "layered_assistant_assistant_skills", force: :cascade do |t|
     t.integer "assistant_id", null: false
     t.datetime "created_at", null: false
@@ -21,8 +21,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_212232) do
     t.index ["skill_id"], name: "index_layered_assistant_assistant_skills_on_skill_id"
   end
 
+  create_table "layered_assistant_assistant_tools", force: :cascade do |t|
+    t.integer "assistant_id", null: false
+    t.datetime "created_at", null: false
+    t.integer "tool_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assistant_id", "tool_id"], name: "idx_assistant_tools_on_assistant_and_tool", unique: true
+    t.index ["assistant_id"], name: "index_layered_assistant_assistant_tools_on_assistant_id"
+    t.index ["tool_id"], name: "index_layered_assistant_assistant_tools_on_tool_id"
+  end
+
   create_table "layered_assistant_assistants", force: :cascade do |t|
     t.bigint "assistant_skills_count", default: 0, null: false
+    t.bigint "assistant_tools_count", default: 0, null: false
     t.bigint "conversations_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "default_model_id"
@@ -138,6 +149,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_212232) do
     t.index ["uid"], name: "index_layered_assistant_skills_on_uid", unique: true
   end
 
+  create_table "layered_assistant_tools", force: :cascade do |t|
+    t.bigint "assistants_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.text "input_schema"
+    t.string "name", null: false
+    t.integer "owner_id"
+    t.string "owner_type"
+    t.string "uid", null: false
+    t.datetime "updated_at", null: false
+    t.index ["owner_type", "owner_id"], name: "index_layered_assistant_tools_on_owner"
+    t.index ["uid"], name: "index_layered_assistant_tools_on_uid", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "confirmation_sent_at"
     t.string "confirmation_token"
@@ -167,6 +192,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_09_212232) do
 
   add_foreign_key "layered_assistant_assistant_skills", "layered_assistant_assistants", column: "assistant_id"
   add_foreign_key "layered_assistant_assistant_skills", "layered_assistant_skills", column: "skill_id"
+  add_foreign_key "layered_assistant_assistant_tools", "layered_assistant_assistants", column: "assistant_id"
+  add_foreign_key "layered_assistant_assistant_tools", "layered_assistant_tools", column: "tool_id"
   add_foreign_key "layered_assistant_assistants", "layered_assistant_models", column: "default_model_id"
   add_foreign_key "layered_assistant_assistants", "layered_assistant_personas", column: "persona_id"
   add_foreign_key "layered_assistant_conversations", "layered_assistant_assistants", column: "assistant_id"

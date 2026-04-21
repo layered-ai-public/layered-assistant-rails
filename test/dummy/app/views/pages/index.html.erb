@@ -1,9 +1,12 @@
 <% content_for :l_ui_body_class do %>l-ui-body--always-show-navigation<% end %>
 
-<h1>layered-assistant-rails (v<%= Layered::Assistant::VERSION %>)</h1>
+<%= l_ui_breadcrumbs do %>
+  <%= l_ui_breadcrumb_item "#{gem_spec.name} (v#{gem_spec.version.to_s})" %>
+<% end %>
+<h1>Home</h1>
 
 <p class="l-ui-utility--mt-md">
-  <%= Gem.loaded_specs["layered-assistant-rails"].description %>
+  <%= gem_spec.description %>
 </p>
 
 <%= render "socials" %>
@@ -19,10 +22,10 @@
   </div>
   <div class="l-ui-surface">
     <div class="flex items-center gap-2">
-      <%= image_tag "icon_bolt.svg", class: "l-ui-icon--md dark:invert", alt: "Lightning bolt icon representing streaming responses" %>
+      <%= image_tag "icon_arrows.svg", class: "l-ui-icon--md dark:invert", alt: "Back and forward arrows icon representing streaming responses" %>
       <h3>Streaming responses</h3>
     </div>
-    <p class="l-ui-utility--mt-sm">Real-time streaming via Turbo Streams for a responsive chat experience with dynamic token fade-in and chunked markdown formatting.</p>
+    <p class="l-ui-utility--mt-sm">Real-time streaming via Turbo Streams for a responsive chat experience with intelligent fade-in for completed markdown sections.</p>
   </div>
   <div class="l-ui-surface">
     <div class="flex items-center gap-2">
@@ -36,7 +39,35 @@
       <%= image_tag "icon_lock.svg", class: "l-ui-icon--md dark:invert", alt: "Padlock icon representing encrypted secrets" %>
       <h3>Encrypted secrets</h3>
     </div>
-    <p class="l-ui-utility--mt-sm">API keys are encrypted at rest using Active Record Encryption.</p>
+    <p class="l-ui-utility--mt-sm">API keys are encrypted at rest using Active Record Encryption by default.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_person.svg", class: "l-ui-icon--md dark:invert", alt: "Person icon representing personas" %>
+      <h3>Personas</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Define custom personas with system prompts to tailor assistant behaviour for different use cases.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_bolt.svg", class: "l-ui-icon--md dark:invert", alt: "Lightning bolt icon representing skills" %>
+      <h3>Skills</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Attach reusable skills to extend assistant capabilities with structured instructions.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_spanner.svg", class: "l-ui-icon--md dark:invert", alt: "Spanner icon representing tool use" %>
+      <h3>Tool use</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Connect assistants to external tools and APIs with configurable tool definitions and execution callbacks.</p>
+  </div>
+  <div class="l-ui-surface">
+    <div class="flex items-center gap-2">
+      <%= image_tag "icon_globe.svg", class: "l-ui-icon--md dark:invert", alt: "Globe icon representing embeddable assistant" %>
+      <h3>Embeddable</h3>
+    </div>
+    <p class="l-ui-utility--mt-sm">Embed public assistants on any website and access the conversations from your Rails backend.</p>
   </div>
 </div>
 

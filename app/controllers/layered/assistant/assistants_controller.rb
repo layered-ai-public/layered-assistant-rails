@@ -5,6 +5,7 @@ module Layered
       before_action :set_models, only: [:new, :create, :edit, :update]
       before_action :set_personas, only: [:new, :create, :edit, :update]
       before_action :set_skills, only: [:new, :create, :edit, :update]
+      before_action :set_tools, only: [:new, :create, :edit, :update]
 
       def index
         @page_title = "Assistants"
@@ -17,12 +18,13 @@ module Layered
       end
 
       def create
-        @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
+        @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids, :tool_ids))
         @assistant.owner = l_ui_current_user
         @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
 
         if @assistant.save
           assign_skills
+          assign_tools
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."
         else
           render :new, status: :unprocessable_entity
@@ -38,8 +40,9 @@ module Layered
           @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
         end
 
-        if @assistant.update(assistant_params.except(:persona_id, :skill_ids))
+        if @assistant.update(assistant_params.except(:persona_id, :skill_ids, :tool_ids))
           assign_skills
+          assign_tools
           redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
         else
           render :edit, status: :unprocessable_entity
@@ -69,6 +72,10 @@ module Layered
         @skills = scoped(Skill).by_name
       end
 
+      def set_tools
+        @tools = scoped(Tool).by_name
+      end
+
       def assign_skills
         if assistant_params.key?(:skill_ids)
           skill_ids = Array(assistant_params[:skill_ids]).compact_blank
@@ -76,8 +83,15 @@ module Layered
         end
       end
 
+      def assign_tools
+        if assistant_params.key?(:tool_ids)
+          tool_ids = Array(assistant_params[:tool_ids]).compact_blank
+          @assistant.tools = scoped(Tool).where(id: tool_ids)
+        end
+      end
+
       def assistant_params
-        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public, skill_ids: [])
+        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public, skill_ids: [], tool_ids: [])
       end
     end
   end

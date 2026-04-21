@@ -1,0 +1,30 @@
+<%= form_with(model: tool, url: url, html: { class: "l-ui-form" }) do |f| %>
+  <%= render "layered_ui/shared/form_errors", item: tool %>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :name, required: true %>
+    <%= f.text_field :name, class: "l-ui-form__field" %>
+    <%= render "layered_ui/shared/field_error", object: tool, field: :name %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :description, required: false %>
+    <%= f.text_area :description, class: "l-ui-form__field", rows: 3 %>
+    <%= render "layered_ui/shared/field_error", object: tool, field: :description %>
+  </div>
+
+  <div class="l-ui-form__group">
+    <%= render "layered_ui/shared/label", form: f, field: :input_schema, name: "Input schema (JSON)", required: false %>
+    <%= f.text_area :input_schema, class: "l-ui-form__field", rows: 8 %>
+    <%= render "layered_ui/shared/field_error", object: tool, field: :input_schema %>
+  </div>
+
+  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+    <% if tool.persisted? %>
+      <%= link_to "Delete", layered_assistant.tool_path(tool), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+    <% else %>
+      <span></span>
+    <% end %>
+    <%= f.submit tool.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+  </div>
+<% end %>

@@ -44,6 +44,19 @@
     </fieldset>
   <% end %>
 
+  <% if @tools.any? %>
+    <fieldset class="l-ui-form__group">
+      <legend class="l-ui-label">Tools</legend>
+      <%= hidden_field_tag "assistant[tool_ids][]", "" %>
+      <% @tools.each do |tool| %>
+        <div class="l-ui-container--checkbox">
+          <%= f.check_box :tool_ids, { multiple: true, checked: assistant.tool_ids.include?(tool.id), id: "assistant_tool_ids_#{tool.id}" }, tool.id, nil %>
+          <label for="assistant_tool_ids_<%= tool.id %>" class="l-ui-label--checkbox"><%= tool.name %></label>
+        </div>
+      <% end %>
+    </fieldset>
+  <% end %>
+
   <label class="l-ui-switch l-ui-utility--mt-xl">
     <%= f.check_box :public, class: "l-ui-switch__input", role: "switch" %>
     <span class="l-ui-switch__track"></span>

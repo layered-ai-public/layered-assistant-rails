@@ -6,8 +6,8 @@ Gem::Specification.new do |spec|
   spec.authors     = ["layered.ai"]
   spec.email       = ["support@layered.ai"]
   spec.homepage    = "https://www.layered.ai"
-  spec.description = "An open source Rails 8+ engine built on `layered-ui-rails` that provides a multi-provider AI assistant with streaming responses and a full conversation UI."
-  spec.summary     = "Open source, multi-provider, streaming AI assistant engine for Rails 8+ built on `layered-ui-rails`."
+  spec.description = "An open source Rails 8+ engine, built on the layered-ui-rails gem, that provides a multi-provider AI assistants with full conversation UI. Real-time streaming responses, custom personas with tailored system prompts, reusable skills for structured capabilities, and tool use. Supports Anthropic, OpenAI, Gemini, Mistral, Groq, OpenRouter, and local providers (Ollama, LM Studio) with configurable models."
+  spec.summary     = "Self-hostable AI chat engine for Rails 8+ supporting Anthropic, OpenAI, Gemini, Mistral, Groq, Ollama, and more."
   spec.license     = "Apache-2.0"
 
   spec.required_ruby_version = ">= 3.2.0"
@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "ruby-openai", "~> 7.0"
   spec.add_dependency "kramdown", "~> 2.4"
   spec.add_dependency "kramdown-parser-gfm", "~> 1.1"
-  spec.add_dependency "layered-ui-rails", "~> 0.4.0"
+  spec.add_dependency "layered-ui-rails", "~> 0.6.0"
   spec.add_development_dependency "propshaft", "~> 1.0"
   spec.add_development_dependency "tailwindcss-rails", "~> 4.0"
   spec.add_development_dependency "importmap-rails", "~> 2.0"

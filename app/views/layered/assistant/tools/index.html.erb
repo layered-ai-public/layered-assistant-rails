@@ -1,0 +1,41 @@
+<div class="l-ui-container--spread">
+  <h1>Tools</h1>
+  <%= link_to "New", layered_assistant.new_tool_path, class: "l-ui-button--primary" %>
+</div>
+
+<div class="l-ui-container--table l-ui-utility--mt-lg">
+  <table class="l-ui-table">
+    <caption class="l-ui-sr-only">Tools</caption>
+    <thead class="l-ui-table__header">
+      <tr>
+        <th scope="col" class="l-ui-table__header-cell">Name</th>
+        <th scope="col" class="l-ui-table__header-cell">Description</th>
+        <th scope="col" class="l-ui-table__header-cell">Assistants</th>
+        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody class="l-ui-table__body">
+      <% @tools.each do |tool| %>
+        <tr>
+          <th scope="row" class="l-ui-table__cell--primary">
+            <%= tool.name %>
+          </th>
+          <td class="l-ui-table__cell">
+            <%= truncate(tool.description, length: 60) %>
+          </td>
+          <td class="l-ui-table__cell">
+            <%= tool.assistants_count %>
+          </td>
+          <td class="l-ui-table__cell--action">
+            <%= link_to "Edit", layered_assistant.edit_tool_path(tool) %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="l-ui-utility--mt-lg">
+    <%= l_ui_pagy(@pagy) %>
+  </div>
+</div>

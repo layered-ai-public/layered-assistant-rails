@@ -23,7 +23,7 @@
       <% @messages.each do |message| %>
         <tr>
           <th scope="row" class="l-ui-table__cell--primary">
-            <%= message.role %>
+            <%= message.role.capitalize %>
           </th>
           <td class="l-ui-table__cell">
             <%= truncate(message.content, length: 100) %>
@@ -35,16 +35,18 @@
             <% total = message.input_tokens.to_i + message.output_tokens.to_i %>
             <% if total > 0 %>
               <% prefix = message.tokens_estimated? ? "~" : "" %>
-              <%= "#{prefix}#{number_with_delimiter(total)}" %>
+              <span class="l-ui-badge--default l-ui-badge--rounded"><%= "#{prefix}#{number_with_delimiter(total)}" %></span>
             <% end %>
           </td>
           <td class="l-ui-table__cell">
             <% if message.output_tokens.to_i > 0 && message.response_ms.to_i >= Layered::Assistant::MessagesHelper::MIN_RESPONSE_MS_FOR_TPS %>
-              <%= (message.output_tokens * 1000.0 / message.response_ms).round(1) %>
+              <span class="l-ui-badge--default l-ui-badge--rounded"><%= (message.output_tokens * 1000.0 / message.response_ms).round(1) %></span>
             <% end %>
           </td>
           <td class="l-ui-table__cell">
-            <%= "#{message.ttft_ms}ms" if message.ttft_ms %>
+            <% if message.ttft_ms %>
+              <span class="l-ui-badge--default l-ui-badge--rounded"><%= "#{message.ttft_ms}ms" %></span>
+            <% end %>
           </td>
           <td class="l-ui-table__cell">
             <%= message.created_at.to_fs(:short) %>

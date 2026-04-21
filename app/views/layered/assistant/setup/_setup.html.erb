@@ -84,6 +84,10 @@ end</code></pre>
         <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Provider</code></th>
         <td class="l-ui-table__cell">API provider credentials (has polymorphic <code>owner</code>)</td>
       </tr>
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Tool</code></th>
+        <td class="l-ui-table__cell">Tool definitions for function calling (has polymorphic <code>owner</code>)</td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -177,6 +181,11 @@ end</code></pre>
         <td class="l-ui-table__cell"><code>false</code></td>
         <td class="l-ui-table__cell">Disable Active Record Encryption on <code>Provider#secret</code>. Only for development/test environments without encryption keys configured</td>
       </tr>
+      <tr>
+        <th class="l-ui-table__cell--primary" scope="row"><code>tool_execution_timeout</code></th>
+        <td class="l-ui-table__cell"><code>30</code></td>
+        <td class="l-ui-table__cell">Timeout in seconds for each tool execution call</td>
+      </tr>
     </tbody>
   </table>
 </div>
@@ -184,11 +193,62 @@ end</code></pre>
 <pre class="l-ui-surface l-ui-utility--mt-lg"><code>Layered::Assistant.log_errors = true
 Layered::Assistant.skip_db_encryption = true</code></pre>
 
+<h2 class="l-ui-utility--mt-xl">Tool use</h2>
+<p class="l-ui-utility--mt-md">
+  Assistants can call tools (functions) during a conversation.
+  <%= link_to "Create tools", layered_assistant.new_tool_path %> in the engine, then assign
+  them to assistants. Each tool has a name, description, and an optional JSON input schema.
+</p>
+
+<h3 class="l-ui-utility--mt-lg">Execute tools</h3>
+<p class="l-ui-utility--mt-md">
+  Tool definitions are managed in the engine, but execution is handled by your application.
+  Configure an <code>execute_tool</code> block in your initialiser. The block receives the
+  tool name, input hash, and a context hash containing <code>:assistant</code>,
+  <code>:conversation</code>, and <code>:message</code>. It must return a string result.
+</p>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.execute_tool do |name, input, context|
+  case name
+  when "get_weather"
+    WeatherService.fetch(input["location"])
+  else
+    "Unknown tool: #{name}"
+  end
+end</code></pre>
+
+<p class="l-ui-utility--mt-md">
+  Each tool execution is wrapped in a timeout (default 30 seconds, configurable via
+  <code>tool_execution_timeout</code>). The engine will loop up to 10 times per response,
+  executing tool calls and feeding results back to the model until it produces a final reply.
+</p>
+
+<h3 class="l-ui-utility--mt-lg">Dynamic tools (optional)</h3>
+<p class="l-ui-utility--mt-md">
+  For tools that need to be resolved at runtime, you can also register a <code>tools</code>
+  block. Any tools returned by the block are merged with the assistant's assigned tools.
+</p>
+<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.tools do |assistant|
+  [
+    {
+      name: "get_weather",
+      description: "Get the current weather for a location",
+      input_schema: {
+        type: "object",
+        properties: {
+          location: { type: "string", description: "City name" }
+        },
+        required: ["location"]
+      }
+    }
+  ]
+end</code></pre>
+
 <h2 class="l-ui-utility--mt-xl">Getting started</h2>
 <ol class="l-ui-list l-ui-utility--mt-md">
   <li><%= link_to "Create a provider", layered_assistant.new_provider_path %> (e.g. Anthropic or OpenAI) with your API key</li>
   <li>Add one or more models to the provider</li>
-  <li><%= link_to "Create an assistant", layered_assistant.new_assistant_path %> and assign a default model</li>
+  <li>Optionally <%= link_to "create tools", layered_assistant.new_tool_path %> and configure an <code>execute_tool</code> block</li>
+  <li><%= link_to "Create an assistant", layered_assistant.new_assistant_path %> and assign a default model, skills, and tools</li>
   <li><%= link_to "Start a conversation", layered_assistant.new_conversation_path %></li>
 </ol>
 

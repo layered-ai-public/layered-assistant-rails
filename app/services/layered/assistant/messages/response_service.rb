@@ -92,12 +92,14 @@ module Layered
 
         private
 
-        # Asks the host app for tool definitions via the configured block.
-        # Returns nil when no tools are configured, which disables tool use.
         def resolve_tools
-          return nil unless Layered::Assistant.tools_block
+          tools = @assistant.tools.map(&:to_tool_definition)
 
-          tools = Layered::Assistant.tools_block.call(@assistant)
+          if Layered::Assistant.tools_block
+            block_tools = Layered::Assistant.tools_block.call(@assistant)
+            tools.concat(Array(block_tools)) if block_tools.present?
+          end
+
           tools.presence
         end
 
