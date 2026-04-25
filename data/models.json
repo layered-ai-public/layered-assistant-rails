@@ -1,42 +1,45 @@
 {
   "Anthropic": [
-    { "name": "Claude Opus 4.6", "identifier": "claude-opus-4-6" },
+    { "name": "Claude Opus 4.7", "identifier": "claude-opus-4-7" },
     { "name": "Claude Sonnet 4.6", "identifier": "claude-sonnet-4-6" },
     { "name": "Claude Haiku 4.5", "identifier": "claude-haiku-4-5" }
   ],
   "OpenAI": [
+    { "name": "GPT-5.5", "identifier": "gpt-5.5" },
+    { "name": "GPT-5.5 Pro", "identifier": "gpt-5.5-pro" },
     { "name": "GPT-5.4", "identifier": "gpt-5.4" },
-    { "name": "GPT-5 Mini", "identifier": "gpt-5-mini" }
+    { "name": "GPT-5.4 Mini", "identifier": "gpt-5.4-mini" },
+    { "name": "GPT-5.4 Nano", "identifier": "gpt-5.4-nano" }
   ],
   "Gemini": [
     { "name": "Gemini 3.1 Pro Preview", "identifier": "gemini-3.1-pro-preview" },
-    { "name": "Gemini 2.5 Flash Lite", "identifier": "gemini-2.5-flash-lite" },
+    { "name": "Gemini 3 Flash Preview", "identifier": "gemini-3-flash-preview" },
+    { "name": "Gemini 3.1 Flash-Lite Preview", "identifier": "gemini-3.1-flash-lite-preview" },
+    { "name": "Gemini 2.5 Pro", "identifier": "gemini-2.5-pro" },
     { "name": "Gemini 2.5 Flash", "identifier": "gemini-2.5-flash" },
-    { "name": "Gemini 2.5 Pro", "identifier": "gemini-2.5-pro" }
+    { "name": "Gemini 2.5 Flash Lite", "identifier": "gemini-2.5-flash-lite" }
   ],
   "OpenRouter": [
-    { "name": "MiniMax M2.5", "identifier": "minimax/minimax-m2.5" },
-    { "name": "DeepSeek V3.2", "identifier": "deepseek/deepseek-v3.2" },
+    { "name": "Grok 4.1 Fast", "identifier": "x-ai/grok-4.1-fast" },
     { "name": "Grok 4", "identifier": "x-ai/grok-4" },
-    { "name": "Grok 4 (Fast)", "identifier": "x-ai/grok-4-fast" },
-    { "name": "Grok 3", "identifier": "x-ai/grok-3" },
-    { "name": "Llama 4 Maverick", "identifier": "meta-llama/llama-4-maverick-17b-128e-instruct" },
-    { "name": "Llama 4 Scout", "identifier": "meta-llama/llama-4-scout-17b-16e-instruct" }
+    { "name": "DeepSeek V3.2", "identifier": "deepseek/deepseek-v3.2" },
+    { "name": "Kimi K2.6", "identifier": "moonshotai/kimi-k2.6" },
+    { "name": "MiniMax M2.7", "identifier": "minimax/minimax-m2.7" },
+    { "name": "MiniMax M2.5", "identifier": "minimax/minimax-m2.5" },
+    { "name": "MiMo V2 Pro", "identifier": "xiaomi/mimo-v2-pro" }
   ],
   "Groq": [
     { "name": "Compound", "identifier": "groq/compound" },
     { "name": "Compound Mini", "identifier": "groq/compound-mini" },
     { "name": "GPT-OSS 120B", "identifier": "openai/gpt-oss-120b" },
-    { "name": "Llama 4 Maverick", "identifier": "meta-llama/llama-4-maverick-17b-128e-instruct" },
-    { "name": "Llama 4 Scout", "identifier": "meta-llama/llama-4-scout-17b-16e-instruct" },
+    { "name": "GPT-OSS 20B", "identifier": "openai/gpt-oss-20b" },
     { "name": "Llama 3.3 70B Versatile", "identifier": "llama-3.3-70b-versatile" },
-    { "name": "Llama 3.1 8B Instant", "identifier": "llama-3.1-8b-instant" },
-    { "name": "Qwen 3 32B", "identifier": "qwen/qwen3-32b" },
-    { "name": "Kimi K2.5", "identifier": "moonshotai/kimi-k2-instruct-0905" }
+    { "name": "Llama 3.1 8B Instant", "identifier": "llama-3.1-8b-instant" }
   ],
   "Mistral": [
-    { "name": "Mistral Large 2512", "identifier": "mistral-large-2512" },
-    { "name": "Mistral Medium 2508", "identifier": "mistral-medium-2508" },
-    { "name": "Mistral Small 2506", "identifier": "mistral-small-2506" }
+    { "name": "Mistral Large 3", "identifier": "mistral-large-2512" },
+    { "name": "Mistral Medium 3.1", "identifier": "mistral-medium-2508" },
+    { "name": "Mistral Small 4", "identifier": "mistral-small-2603" },
+    { "name": "Magistral Medium 1.2", "identifier": "magistral-medium-2509" }
   ]
 }

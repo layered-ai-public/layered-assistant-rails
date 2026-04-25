@@ -208,6 +208,10 @@ Run the gem tests from the root directory:
 bundle exec rake test
 ```
 
+## Contributing
+
+This project is still in its early days. We welcome issues, feedback, and ideas - they genuinely help shape the direction of the project. That said, we're holding off on accepting pull requests for now to stay focused on getting the foundations right. Thank you for your patience and interest. See [CLA.md](CLA.md) for the full policy.
+
 ## License
 
 Released under the [Apache 2.0 License](LICENSE).
@@ -217,7 +221,3 @@ Copyright 2026 LAYERED AI LIMITED (UK company number: 17056830). See [NOTICE](NO
 ## Trademarks
 
 The source code is fully open, but the layered.ai name, logo, and brand assets are trademarks of LAYERED AI LIMITED. The Apache 2.0 license does not grant rights to use the layered.ai branding. Forks and redistributions must use a distinct name. See [TRADEMARK.md](TRADEMARK.md) for the full policy.
-
-## Contributing
-
-- [CLA.md](CLA.md) - contributor license agreement

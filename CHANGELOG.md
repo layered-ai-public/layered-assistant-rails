@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.0] - 2026-04-25
+
+### Breaking
+
+- Bump `layered-ui-rails` to `~> 0.8`. Host apps with a customised `layered_ui_overrides.css` must migrate values from HSL channels (e.g. `220 80% 55%`) to full CSS colors, preferably `oklch()`. See the layered-ui-rails 0.8 changelog for details.
+
+### Added
+
+- Anthropic: Claude Opus 4.7 (`claude-opus-4-7`) added to the model catalogue
+- OpenAI: GPT-5.5 and GPT-5.5 Pro added; GPT-5.4 lineup expanded with Mini and Nano variants
+- Gemini: Gemini 3 Flash Preview and Gemini 3.1 Flash-Lite Preview added
+- `Models::CreateService` reads from the gem's local `data/models.json` in development, making catalogue edits visible without a publish step
+
+### Changed
+
+- Scroll-to-bottom button no longer renders an inner `<img>`; the chevron icon is now baked into `l-ui-scroll-to-bottom` via CSS in layered-ui-rails 0.8
+- OpenRouter catalogue refreshed to current top-traffic third-party models; Grok 3 and the Llama 4 entries dropped
+- Groq catalogue trimmed to current production models; preview-only entries (Llama 4 Maverick/Scout, Qwen 3 32B, Kimi K2) removed
+- Mistral entries renamed to friendlier names (Mistral Large 3, Medium 3.1, Small 4)
+
 ## [0.3.2] - 2026-04-09
 
 ### Added

@@ -12,7 +12,7 @@ module Layered
           }
           if @provider.url.present?
             client_options[:uri_base] = @provider.url.sub(/\/\z/, "")
-            client_options[:api_version] = ""  # Gemini and other OpenAI-compatible APIs use their own path
+            client_options[:api_version] = "" # Gemini and other OpenAI-compatible APIs use their own path
           end
 
           ::OpenAI::Client.new(**client_options) do |f|
