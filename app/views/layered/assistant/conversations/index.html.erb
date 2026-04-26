@@ -1,11 +1,6 @@
 <%= l_ui_title_bar(
   title: @assistant ? "Conversations - #{@assistant.name}" : "Conversations",
-  breadcrumbs: @assistant ?
-    [
-      ["Setup", layered_assistant.root_path],
-      ["Assistants", layered_assistant.assistants_path]
-    ] :
-    [["Setup", layered_assistant.root_path]]
+  breadcrumbs: @assistant ? [["Assistants", layered_assistant.assistants_path]] : []
 ) do %>
   <%= link_to "New", layered_assistant.new_conversation_path(conversation: @assistant ? { assistant_id: @assistant.id } : {}), class: "l-ui-button--primary" %>
 <% end %>

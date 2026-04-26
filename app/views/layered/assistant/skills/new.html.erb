@@ -1,9 +1,6 @@
 <%= l_ui_title_bar(
   title: "New skill",
-  breadcrumbs: [
-    ["Setup", layered_assistant.root_path],
-    ["Skills", layered_assistant.skills_path]
-  ]
+  breadcrumbs: [["Skills", layered_assistant.skills_path]]
 ) %>
 
 <%= render "form", skill: @skill, url: layered_assistant.skills_path %>
