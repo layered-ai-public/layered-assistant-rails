@@ -1,7 +1,9 @@
-<div class="l-ui-container--spread">
-  <h1>Personas</h1>
+<%= l_ui_title_bar(
+  title: "Personas",
+  breadcrumbs: [["Setup", layered_assistant.root_path]]
+) do %>
   <%= link_to "New", layered_assistant.new_persona_path, class: "l-ui-button--primary" %>
-</div>
+<% end %>
 
 <div class="l-ui-container--table l-ui-utility--mt-lg">
   <table class="l-ui-table">

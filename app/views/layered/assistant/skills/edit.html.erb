@@ -1,2 +1,9 @@
-<h1>Edit skill</h1>
+<%= l_ui_title_bar(
+  title: "Edit skill",
+  breadcrumbs: [
+    ["Setup", layered_assistant.root_path],
+    ["Skills", layered_assistant.skills_path]
+  ]
+) %>
+
 <%= render "form", skill: @skill, url: layered_assistant.skill_path(@skill) %>

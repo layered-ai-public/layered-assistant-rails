@@ -1,7 +1,10 @@
-<div class="l-ui-container--spread">
-  <h1>Messages</h1>
-  <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
-</div>
+<%= l_ui_title_bar(
+  title: "Messages",
+  breadcrumbs: [
+    ["Setup", layered_assistant.root_path],
+    ["Conversations", layered_assistant.conversations_path]
+  ]
+) %>
 
 <div class="l-ui-container--table l-ui-utility--mt-lg">
   <table class="l-ui-table">
