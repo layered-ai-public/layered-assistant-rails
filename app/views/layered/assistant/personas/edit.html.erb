@@ -1,2 +1,6 @@
-<h1>Edit persona</h1>
+<%= l_ui_title_bar(
+  title: "Edit persona",
+  breadcrumbs: [["Personas", layered_assistant.personas_path]]
+) %>
+
 <%= render "form", persona: @persona, url: layered_assistant.persona_path(@persona) %>

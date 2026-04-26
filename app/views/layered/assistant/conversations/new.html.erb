@@ -1,6 +1,6 @@
-<div class="l-ui-container--spread">
-  <h1>New Conversation</h1>
-  <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
-</div>
+<%= l_ui_title_bar(
+  title: "New conversation",
+  breadcrumbs: [["Conversations", layered_assistant.conversations_path]]
+) %>
 
 <%= render "form", conversation: @conversation, url: layered_assistant.conversations_path %>

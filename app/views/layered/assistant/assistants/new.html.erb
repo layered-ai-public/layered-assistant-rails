@@ -1,6 +1,6 @@
-<div class="l-ui-container--spread">
-  <h1>New assistant</h1>
-  <%= link_to "Back", layered_assistant.assistants_path, class: "l-ui-button--outline" %>
-</div>
+<%= l_ui_title_bar(
+  title: "New assistant",
+  breadcrumbs: [["Assistants", layered_assistant.assistants_path]]
+) %>
 
 <%= render "form", assistant: @assistant, url: layered_assistant.assistants_path %>

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.4.1] - 2026-04-26
+
+### Changed
+
+- Bump `layered-ui-rails` to `~> 0.9`
+
+### Removed
+
+- Empty CSS distribution from the install generator. The gem no longer ships an `app/assets/tailwind/layered/assistant/styles.css` file or injects a `@import "layered_assistant"` line into host `application.css` - all engine styles come from `layered-ui-rails`
+
 ## [0.4.0] - 2026-04-25
 
 ### Breaking

@@ -1,10 +1,9 @@
-<div class="l-ui-container--spread">
-  <h1>Models</h1>
-  <div class="l-ui-container--spread">
-    <%= link_to "Back", layered_assistant.providers_path, class: "l-ui-button--outline" %>
-    <%= link_to "New", layered_assistant.new_provider_model_path(@provider), class: "l-ui-button--primary" %>
-  </div>
-</div>
+<%= l_ui_title_bar(
+  title: "Models",
+  breadcrumbs: [["Providers", layered_assistant.providers_path]]
+) do %>
+  <%= link_to "New", layered_assistant.new_provider_model_path(@provider), class: "l-ui-button--primary" %>
+<% end %>
 
 <div class="l-ui-container--table l-ui-utility--mt-lg">
   <table class="l-ui-table">
