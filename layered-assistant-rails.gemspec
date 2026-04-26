@@ -53,10 +53,9 @@ Gem::Specification.new do |spec|
       bin/rails generate layered:assistant:install
 
     This command will:
-      • Copy the layered assistant CSS to your host app at app/assets/tailwind/layered_assistant.css
-        • This approach ensures the CSS is processed with your host app's Tailwind configuration
-      • Add an import statement to your app/assets/tailwind/application.css
       • Add `import "layered_assistant"` to your app/javascript/application.js (just after `import "layered_ui"`, which must already be present)
+      • Mount the engine at /layered/assistant in your config/routes.rb
+      • Create a starter initialiser at config/initializers/layered_assistant.rb
       • Copy engine migrations to your app's db/migrate/
 
     If these imports already exist, they will not be duplicated.

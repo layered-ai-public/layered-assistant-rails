@@ -4,7 +4,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Project Overview
 
-**layered-assistant-rails** is a Rails 8+ engine gem (`Layered::Assistant`) providing AI assistant UI components. It uses `isolate_namespace Layered::Assistant` and distributes assets (Tailwind CSS + importmap JS) to host applications via a generator.
+**layered-assistant-rails** is a Rails 8+ engine gem (`Layered::Assistant`) providing AI assistant UI components. It uses `isolate_namespace Layered::Assistant` and distributes JS (importmap) to host applications via a generator.
 
 Requires Rails >= 8.0.0, Ruby >= 3.2.0. Depends on sibling gem `layered-ui-rails` (path dependency at `../layered-ui-rails`).
 
@@ -18,12 +18,11 @@ Requires Rails >= 8.0.0, Ruby >= 3.2.0. Depends on sibling gem `layered-ui-rails
 
 ### Asset Distribution
 
-CSS and JS are authored in the engine and delivered to host apps:
+JS is authored in the engine and delivered to host apps:
 
-- **CSS**: `app/assets/tailwind/layered/assistant/styles.css` — copied to host app by the install generator
 - **JS**: `app/javascript/layered_assistant/index.js` — pinned via `config/importmap.rb`, made available through engine initializer
 
-The install generator (`lib/generators/layered/assistant/install_generator.rb`) verifies `layered-ui-rails` is installed first, then copies CSS and injects import lines into `application.css` and `application.js`.
+The install generator (`lib/generators/layered/assistant/install_generator.rb`) verifies `layered-ui-rails` is installed first, then injects the JS import line into `application.js`.
 
 ### Test Harness
 
