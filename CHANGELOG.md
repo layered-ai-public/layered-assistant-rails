@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. This projec
 ### Changed
 
 - Bump `layered-ui-rails` to `~> 0.9`
+- Adopt `l_ui_title_bar` helper across engine views (assistants, conversations, messages, models, personas, providers, skills, public assistants, setup) for consistent page headings
 
 ### Removed
 
