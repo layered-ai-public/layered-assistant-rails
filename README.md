@@ -33,7 +33,7 @@ bundle install
 
 ### Install generator
 
-Run the install generator to copy CSS and register imports:
+Run the install generator to register imports and mount the engine:
 
 ```bash
 bin/rails generate layered:assistant:install
@@ -43,8 +43,6 @@ This will:
 - Copy `layered_ui.css` to `app/assets/tailwind/`
 - Add `@import "./layered_ui";` to your `application.css`
 - Add `import "layered_ui"` to your `application.js`
-- Copy `layered_assistant.css` to `app/assets/tailwind/layered_assistant.css`
-- Add `@import "./layered_assistant";` to your `app/assets/tailwind/application.css` (after the layered-ui import)
 - Add `import "layered_assistant"` to your `app/javascript/application.js` (after the layered-ui import)
 - Mount the engine at `/layered/assistant` in your `config/routes.rb`
 - Copy engine migrations into your application
