@@ -4,8 +4,6 @@
     ["Providers", layered_assistant.providers_path],
     ["Models", layered_assistant.provider_models_path(@provider)]
   ]
-) do %>
-  <%= link_to "Back", layered_assistant.provider_models_path(@provider), class: "l-ui-button--outline" %>
-<% end %>
+) %>
 
 <%= render "form", model: @model, url: layered_assistant.provider_model_path(@provider, @model) %>

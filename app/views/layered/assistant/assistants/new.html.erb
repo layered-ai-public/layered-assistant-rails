@@ -1,8 +1,6 @@
 <%= l_ui_title_bar(
   title: "New assistant",
   breadcrumbs: [["Assistants", layered_assistant.assistants_path]]
-) do %>
-  <%= link_to "Back", layered_assistant.assistants_path, class: "l-ui-button--outline" %>
-<% end %>
+) %>
 
 <%= render "form", assistant: @assistant, url: layered_assistant.assistants_path %>

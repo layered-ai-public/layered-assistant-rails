@@ -1,8 +1,6 @@
 <%= l_ui_title_bar(
   title: "Edit provider",
   breadcrumbs: [["Providers", layered_assistant.providers_path]]
-) do %>
-  <%= link_to "Back", layered_assistant.providers_path, class: "l-ui-button--outline" %>
-<% end %>
+) %>
 
 <%= render "form", provider: @provider, url: layered_assistant.provider_path(@provider) %>

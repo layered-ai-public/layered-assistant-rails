@@ -1,8 +1,6 @@
 <%= l_ui_title_bar(
   title: "New conversation",
   breadcrumbs: [["Conversations", layered_assistant.conversations_path]]
-) do %>
-  <%= link_to "Back", layered_assistant.conversations_path, class: "l-ui-button--outline" %>
-<% end %>
+) %>
 
 <%= render "form", conversation: @conversation, url: layered_assistant.conversations_path %>
