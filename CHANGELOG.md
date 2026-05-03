@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- `layered:assistant:install_agent_skill` generator that copies a `layered-assistant-rails` Claude Code skill into host apps' `.claude/skills/`, covering installation, authorization, scoping, and panel mounting
+
 ## [0.4.1] - 2026-04-26
 
 ### Changed
