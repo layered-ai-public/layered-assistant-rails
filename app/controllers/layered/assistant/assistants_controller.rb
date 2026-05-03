@@ -1,10 +1,10 @@
 module Layered
   module Assistant
     class AssistantsController < ApplicationController
-      before_action :set_assistant, only: [:edit, :update, :destroy]
-      before_action :set_models, only: [:new, :create, :edit, :update]
-      before_action :set_personas, only: [:new, :create, :edit, :update]
-      before_action :set_skills, only: [:new, :create, :edit, :update]
+      before_action :set_assistant, only: [ :edit, :update, :destroy ]
+      before_action :set_models, only: [ :new, :create, :edit, :update ]
+      before_action :set_personas, only: [ :new, :create, :edit, :update ]
+      before_action :set_skills, only: [ :new, :create, :edit, :update ]
 
       def index
         @page_title = "Assistants"

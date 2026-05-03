@@ -5,9 +5,9 @@ module Layered
         include StoppableResponse
         layout false
 
-        before_action :set_conversation, only: [:show, :destroy, :stop]
-        before_action :set_conversations, only: [:index, :show]
-        before_action :set_assistants, only: [:index, :show, :new, :create]
+        before_action :set_conversation, only: [ :show, :destroy, :stop ]
+        before_action :set_conversations, only: [ :index, :show ]
+        before_action :set_assistants, only: [ :index, :show, :new, :create ]
 
         def index
         end

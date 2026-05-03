@@ -2,7 +2,7 @@ module Layered
   module Assistant
     class ModelsController < ApplicationController
       before_action :set_provider
-      before_action :set_model, only: [:edit, :update, :destroy]
+      before_action :set_model, only: [ :edit, :update, :destroy ]
 
       def index
         @pagy, @models = pagy(@provider.models.sorted)

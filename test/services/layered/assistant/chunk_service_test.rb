@@ -59,7 +59,7 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        service.call({ "choices" => [{ "delta" => { "content" => "Hello" } }] })
+        service.call({ "choices" => [ { "delta" => { "content" => "Hello" } } ] })
         assert_equal "Hello", message.reload.content
       end
 
@@ -67,8 +67,8 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        service.call({ "choices" => [{ "delta" => { "content" => "Hello" } }] })
-        service.call({ "choices" => [{ "delta" => { "content" => " world" } }] })
+        service.call({ "choices" => [ { "delta" => { "content" => "Hello" } } ] })
+        service.call({ "choices" => [ { "delta" => { "content" => " world" } } ] })
         assert_equal "Hello world", message.reload.content
       end
 
@@ -76,7 +76,7 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        service.call({ "choices" => [{ "delta" => {} }] })
+        service.call({ "choices" => [ { "delta" => {} } ] })
         assert_nil message.reload.content
       end
 
@@ -84,8 +84,8 @@ module Layered
         message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        service.call({ "choices" => [{ "delta" => { "content" => "Done" } }] })
-        service.call({ "choices" => [{ "delta" => {}, "finish_reason" => "stop" }] })
+        service.call({ "choices" => [ { "delta" => { "content" => "Done" } } ] })
+        service.call({ "choices" => [ { "delta" => {}, "finish_reason" => "stop" } ] })
         assert_equal "Done", message.reload.content
       end
 
@@ -95,7 +95,7 @@ module Layered
 
         # broadcast_streaming_content is called for text deltas (not broadcast_updated)
         assert_respond_to message, :broadcast_streaming_content
-        service.call({ "choices" => [{ "delta" => { "content" => "Hello" } }] })
+        service.call({ "choices" => [ { "delta" => { "content" => "Hello" } } ] })
       end
 
       # Anthropic usage extraction
@@ -123,8 +123,8 @@ module Layered
         message = conversation.messages.create!(role: :assistant, content: nil)
         service = ChunkService.new(message, provider: @openai_provider)
 
-        service.call({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
-        service.call({ "choices" => [{ "delta" => {}, "finish_reason" => "stop" }] })
+        service.call({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+        service.call({ "choices" => [ { "delta" => {}, "finish_reason" => "stop" } ] })
         service.call({ "choices" => [], "usage" => { "prompt_tokens" => 80, "completion_tokens" => 20 } })
 
         message.reload

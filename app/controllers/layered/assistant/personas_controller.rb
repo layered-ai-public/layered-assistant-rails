@@ -1,7 +1,7 @@
 module Layered
   module Assistant
     class PersonasController < ApplicationController
-      before_action :set_persona, only: [:edit, :update, :destroy]
+      before_action :set_persona, only: [ :edit, :update, :destroy ]
 
       def index
         @page_title = "Personas"

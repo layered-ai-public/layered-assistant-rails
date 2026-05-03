@@ -22,10 +22,10 @@ module Layered
           when "system"
             system_messages << message.content
           when "user"
-            regular_messages << { role: "user", content: [{ type: "text", text: message.content }] }
+            regular_messages << { role: "user", content: [ { type: "text", text: message.content } ] }
           when "assistant"
             next if message.content.blank?
-            regular_messages << { role: "assistant", content: [{ type: "text", text: message.content }] }
+            regular_messages << { role: "assistant", content: [ { type: "text", text: message.content } ] }
           end
         end
 

@@ -1,7 +1,7 @@
 module Layered
   module Assistant
     class ProvidersController < ApplicationController
-      before_action :set_provider, only: [:edit, :update, :destroy]
+      before_action :set_provider, only: [ :edit, :update, :destroy ]
 
       def index
         @page_title = "Providers"

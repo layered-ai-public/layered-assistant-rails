@@ -61,27 +61,27 @@ module Layered
 
       test "openai: text returns nil for delta without content" do
         parser = ChunkParser.new("openai")
-        assert_nil parser.text({ "choices" => [{ "delta" => {} }] })
+        assert_nil parser.text({ "choices" => [ { "delta" => {} } ] })
       end
 
       test "openai: text returns nil for empty string content" do
         parser = ChunkParser.new("openai")
-        assert_nil parser.text({ "choices" => [{ "delta" => { "content" => "" } }] })
+        assert_nil parser.text({ "choices" => [ { "delta" => { "content" => "" } } ] })
       end
 
       test "openai: text returns string for valid delta content" do
         parser = ChunkParser.new("openai")
-        assert_equal "Hi", parser.text({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
+        assert_equal "Hi", parser.text({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
 
       test "openai: finished? is true when finish_reason present" do
         parser = ChunkParser.new("openai")
-        assert parser.finished?({ "choices" => [{ "delta" => {}, "finish_reason" => "stop" }] })
+        assert parser.finished?({ "choices" => [ { "delta" => {}, "finish_reason" => "stop" } ] })
       end
 
       test "openai: finished? is false when no finish_reason" do
         parser = ChunkParser.new("openai")
-        assert_not parser.finished?({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
+        assert_not parser.finished?({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
 
       test "openai: usage_ready? is true for usage-only chunk" do
@@ -91,7 +91,7 @@ module Layered
 
       test "openai: usage_ready? is false for regular delta chunk" do
         parser = ChunkParser.new("openai")
-        assert_not parser.usage_ready?({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
+        assert_not parser.usage_ready?({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
 
       test "openai: input_tokens returns prompt_tokens from usage chunk" do
@@ -102,7 +102,7 @@ module Layered
 
       test "openai: input_tokens returns nil for regular delta chunk" do
         parser = ChunkParser.new("openai")
-        assert_nil parser.input_tokens({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
+        assert_nil parser.input_tokens({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
 
       test "openai: output_tokens returns completion_tokens from usage chunk" do
@@ -113,7 +113,7 @@ module Layered
 
       test "openai: output_tokens returns nil for regular delta chunk" do
         parser = ChunkParser.new("openai")
-        assert_nil parser.output_tokens({ "choices" => [{ "delta" => { "content" => "Hi" } }] })
+        assert_nil parser.output_tokens({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
     end
   end

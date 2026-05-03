@@ -4,7 +4,7 @@ module Layered
       include MessageCreation
 
       before_action :set_conversation
-      before_action :set_message, only: [:destroy]
+      before_action :set_message, only: [ :destroy ]
 
       def index
         @page_title = "Messages"

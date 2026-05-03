@@ -11,7 +11,7 @@ module Layered
 
       test "sorted scope orders by position then name" do
         sorted = Provider.sorted
-        assert_equal sorted, sorted.sort_by { |p| [p.position, p.name] }
+        assert_equal sorted, sorted.sort_by { |p| [ p.position, p.name ] }
       end
 
       test "validates url format when present" do

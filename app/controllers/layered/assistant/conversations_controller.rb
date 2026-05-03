@@ -3,8 +3,8 @@ module Layered
     class ConversationsController < ApplicationController
       include StoppableResponse
 
-      before_action :set_conversation, only: [:show, :edit, :update, :destroy, :stop]
-      before_action :set_assistants, only: [:new, :create]
+      before_action :set_conversation, only: [ :show, :edit, :update, :destroy, :stop ]
+      before_action :set_assistants, only: [ :new, :create ]
 
       def index
         if params[:assistant_id]
@@ -26,7 +26,7 @@ module Layered
 
       def new
         @page_title = "New conversation"
-        @conversation = Conversation.new(params.permit(conversation: [:assistant_id])[:conversation])
+        @conversation = Conversation.new(params.permit(conversation: [ :assistant_id ])[:conversation])
       end
 
       def create

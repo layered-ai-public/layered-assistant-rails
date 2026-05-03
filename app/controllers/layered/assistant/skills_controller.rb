@@ -1,7 +1,7 @@
 module Layered
   module Assistant
     class SkillsController < ApplicationController
-      before_action :set_skill, only: [:edit, :update, :destroy]
+      before_action :set_skill, only: [ :edit, :update, :destroy ]
 
       def index
         @page_title = "Skills"

@@ -215,21 +215,21 @@ if sonnet
       name: "Sales assistant",
       description: "Handles pre-sales queries using product and pricing knowledge.",
       instructions: "You help prospective customers understand Acme Flow. Answer questions about features, pricing, and how the product compares to alternatives. Be honest about limitations. If a question falls outside your knowledge, suggest booking a demo.",
-      skills: ["Product catalogue", "House style"],
+      skills: [ "Product catalogue", "House style" ],
       public: true
     },
     {
       name: "Compliance assistant",
       description: "Answers data protection and security questions for prospects and customers.",
       instructions: "You help answer compliance, security, and data protection questions about Acme Flow. Be precise and factual. Never speculate beyond the information you have been given.",
-      skills: ["Compliance guidance", "Company context"],
+      skills: [ "Compliance guidance", "Company context" ],
       public: true
     },
     {
       name: "Customer support",
       description: "All-round support assistant with full company context.",
       instructions: "You are a front-line support assistant for Acme Flow. Help customers with account queries, feature questions, and general troubleshooting. Escalate billing disputes and technical bugs to the appropriate team.",
-      skills: ["Company context", "Product catalogue", "Compliance guidance", "House style"],
+      skills: [ "Company context", "Product catalogue", "Compliance guidance", "House style" ],
       public: true
     }
   ]
