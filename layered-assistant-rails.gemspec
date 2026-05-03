@@ -15,8 +15,11 @@ Gem::Specification.new do |spec|
   # Metadata
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/layered-ai-public/layered-assistant-rails"
-  spec.metadata["changelog_uri"]    = "https://github.com/layered-ai-public/layered-assistant-rails/blob/main/CHANGELOG.md"
   spec.metadata["bug_tracker_uri"]  = "https://github.com/layered-ai-public/layered-assistant-rails/issues"
+  spec.metadata["changelog_uri"]    = "https://github.com/layered-ai-public/layered-assistant-rails/blob/main/CHANGELOG.md"
+  spec.metadata["documentation_uri"] = "https://layered-assistant-rails.layered.ai/"
+  spec.metadata["discord_uri"] = "https://discord.gg/aCGqz9Bx"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Files
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
