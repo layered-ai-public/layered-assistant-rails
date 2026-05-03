@@ -1,8 +1,3 @@
-.claude
-.cursor
-.DS_Store
-*.gem
-
 # Ignore bundler config.
 test/dummy/.bundle
 
@@ -42,3 +37,14 @@ test/dummy/.kamal/secrets
 
 # Ignore VS Code settings.
 /.vscode/
+
+# Claude
+.claude/*
+!.claude/skills/
+
+# Cursor
+.cursor
+
+# Other
+.DS_Store
+*.gem

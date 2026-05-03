@@ -15,6 +15,24 @@ An open source Rails 8+ engine built on [layered-ui-rails](https://github.com/la
 - Ruby on Rails >= 8.0
 - [layered-ui-rails](https://github.com/layered-ai-public/layered-ui-rails) installed in the host app
 
+## Agent skill
+
+An [agent skill](https://agentskills.io) is included so AI coding agents can work with `layered-assistant-rails` in your project. Once installed, the agent can handle the full setup - just ask it to add `layered-assistant-rails` to your app and it will install the gem, run the generator, and configure your layout.
+
+**Project install** - scoped to a single repo, available to all contributors:
+
+```bash
+bin/rails generate layered:assistant:install_agent_skill
+```
+
+**Global install** - available across all your projects:
+
+```bash
+./install-skill.sh
+# or install remotely without cloning the repo:
+curl -fsSL https://raw.githubusercontent.com/layered-ai-public/layered-assistant-rails/main/install-skill.sh | sh
+```
+
 ## Installation
 
 Add to your Gemfile:
