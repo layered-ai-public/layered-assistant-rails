@@ -7,14 +7,18 @@
 <% content_for :l_ui_navigation_items do %>
   <%= render "layouts/layered/assistant/host_navigation" %>
   <% if l_assistant_accessible? %>
-    <%= l_ui_navigation_item "Setup", layered_assistant.root_path %>
-    <%= l_ui_navigation_item "Providers", layered_assistant.providers_path %>
-    <%= l_ui_navigation_item "Personas", layered_assistant.personas_path %>
-    <%= l_ui_navigation_item "Skills", layered_assistant.skills_path %>
-    <%= l_ui_navigation_item "Assistants", layered_assistant.assistants_path %>
-    <%= l_ui_navigation_item "Conversations", layered_assistant.conversations_path %>
+    <%= l_ui_navigation_section do %>
+      <%= l_ui_navigation_item "Setup", layered_assistant.root_path, icon_path: "layered_assistant/icon_spanner.svg" %>
+      <%= l_ui_navigation_item "Providers", layered_assistant.providers_path, icon_path: "layered_assistant/icon_providers.svg" %>
+      <%= l_ui_navigation_item "Personas", layered_assistant.personas_path, icon_path: "layered_assistant/icon_personas.svg" %>
+      <%= l_ui_navigation_item "Skills", layered_assistant.skills_path, icon_path: "layered_assistant/icon_skills.svg" %>
+      <%= l_ui_navigation_item "Assistants", layered_assistant.assistants_path, icon_path: "layered_assistant/icon_assistants.svg" %>
+      <%= l_ui_navigation_item "Conversations", layered_assistant.conversations_path, icon_path: "layered_assistant/icon_conversations.svg" %>
+    <% end %>
   <% else %>
-    <%= l_ui_navigation_item "Assistants", layered_assistant.public_assistants_path %>
+    <%= l_ui_navigation_section do %>
+      <%= l_ui_navigation_item "Assistants", layered_assistant.public_assistants_path, icon_path: "layered_assistant/icon_assistants.svg" %>
+    <% end %>
   <% end %>
 <% end %>
 

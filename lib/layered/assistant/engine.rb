@@ -15,6 +15,7 @@ module Layered
 
       initializer "layered-assistant-rails.assets" do |app|
         app.config.assets.paths << Engine.root.join("app/javascript")
+        app.config.assets.paths << Engine.root.join("app/assets/images")
       end
 
       initializer "layered-assistant-rails.helpers" do
