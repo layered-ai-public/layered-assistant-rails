@@ -12,7 +12,7 @@ class ApplicationController < ActionController::Base
   before_action :set_meta_tags
 
   def set_meta_tags
-    @page_title = "layered-ui-rails (v#{Layered::Assistant::VERSION})"
+    @page_title = "layered-assistant-rails (v#{Layered::Assistant::VERSION})"
     @page_description = Gem.loaded_specs["layered-assistant-rails"].description
   end
 

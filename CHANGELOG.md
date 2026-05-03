@@ -4,9 +4,21 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-03
+
+### Breaking
+
+- Minimum Ruby version raised to 3.3.0 (follows the `layered-ui-rails` 0.10 bump; Ruby 3.2 is EOL). CI matrix now covers Ruby 3.3, 3.4, and 4.0.
+
 ### Added
 
 - `layered:assistant:install_agent_skill` generator that copies a `layered-assistant-rails` Claude Code skill into host apps' `.claude/skills/`, covering installation, authorization, scoping, and panel mounting
+- Six SVG navigation icons under `app/assets/images/layered_assistant/` (assistants, conversations, personas, providers, skills, spanner) and an asset path entry on the engine so host apps can resolve them
+
+### Changed
+
+- Bump `layered-ui-rails` to `~> 0.10`
+- Adopt the new `l_ui_navigation_section` nested navigation helper in the host navigation partial, with icons applied to every nav item
 
 ## [0.4.1] - 2026-04-26
 

@@ -6,7 +6,7 @@ This file provides guidance to AI agents when working with code in this reposito
 
 **layered-assistant-rails** is a Rails 8+ engine gem (`Layered::Assistant`) providing AI assistant UI components. It uses `isolate_namespace Layered::Assistant` and distributes JS (importmap) to host applications via a generator.
 
-Requires Rails >= 8.0.0, Ruby >= 3.2.0. Depends on sibling gem `layered-ui-rails` (path dependency at `../layered-ui-rails`).
+Requires Rails >= 8.0.0, Ruby >= 3.3.0. Depends on sibling gem `layered-ui-rails` (path dependency at `../layered-ui-rails`).
 
 ## Architecture
 

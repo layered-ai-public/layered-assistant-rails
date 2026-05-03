@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.summary     = "Open source, multi-provider, streaming AI assistant engine for Rails 8+ built on `layered-ui-rails`."
   spec.license     = "Apache-2.0"
 
-  spec.required_ruby_version = ">= 3.2.0"
+  spec.required_ruby_version = ">= 3.3.0"
 
   # Metadata
   spec.metadata["homepage_uri"] = spec.homepage
