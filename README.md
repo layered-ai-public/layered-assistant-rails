@@ -30,7 +30,7 @@ bin/rails generate layered:assistant:install_agent_skill
 ```bash
 ./install-skill.sh
 # or install remotely without cloning the repo:
-curl -fsSL https://raw.githubusercontent.com/layered-ai-public/layered-ui-rails/main/install-skill.sh | sh
+curl -fsSL https://raw.githubusercontent.com/layered-ai-public/layered-assistant-rails/main/install-skill.sh | sh
 ```
 
 ## Installation
