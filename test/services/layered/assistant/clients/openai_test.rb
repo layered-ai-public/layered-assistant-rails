@@ -11,9 +11,10 @@ module Layered
         test "raises error when API key is blank" do
           @provider.update!(secret: nil)
 
-          assert_raises(StandardError, /API key is not set/) do
+          error = assert_raises(StandardError) do
             Clients::OpenAI.new(@provider)
           end
+          assert_match(/API key is not set/, error.message)
         end
 
         test "formats messages using OpenAI format" do
