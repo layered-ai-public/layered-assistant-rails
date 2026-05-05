@@ -5,7 +5,7 @@ module Layered
         queue_as :default
 
         def perform(message_id)
-          message = Message.includes(model: :provider, conversation: [:assistant, :messages]).find(message_id)
+          message = Message.includes(model: :provider, conversation: [ :assistant, :messages ]).find(message_id)
 
           unless message.model&.provider
             message.update(content: "No provider is configured for this model.")

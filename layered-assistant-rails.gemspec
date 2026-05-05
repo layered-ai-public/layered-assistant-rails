@@ -3,8 +3,8 @@ require_relative "lib/layered/assistant/version"
 Gem::Specification.new do |spec|
   spec.name        = "layered-assistant-rails"
   spec.version     = Layered::Assistant::VERSION
-  spec.authors     = ["layered.ai"]
-  spec.email       = ["support@layered.ai"]
+  spec.authors     = [ "layered.ai" ]
+  spec.email       = [ "support@layered.ai" ]
   spec.homepage    = "https://www.layered.ai"
   spec.description = "An open source Rails 8+ engine built on `layered-ui-rails` that provides a multi-provider AI assistant with streaming responses and a full conversation UI."
   spec.summary     = "Open source, multi-provider, streaming AI assistant engine for Rails 8+ built on `layered-ui-rails`."
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
     Dir["{app,config,data,db,lib,.claude/skills}/**/*", "LICENSE", "NOTICE", "Rakefile", "README.md", "AGENTS.md"]
       .reject { |f| File.basename(f) == ".DS_Store" }
   end
-  spec.require_paths = ["lib"]
+  spec.require_paths = [ "lib" ]
 
   # Dependencies
   spec.add_dependency "rails", "~> 8.0"
@@ -49,6 +49,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "dotenv-rails", "~> 3.0"
   spec.add_development_dependency "honeybadger", "~> 6.5"
   spec.add_development_dependency "webmock", "~> 3.0"
+  spec.add_development_dependency "rubocop-rails-omakase", "~> 1.0"
 
   # Post-install message
   spec.post_install_message = <<~MSG
