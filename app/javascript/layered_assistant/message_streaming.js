@@ -1,10 +1,12 @@
 // Streaming render for assistant messages.
 //
 // The server broadcasts the raw markdown content as it grows; the
-// client parses it with marked and replaces the message content
-// element. The typing indicator lives as a sibling and is left alone
-// across chunks so its CSS animation never restarts. It's removed
-// when the partial is replaced after streaming completes or stops.
+// client parses it with marked and appends newly-closed top-level
+// blocks to the message content element with a fade. The trailing
+// in-progress block is held back so we don't fade-restart it on every
+// chunk; the typing indicator sibling covers for it visually. The
+// final completed content arrives via the partial replacement after
+// streaming finishes.
 
 import "@hotwired/turbo-rails"
 import { renderMarkdown } from "layered_assistant/marked_setup"
@@ -18,6 +20,22 @@ Turbo.StreamActions.enable_composer = function () {
   })
 }
 
+function syncStreamingContent(target, markdown) {
+  const tmp = document.createElement("div")
+  tmp.innerHTML = renderMarkdown(markdown)
+  const incoming = [...tmp.children]
+  // Hold back the trailing in-progress block; only append new closed ones.
+  const closedCount = Math.max(0, incoming.length - 1)
+  for (let i = target.children.length; i < closedCount; i++) {
+    incoming[i].classList.add("l-ui-stream-fade")
+    target.appendChild(incoming[i])
+  }
+  if (target.children.length > 0) {
+    const indicator = target.parentElement?.querySelector(".l-ui-typing-indicator")
+    indicator?.classList.add("l-ui-utility--mt-4")
+  }
+}
+
 Turbo.StreamActions.render_content = function () {
   const markdown = this.templateContent.textContent
 
@@ -29,7 +47,7 @@ Turbo.StreamActions.render_content = function () {
         pendingRender.delete(target)
         const md = pendingMarkdown.get(target)
         if (md != null) {
-          target.innerHTML = renderMarkdown(md)
+          syncStreamingContent(target, md)
           pendingMarkdown.delete(target)
         }
       }))

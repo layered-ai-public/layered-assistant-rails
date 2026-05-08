@@ -3,8 +3,8 @@
     <% unless message.user? %>
       <div class="l-ui-message__author"><%= message.role.capitalize %></div>
     <% end %>
-    <div class="<%= dom_id(message) %>_body l-ui-message__body l-ui-markdown">
-      <div class="<%= dom_id(message) %>_content" data-controller="markdown"><%= message.content %></div>
+    <div class="<%= dom_id(message) %>_body l-ui-message__body">
+      <div class="<%= dom_id(message) %>_content l-ui-markdown" data-controller="markdown"><%= message.content %></div>
       <% if message.assistant? && message.content.blank? && !message.stopped? %>
         <div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">
           <span class="l-ui-typing-indicator__dot"></span>
@@ -17,7 +17,7 @@
       <% end %>
     </div>
     <div class="l-ui-message__footer">
-      <% if message.model %>
+      <% if message.model && !message.user? %>
         <% title = message_metadata_title(message) %>
         <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message.model.name %></span>
       <% end %>
