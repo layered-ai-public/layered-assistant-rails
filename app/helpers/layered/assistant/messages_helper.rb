@@ -38,17 +38,18 @@ module Layered
         render_markdown(message.content)
       end
 
-      # Renders accumulated content for streaming, holding back any
-      # trailing unclosed code fence that Kramdown can't parse correctly.
-      # Returns { html:, has_unclosed_fence: } so the caller can decide
-      # whether to show a typing indicator.
+      # Renders only the fully-closed top-level blocks of a streaming
+      # message. The in-progress trailing block is held back so the
+      # caller can show a typing indicator in its place, then the whole
+      # block fades in when it closes.
+      # Returns { html:, in_progress: }.
       def render_streaming_markdown(content)
-        return { html: "", has_unclosed_fence: false } if content.blank?
+        return { html: "", in_progress: false } if content.blank?
 
-        safe = strip_unclosed_fence(content)
+        closed = closed_block_prefix(content)
         {
-          html: safe.present? ? render_markdown(safe) : "",
-          has_unclosed_fence: safe.length < content.length
+          html: closed.present? ? render_markdown(closed) : "",
+          in_progress: closed.length < content.length
         }
       end
 
@@ -84,26 +85,31 @@ module Layered
         text.gsub(/([^\n])\n(\|[^\n]+\|\s*\n\|[\s:|-]+\|\s*\n)/, "\\1\n\n\\2")
       end
 
-      # Returns text up to (but not including) any trailing unclosed code
-      # fence. Kramdown can't produce valid output for a half-open fence,
-      # so we hold it back until the closing marker arrives.
-      def strip_unclosed_fence(text)
+      # Returns the prefix of text consisting of fully-closed top-level
+      # blocks. A block boundary is a blank line outside any open code
+      # fence; a closing fence also marks its block as closed. Anything
+      # after the last boundary is treated as in-progress and held back.
+      def closed_block_prefix(text)
         fence_marker = nil
-        fence_start = 0
+        last_boundary = 0
         pos = 0
 
         text.each_line do |line|
           trimmed = line.lstrip
-          if fence_marker.nil? && (match = trimmed.match(/\A(`{3,}|~{3,})/))
+          if fence_marker
+            if trimmed.match?(/\A#{Regexp.escape(fence_marker[0])}{#{fence_marker.length},}\s*\z/)
+              fence_marker = nil
+              last_boundary = pos + line.length
+            end
+          elsif (match = trimmed.match(/\A(`{3,}|~{3,})/))
             fence_marker = match[1]
-            fence_start = pos
-          elsif fence_marker && trimmed.match?(/\A#{Regexp.escape(fence_marker[0])}{#{fence_marker.length},}\s*\z/)
-            fence_marker = nil
+          elsif line.strip.empty?
+            last_boundary = pos + line.length
           end
           pos += line.length
         end
 
-        fence_marker ? text[0, fence_start] : text
+        text[0, last_boundary]
       end
     end
   end

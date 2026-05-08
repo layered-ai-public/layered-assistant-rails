@@ -1,44 +1,47 @@
-// Incremental markdown rendering for streamed assistant messages.
+// Streaming render for assistant messages.
 //
-// The server broadcasts pre-rendered HTML via a custom Turbo Stream action
-// (render_content). This module reconciles the DOM block by block -
-// patching unchanged blocks in place so fade-in animations aren't
-// interrupted. Both streaming preview and final output use the same
-// server-side Kramdown pipeline, eliminating parser drift.
+// The server broadcasts pre-rendered HTML containing only fully-closed
+// top-level markdown blocks, optionally followed by a typing indicator
+// for the in-progress block. The client appends new closed blocks with
+// a fade-in and keeps a single trailing typing indicator while the
+// next block is being typed.
 
 import "@hotwired/turbo-rails"
 
 const pendingHtml = new WeakMap()
 const pendingRender = new WeakMap()
 
-function reconcile(target, html) {
+function syncStream(target, html) {
   const temp = document.createElement("div")
   temp.innerHTML = html
+  const incoming = [...temp.children]
 
-  // Snapshot temp.children since moves will mutate the live HTMLCollection
-  const newBlocks = [...temp.children]
+  const lastIsIndicator =
+    incoming[incoming.length - 1]?.classList.contains("l-ui-typing-indicator")
+  const newIndicator = lastIsIndicator ? incoming.pop() : null
 
-  // Trim excess blocks from previous render
-  while (target.children.length > newBlocks.length) {
-    target.lastElementChild.remove()
+  // Keep the existing indicator in place across broadcasts so its
+  // animation doesn't restart on every chunk.
+  const existingIndicator = target.querySelector(":scope > .l-ui-typing-indicator")
+  const existingClosedCount = target.children.length - (existingIndicator ? 1 : 0)
+
+  // Closed blocks are immutable across broadcasts, so this is purely
+  // additive. Insert before the indicator if one's already there.
+  for (let i = existingClosedCount; i < incoming.length; i++) {
+    incoming[i].classList.add("l-ui-stream-fade")
+    if (existingIndicator) {
+      target.insertBefore(incoming[i], existingIndicator)
+    } else {
+      target.appendChild(incoming[i])
+    }
   }
 
-  // Reconcile block by block - preserves existing DOM nodes (and their
-  // running fade-in animations) wherever possible
-  for (let i = 0; i < newBlocks.length; i++) {
-    if (i < target.children.length && target.children[i].tagName === newBlocks[i].tagName) {
-      // Same tag - patch content in place
-      if (target.children[i].innerHTML !== newBlocks[i].innerHTML) {
-        target.children[i].innerHTML = newBlocks[i].innerHTML
-      }
-    } else if (i < target.children.length) {
-      // Tag changed (e.g. <p> became <table>) - replace node
-      target.children[i].replaceWith(newBlocks[i])
-    } else {
-      // New block - append with fade
-      newBlocks[i].classList.add("l-ui-stream-fade")
-      target.appendChild(newBlocks[i])
-    }
+  // Only add an indicator if one isn't already there. Don't replace or
+  // remove the existing one - that would restart its animation, and
+  // broadcast_updated re-renders the whole partial when the response
+  // completes.
+  if (newIndicator && !existingIndicator) {
+    target.appendChild(newIndicator)
   }
 }
 
@@ -54,12 +57,9 @@ Turbo.StreamActions.render_content = function () {
       target.classList.add("l-ui-markdown")
     }
 
-    const html = this.templateContent
-
-    // Always store the latest HTML so the requestAnimationFrame callback
-    // uses the newest version - convert DocumentFragment to HTML string
+    // Stash the latest HTML; coalesce multiple chunks per frame.
     const div = document.createElement("div")
-    div.append(html.cloneNode(true))
+    div.append(this.templateContent.cloneNode(true))
     pendingHtml.set(target, div.innerHTML)
 
     if (!pendingRender.has(target)) {
@@ -67,7 +67,7 @@ Turbo.StreamActions.render_content = function () {
         pendingRender.delete(target)
         const latestHtml = pendingHtml.get(target)
         if (latestHtml != null) {
-          reconcile(target, latestHtml)
+          syncStream(target, latestHtml)
           pendingHtml.delete(target)
         }
       }))

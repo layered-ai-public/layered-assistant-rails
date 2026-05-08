@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file. This projec
 
 - RuboCop linting via `rubocop-rails-omakase`, with a `lint` job in CI
 
+### Changed
+
+- Streaming render is now block-atomic: only fully-closed top-level markdown blocks are rendered, with a typing indicator standing in for the in-progress block. Each closed block fades in once when it arrives, replacing the previous per-token reconciliation
+
 ## [0.5.0] - 2026-05-03
 
 ### Breaking

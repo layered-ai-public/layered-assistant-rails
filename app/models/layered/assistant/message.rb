@@ -49,7 +49,7 @@ module Layered
         rendered = helpers.render_streaming_markdown(content)
         html = rendered[:html]
 
-        if rendered[:has_unclosed_fence]
+        if rendered[:in_progress]
           html += helpers.tag.div(
             helpers.tag.span(class: "l-ui-typing-indicator__dot") +
             helpers.tag.span(class: "l-ui-typing-indicator__dot") +
