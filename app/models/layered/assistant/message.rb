@@ -46,30 +46,10 @@ module Layered
       end
 
       def broadcast_streaming_content
-        rendered = helpers.render_streaming_markdown(content)
-        html = rendered[:html]
-
-        if rendered[:in_progress]
-          html += helpers.tag.div(
-            helpers.tag.span(class: "l-ui-typing-indicator__dot") +
-            helpers.tag.span(class: "l-ui-typing-indicator__dot") +
-            helpers.tag.span(class: "l-ui-typing-indicator__dot"),
-            class: "l-ui-typing-indicator",
-            role: "status",
-            "aria-label": "Assistant is typing"
-          )
-        end
-
         broadcast_action_to conversation,
           action: :render_content,
           targets: ".#{dom_id(self)}_body",
-          content: html
-      end
-
-      private
-
-      def helpers
-        ApplicationController.helpers
+          content: content
       end
     end
   end

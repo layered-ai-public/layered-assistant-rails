@@ -1,4 +1,5 @@
 pin "layered_assistant", to: "layered_assistant/index.js"
+pin "marked", to: "layered_assistant/vendor/marked.js"
 pin "layered_assistant/message_streaming", to: "layered_assistant/message_streaming.js"
 pin "layered_assistant/composer_controller", to: "layered_assistant/composer_controller.js"
 pin "layered_assistant/conversation_select_controller", to: "layered_assistant/conversation_select_controller.js"

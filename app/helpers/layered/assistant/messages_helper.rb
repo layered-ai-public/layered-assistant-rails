@@ -38,21 +38,6 @@ module Layered
         render_markdown(message.content)
       end
 
-      # Renders only the fully-closed top-level blocks of a streaming
-      # message. The in-progress trailing block is held back so the
-      # caller can show a typing indicator in its place, then the whole
-      # block fades in when it closes.
-      # Returns { html:, in_progress: }.
-      def render_streaming_markdown(content)
-        return { html: "", in_progress: false } if content.blank?
-
-        closed = closed_block_prefix(content)
-        {
-          html: closed.present? ? render_markdown(closed) : "",
-          in_progress: closed.length < content.length
-        }
-      end
-
       private
 
       def render_markdown(content)
@@ -83,33 +68,6 @@ module Layered
       # where missing so that Kramdown recognises the table syntax.
       def ensure_blank_line_before_tables(text)
         text.gsub(/([^\n])\n(\|[^\n]+\|\s*\n\|[\s:|-]+\|\s*\n)/, "\\1\n\n\\2")
-      end
-
-      # Returns the prefix of text consisting of fully-closed top-level
-      # blocks. A block boundary is a blank line outside any open code
-      # fence; a closing fence also marks its block as closed. Anything
-      # after the last boundary is treated as in-progress and held back.
-      def closed_block_prefix(text)
-        fence_marker = nil
-        last_boundary = 0
-        pos = 0
-
-        text.each_line do |line|
-          trimmed = line.lstrip
-          if fence_marker
-            if trimmed.match?(/\A#{Regexp.escape(fence_marker[0])}{#{fence_marker.length},}\s*\z/)
-              fence_marker = nil
-              last_boundary = pos + line.length
-            end
-          elsif (match = trimmed.match(/\A(`{3,}|~{3,})/))
-            fence_marker = match[1]
-          elsif line.strip.empty?
-            last_boundary = pos + line.length
-          end
-          pos += line.length
-        end
-
-        text[0, last_boundary]
       end
     end
   end
