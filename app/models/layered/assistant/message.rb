@@ -48,7 +48,7 @@ module Layered
       def broadcast_streaming_content
         broadcast_action_to conversation,
           action: :render_content,
-          targets: ".#{dom_id(self)}_body",
+          targets: ".#{dom_id(self)}_content",
           content: content
       end
     end

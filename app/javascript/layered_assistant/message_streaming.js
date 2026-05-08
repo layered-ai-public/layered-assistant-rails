@@ -1,16 +1,13 @@
 // Streaming render for assistant messages.
 //
 // The server broadcasts the raw markdown content as it grows; the
-// client parses it with marked and replaces the message body. A
-// typing indicator is appended while streaming. Renders are
-// coalesced per animation frame.
+// client parses it with marked and replaces the message content
+// element. The typing indicator lives as a sibling and is left alone
+// across chunks so its CSS animation never restarts. It's removed
+// when the partial is replaced after streaming completes or stops.
 
 import "@hotwired/turbo-rails"
-import { marked } from "marked"
-
-marked.use({ gfm: true, breaks: false })
-
-const TYPING_INDICATOR = '<div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing"><span class="l-ui-typing-indicator__dot"></span><span class="l-ui-typing-indicator__dot"></span><span class="l-ui-typing-indicator__dot"></span></div>'
+import { renderMarkdown } from "layered_assistant/marked_setup"
 
 const pendingMarkdown = new WeakMap()
 const pendingRender = new WeakMap()
@@ -25,7 +22,6 @@ Turbo.StreamActions.render_content = function () {
   const markdown = this.templateContent.textContent
 
   this.targetElements.forEach((target) => {
-    target.classList.add("l-ui-markdown")
     pendingMarkdown.set(target, markdown)
 
     if (!pendingRender.has(target)) {
@@ -33,7 +29,7 @@ Turbo.StreamActions.render_content = function () {
         pendingRender.delete(target)
         const md = pendingMarkdown.get(target)
         if (md != null) {
-          target.innerHTML = marked.parse(md) + TYPING_INDICATOR
+          target.innerHTML = renderMarkdown(md)
           pendingMarkdown.delete(target)
         }
       }))

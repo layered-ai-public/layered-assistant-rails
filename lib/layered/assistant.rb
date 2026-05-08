@@ -1,6 +1,4 @@
 require "anthropic"
-require "kramdown"
-require "kramdown-parser-gfm"
 require "layered-ui-rails"
 require "openai"
 require "pagy"
