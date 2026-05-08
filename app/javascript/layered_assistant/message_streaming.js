@@ -36,7 +36,7 @@ function reconcile(target, html) {
       target.children[i].replaceWith(newBlocks[i])
     } else {
       // New block - append with fade
-      newBlocks[i].classList.add("l-ui-token-fade")
+      newBlocks[i].classList.add("l-ui-stream-fade")
       target.appendChild(newBlocks[i])
     }
   }
