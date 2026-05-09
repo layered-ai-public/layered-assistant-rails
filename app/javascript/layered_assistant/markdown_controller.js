@@ -7,7 +7,6 @@ import { renderMarkdown } from "layered_assistant/marked_setup"
 
 export default class extends Controller {
   connect() {
-    if (this.element.querySelector(":scope > .l-ui-typing-indicator")) return
     const text = this.element.textContent.trim()
     if (!text) return
     this.element.innerHTML = renderMarkdown(text)
