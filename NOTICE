@@ -5,3 +5,23 @@ Copyright 2026 LAYERED AI LIMITED (UK company number: 17056830).
 This product includes software developed by LAYERED AI LIMITED and contributors.
 
 Licensed under the Apache License, Version 2.0.
+
+------------------------------------------------------------------------
+Third-party software
+------------------------------------------------------------------------
+
+This product bundles the following third-party JavaScript libraries
+under app/javascript/layered_assistant/vendor/. Their full license
+texts are included alongside the source files.
+
+  marked (https://github.com/markedjs/marked)
+    Copyright (c) 2018+ MarkedJS
+    Copyright (c) 2011-2018 Christopher Jeffrey
+    Licensed under the MIT License.
+    See: app/javascript/layered_assistant/vendor/marked.LICENSE
+
+  DOMPurify (https://github.com/cure53/DOMPurify)
+    Copyright Dr.-Ing. Mario Heiderich, Cure53
+    Dual-licensed under the Apache License 2.0 or the
+    Mozilla Public License 2.0; used here under Apache-2.0.
+    See: app/javascript/layered_assistant/vendor/dompurify.LICENSE

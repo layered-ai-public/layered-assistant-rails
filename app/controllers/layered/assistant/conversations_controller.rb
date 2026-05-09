@@ -35,7 +35,7 @@ module Layered
         @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
         @conversation.name = Conversation.default_name if @conversation.name.blank?
         if @conversation.save
-          redirect_to layered_assistant.conversation_path(@conversation), notice: "Conversation was successfully created."
+          redirect_to layered_assistant.conversation_path(@conversation)
         else
           render :new, status: :unprocessable_entity
         end

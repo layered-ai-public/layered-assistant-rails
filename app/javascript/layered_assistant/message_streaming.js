@@ -1,49 +1,20 @@
 // Streaming render for assistant messages.
 //
-// The server broadcasts pre-rendered HTML containing only fully-closed
-// top-level markdown blocks, optionally followed by a typing indicator
-// for the in-progress block. The client appends new closed blocks with
-// a fade-in and keeps a single trailing typing indicator while the
-// next block is being typed.
+// The server broadcasts the raw markdown content as it grows; the
+// client parses it with marked and appends newly-closed top-level
+// blocks to the message content element with a fade. The trailing
+// block is always held back - even when it's already complete - so
+// we don't fade-restart it on every chunk; the typing indicator
+// sibling covers for it visually. Trade-off: single-block responses
+// stay hidden until broadcast_response_complete swaps in the final
+// partial. Acceptable because the swap is near-instant and the
+// indicator masks the gap.
 
 import "@hotwired/turbo-rails"
+import { renderMarkdown } from "layered_assistant/marked_setup"
 
-const pendingHtml = new WeakMap()
+const pendingMarkdown = new WeakMap()
 const pendingRender = new WeakMap()
-
-function syncStream(target, html) {
-  const temp = document.createElement("div")
-  temp.innerHTML = html
-  const incoming = [...temp.children]
-
-  const lastIsIndicator =
-    incoming[incoming.length - 1]?.classList.contains("l-ui-typing-indicator")
-  const newIndicator = lastIsIndicator ? incoming.pop() : null
-
-  // Keep the existing indicator in place across broadcasts so its
-  // animation doesn't restart on every chunk.
-  const existingIndicator = target.querySelector(":scope > .l-ui-typing-indicator")
-  const existingClosedCount = target.children.length - (existingIndicator ? 1 : 0)
-
-  // Closed blocks are immutable across broadcasts, so this is purely
-  // additive. Insert before the indicator if one's already there.
-  for (let i = existingClosedCount; i < incoming.length; i++) {
-    incoming[i].classList.add("l-ui-stream-fade")
-    if (existingIndicator) {
-      target.insertBefore(incoming[i], existingIndicator)
-    } else {
-      target.appendChild(incoming[i])
-    }
-  }
-
-  // Only add an indicator if one isn't already there. Don't replace or
-  // remove the existing one - that would restart its animation, and
-  // broadcast_updated re-renders the whole partial when the response
-  // completes.
-  if (newIndicator && !existingIndicator) {
-    target.appendChild(newIndicator)
-  }
-}
 
 Turbo.StreamActions.enable_composer = function () {
   this.targetElements.forEach((form) => {
@@ -51,24 +22,35 @@ Turbo.StreamActions.enable_composer = function () {
   })
 }
 
-Turbo.StreamActions.render_content = function () {
-  this.targetElements.forEach((target) => {
-    if (!target.classList.contains("l-ui-markdown")) {
-      target.classList.add("l-ui-markdown")
-    }
+function syncStreamingContent(target, markdown) {
+  const tmp = document.createElement("div")
+  tmp.innerHTML = renderMarkdown(markdown)
+  const incoming = [...tmp.children]
+  // Hold back the trailing in-progress block; only append new closed ones.
+  const closedCount = Math.max(0, incoming.length - 1)
+  for (let i = target.children.length; i < closedCount; i++) {
+    incoming[i].classList.add("l-ui-stream-fade")
+    target.appendChild(incoming[i])
+  }
+  if (target.children.length > 0) {
+    const indicator = target.parentElement?.querySelector(".l-ui-typing-indicator")
+    indicator?.classList.add("l-ui-utility--mt-4")
+  }
+}
 
-    // Stash the latest HTML; coalesce multiple chunks per frame.
-    const div = document.createElement("div")
-    div.append(this.templateContent.cloneNode(true))
-    pendingHtml.set(target, div.innerHTML)
+Turbo.StreamActions.render_content = function () {
+  const markdown = this.templateContent.textContent
+
+  this.targetElements.forEach((target) => {
+    pendingMarkdown.set(target, markdown)
 
     if (!pendingRender.has(target)) {
       pendingRender.set(target, requestAnimationFrame(() => {
         pendingRender.delete(target)
-        const latestHtml = pendingHtml.get(target)
-        if (latestHtml != null) {
-          syncStream(target, latestHtml)
-          pendingHtml.delete(target)
+        const md = pendingMarkdown.get(target)
+        if (md != null) {
+          syncStreamingContent(target, md)
+          pendingMarkdown.delete(target)
         }
       }))
     }
