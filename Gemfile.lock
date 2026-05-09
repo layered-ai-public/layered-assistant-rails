@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/layered-ai-public/layered-resource-rails.git
-  revision: dc7a8fd69973d9156315dacb9310b060abb5ba98
+  revision: 49dd68734142505cec26f3a8ed013775bba037d5
   specs:
     layered-resource-rails (0.1.0)
       concurrent-ruby (>= 1.0)
