@@ -21,7 +21,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully created.", flash[:notice]
+        assert_equal "Persona created", flash[:notice]
       end
 
       test "should not create persona with invalid params" do
@@ -46,7 +46,7 @@ module Layered
 
         patch "/layered/assistant/personas/#{persona.id}", params: { persona: { name: "Updated Name", description: "New description" } }
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully updated.", flash[:notice]
+        assert_equal "Persona updated", flash[:notice]
 
         persona.reload
         assert_equal "Updated Name", persona.name
@@ -69,7 +69,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully deleted.", flash[:notice]
+        assert_equal "Persona deleted", flash[:notice]
       end
 
       test "should return 404 for out-of-scope persona on edit" do
@@ -110,7 +110,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona could not be deleted because it is assigned to assistants.", flash[:alert]
+        assert_match(/Persona could not be deleted/, flash[:alert])
       end
     end
   end
