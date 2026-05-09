@@ -1,17 +1,17 @@
 Layered::Assistant::Engine.routes.draw do
   root "setup#index"
-  layered_resources :personas, except: [ :show ],
-    resource: "Layered::Assistant::PersonaResource",
-    controller: "/layered/assistant/resources"
-  layered_resources :skills, except: [ :show ],
-    resource: "Layered::Assistant::SkillResource",
-    controller: "/layered/assistant/resources"
+
+  layered_resources :personas, except: [ :show ], namespace: "Layered::Assistant"
+  layered_resources :skills, except: [ :show ], namespace: "Layered::Assistant"
+
   resources :assistants, except: [ :show ] do
     resources :conversations, only: [ :index ]
   end
+
   resources :providers, only: [ :index, :new, :create, :edit, :update, :destroy ] do
     resources :models, only: [ :index, :new, :create, :edit, :update, :destroy ]
   end
+
   resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     patch :stop, on: :member
     resources :messages, only: [ :index, :create, :destroy ]
