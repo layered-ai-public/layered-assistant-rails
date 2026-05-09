@@ -21,7 +21,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/skills"
-        assert_equal "Skill was successfully created.", flash[:notice]
+        assert_equal "Skill created", flash[:notice]
       end
 
       test "should not create skill with invalid params" do
@@ -46,7 +46,7 @@ module Layered
 
         patch "/layered/assistant/skills/#{skill.id}", params: { skill: { name: "Updated Name", description: "New description" } }
         assert_redirected_to "/layered/assistant/skills"
-        assert_equal "Skill was successfully updated.", flash[:notice]
+        assert_equal "Skill updated", flash[:notice]
 
         skill.reload
         assert_equal "Updated Name", skill.name
@@ -69,7 +69,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/skills"
-        assert_equal "Skill was successfully deleted.", flash[:notice]
+        assert_equal "Skill deleted", flash[:notice]
       end
 
       test "should return 404 for out-of-scope skill on edit" do
