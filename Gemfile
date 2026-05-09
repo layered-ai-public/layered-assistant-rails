@@ -2,15 +2,8 @@ source "https://rubygems.org"
 
 gemspec development_group: [ :development, :test ]
 
-# Use a local path for layered-ui-rails during development
-# if Dir.exist?(File.expand_path("../layered-ui-rails", __dir__))
-#   gem "layered-ui-rails", path: "../layered-ui-rails"
-# end
-
-# Use a local path for layered-resource-rails during development
-if Dir.exist?(File.expand_path("../layered-resource-rails", __dir__))
-  gem "layered-resource-rails", path: "../layered-resource-rails"
-end
+# Use a github repo for layered-resource-rails during development
+gem "layered-resource-rails", github: "layered-ai-public/layered-resource-rails"
 
 # Workaround for macOS OpenSSL v4 — not needed in Docker/Linux
 group :local do

@@ -8,8 +8,9 @@ Layered::Assistant::Engine.routes.draw do
     resources :conversations, only: [ :index ]
   end
 
-  resources :providers, only: [ :index, :new, :create, :edit, :update, :destroy ] do
-    resources :models, only: [ :index, :new, :create, :edit, :update, :destroy ]
+  resources :providers, only: [ :index, :new, :create, :edit, :update, :destroy ]
+  scope path: "providers/:provider_id" do
+    layered_resources :models, except: [ :show ], namespace: "Layered::Assistant"
   end
 
   resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
