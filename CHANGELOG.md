@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Breaking
+
+- Removed `Layered::Assistant.scope` configuration block. Engine records are now scoped to the signed-in user via a polymorphic `owner` association on every owner-bearing model (`Assistant`, `Conversation`, `Provider`, `Persona`, `Skill`), with reads filtered through `Model.owned_by(l_ui_current_user)`. Hosts that previously customised the scope block should override `l_ui_current_user` or subclass the engine's controllers instead
+
 ### Added
 
 - RuboCop linting via `rubocop-rails-omakase`, with a `lint` job in CI
+- `layered-resource-rails` (`~> 0.1`) dependency. The five admin resources (assistants, providers, models, personas, skills) are now declared via `layered_resources` in routes and a `*_resource.rb` class, replacing their bespoke controllers. The provider and assistant forms remain ejected where the gem can't cover the per-request collection plumbing (Stimulus template selector, scoped persona/skill dropdowns)
 
 ### Changed
 
