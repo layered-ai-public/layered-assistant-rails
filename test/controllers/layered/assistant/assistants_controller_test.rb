@@ -21,7 +21,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully created.", flash[:notice]
+        assert_equal "Assistant created", flash[:notice]
 
         assistant = Assistant.order(:id).last
         assert_equal users(:one), assistant.owner
@@ -68,7 +68,7 @@ module Layered
 
         patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { name: "Updated Name", description: "New description" } }
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully updated.", flash[:notice]
+        assert_equal "Assistant updated", flash[:notice]
 
         assistant.reload
         assert_equal "Updated Name", assistant.name
@@ -114,7 +114,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully deleted.", flash[:notice]
+        assert_equal "Assistant deleted", flash[:notice]
       end
     end
   end

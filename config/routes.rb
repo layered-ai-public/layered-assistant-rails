@@ -4,7 +4,10 @@ Layered::Assistant::Engine.routes.draw do
   layered_resources :personas, except: [ :show ], namespace: "Layered::Assistant"
   layered_resources :skills, except: [ :show ], namespace: "Layered::Assistant"
 
-  resources :assistants, except: [ :show ] do
+  layered_resources :assistants, except: [ :show ],
+    namespace: "Layered::Assistant",
+    controller: "/layered/assistant/assistants"
+  resources :assistants, only: [] do
     resources :conversations, only: [ :index ]
   end
 
