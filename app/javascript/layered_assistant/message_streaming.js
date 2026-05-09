@@ -3,10 +3,12 @@
 // The server broadcasts the raw markdown content as it grows; the
 // client parses it with marked and appends newly-closed top-level
 // blocks to the message content element with a fade. The trailing
-// in-progress block is held back so we don't fade-restart it on every
-// chunk; the typing indicator sibling covers for it visually. The
-// final completed content arrives via the partial replacement after
-// streaming finishes.
+// block is always held back - even when it's already complete - so
+// we don't fade-restart it on every chunk; the typing indicator
+// sibling covers for it visually. Trade-off: single-block responses
+// stay hidden until broadcast_response_complete swaps in the final
+// partial. Acceptable because the swap is near-instant and the
+// indicator masks the gap.
 
 import "@hotwired/turbo-rails"
 import { renderMarkdown } from "layered_assistant/marked_setup"
