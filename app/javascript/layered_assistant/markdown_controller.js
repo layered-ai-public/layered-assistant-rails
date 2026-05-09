@@ -7,6 +7,11 @@ import { renderMarkdown } from "layered_assistant/marked_setup"
 
 export default class extends Controller {
   connect() {
+    // Skip if the element already contains rendered HTML - e.g. Turbo
+    // Drive cache restore, or streaming output appended by the message
+    // stream actions. textContent would flatten rendered HTML back to
+    // plain text and marked would silently drop all formatting.
+    if (this.element.firstElementChild) return
     const text = this.element.textContent.trim()
     if (!text) return
     this.element.innerHTML = renderMarkdown(text)

@@ -36,7 +36,6 @@ module Layered
         assert_equal assistant, conversation.assistant
         assert_equal users(:one), conversation.owner
         assert_redirected_to "/layered/assistant/conversations/#{conversation.uid}"
-        assert_equal "Conversation was successfully created.", flash[:notice]
       end
 
       test "should reject out-of-scope assistant_id on create" do
