@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Skills"
-        @pagy, @skills = pagy(scoped(Skill).by_name)
+        @pagy, @skills = pagy(Skill.owned_by(l_ui_current_user).by_name)
       end
 
       def new
@@ -49,7 +49,7 @@ module Layered
       private
 
       def set_skill
-        @skill = scoped(Skill).find(params[:id])
+        @skill = Skill.owned_by(l_ui_current_user).find(params[:id])
       end
 
       def skill_params

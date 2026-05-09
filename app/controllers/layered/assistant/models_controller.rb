@@ -46,7 +46,7 @@ module Layered
       private
 
       def set_provider
-        @provider = scoped(Provider).find(params[:provider_id])
+        @provider = Provider.owned_by(l_ui_current_user).find(params[:provider_id])
       end
 
       def set_model

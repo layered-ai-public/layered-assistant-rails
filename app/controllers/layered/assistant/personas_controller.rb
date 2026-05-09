@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Personas"
-        @pagy, @personas = pagy(scoped(Persona).by_name)
+        @pagy, @personas = pagy(Persona.owned_by(l_ui_current_user).by_name)
       end
 
       def new
@@ -49,7 +49,7 @@ module Layered
       private
 
       def set_persona
-        @persona = scoped(Persona).find(params[:id])
+        @persona = Persona.owned_by(l_ui_current_user).find(params[:id])
       end
 
       def persona_params

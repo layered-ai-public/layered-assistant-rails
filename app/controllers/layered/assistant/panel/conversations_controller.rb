@@ -25,7 +25,7 @@ module Layered
         def create
           @conversation = Conversation.new(conversation_params)
           @conversation.owner = l_ui_current_user
-          @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
+          @conversation.assistant = Assistant.owned_by(l_ui_current_user).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
           @conversation.name = Conversation.default_name if @conversation.name.blank?
 
           if @conversation.save
@@ -43,15 +43,15 @@ module Layered
         private
 
         def set_conversation
-          @conversation = scoped(Conversation).find_by!(uid: params[:id])
+          @conversation = Conversation.owned_by(l_ui_current_user).find_by!(uid: params[:id])
         end
 
         def set_assistants
-          @assistants = scoped(Assistant).by_name
+          @assistants = Assistant.owned_by(l_ui_current_user).by_name
         end
 
         def set_conversations
-          scope = scoped(Conversation).by_created_at
+          scope = Conversation.owned_by(l_ui_current_user).by_created_at
           scope = scope.where(assistant_id: params[:assistant_id]) if params[:assistant_id].present?
           @conversations = scope.limit(20)
         end

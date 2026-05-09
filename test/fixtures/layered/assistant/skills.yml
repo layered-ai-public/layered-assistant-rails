@@ -3,13 +3,16 @@ research:
   name: Research
   description: Deep research and analysis capabilities.
   instructions: You are skilled at research. Gather information thoroughly and cite sources where possible.
+  owner: one (User)
 
 coding:
   uid: skl_coding_fixture_002
   name: Coding
   description: Programming and code review capabilities.
   instructions: You are an expert programmer. Write clean, well-tested code and explain your reasoning.
+  owner: one (User)
 
 empty:
   uid: skl_empty_fixture_003
   name: Empty skill
+  owner: one (User)
