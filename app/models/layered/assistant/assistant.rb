@@ -17,6 +17,7 @@ module Layered
       validates :default_model, presence: true, if: :public?
 
       # Scopes
+      scope :owned_by, ->(user) { where(owner: user) }
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
       scope :by_created_at, -> { order(created_at: :desc) }
       scope :publicly_available, -> { where(public: true) }
