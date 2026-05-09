@@ -25,7 +25,7 @@
             <%= I18n.t("layered_assistant.protocols.#{provider.protocol}") %>
           </td>
           <td class="l-ui-table__cell">
-            <%= link_to provider.models_count, layered_assistant.provider_models_path(provider) %>
+            <%= link_to provider.models_count, layered_assistant.providers_models_path(provider) %>
           </td>
           <td class="l-ui-table__cell">
             <span class="<%= provider.enabled? ? "l-ui-badge--success" : "l-ui-badge--danger" %>">
