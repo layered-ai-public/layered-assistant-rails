@@ -1,7 +1,18 @@
 PATH
+  remote: ../layered-resource-rails
+  specs:
+    layered-resource-rails (0.1.0)
+      concurrent-ruby (>= 1.0)
+      layered-ui-rails (~> 0.13)
+      pagy (~> 43.2)
+      rails (~> 8.0)
+      ransack (~> 4.0)
+
+PATH
   remote: .
   specs:
     layered-assistant-rails (0.5.0)
+      layered-resource-rails (~> 0.1)
       layered-ui-rails (~> 0.13)
       pagy (~> 43.2)
       positioning (~> 0.4)
@@ -259,6 +270,10 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.4.2)
+    ransack (4.4.1)
+      activerecord (>= 7.2)
+      activesupport (>= 7.2)
+      i18n
     rdoc (7.2.0)
       erb
       psych (>= 4.0.0)
@@ -376,6 +391,7 @@ DEPENDENCIES
   honeybadger (~> 6.5)
   importmap-rails (~> 2.0)
   layered-assistant-rails!
+  layered-resource-rails!
   openssl (~> 4.0)
   propshaft (~> 1.0)
   puma (~> 7.0)
