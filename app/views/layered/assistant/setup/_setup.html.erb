@@ -1,7 +1,7 @@
-<p class="l-ui-utility--mt-md">Run the install generator to copy CSS, JS, and migrations to your application:</p>
-<code class="l-ui-surface l-ui-utility--mt-md">bin/rails generate layered:assistant:install</code>
-<p class="l-ui-utility--mt-lg">This will:</p>
-<ul class="l-ui-list l-ui-utility--mt-sm">
+<p class="l-ui-mt-3">Run the install generator to copy CSS, JS, and migrations to your application:</p>
+<code class="l-ui-surface l-ui-mt-3">bin/rails generate layered:assistant:install</code>
+<p class="l-ui-mt-4">This will:</p>
+<ul class="l-ui-list l-ui-mt-2">
   <li>Copy <code>layered_ui.css</code> to <code>app/assets/tailwind/</code></li>
   <li>Add <code>@import "./layered_ui";</code> to your <code>application.css</code></li>
   <li>Add <code>import "layered_ui"</code> to your <code>application.js</code></li>
@@ -11,58 +11,58 @@
   <li>Mount the engine at <code>/layered/assistant</code> in your <code>config/routes.rb</code></li>
   <li>Copy engine migrations into your application</li>
 </ul>
-<p class="l-ui-utility--mt-md">All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.</p>
+<p class="l-ui-mt-3">All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.</p>
 
-<h2 class="l-ui-utility--mt-xl">Authorization</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Authorization</h2>
+<p class="l-ui-mt-3">
   All non-public engine routes are blocked by default (403 Forbidden) until you configure an
   <code>authorize</code> block in <code>config/initializers/layered_assistant.rb</code>.
 </p>
-<p class="l-ui-utility--mt-md">
+<p class="l-ui-mt-3">
   The install generator creates this file for you. Uncomment one of the examples to get started.
 </p>
-<p class="l-ui-utility--mt-lg">
+<p class="l-ui-mt-4">
   The block runs in controller context, so you have access to
   <code>request</code>, <code>current_user</code>, <code>redirect_to</code>,
   <code>head</code>, <code>main_app</code>, and all other controller methods.
 </p>
 
-<h3 class="l-ui-utility--mt-lg">Allow all requests</h3>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+<h3 class="l-ui-mt-4">Allow all requests</h3>
+<pre class="l-ui-surface l-ui-mt-3"><code>Layered::Assistant.authorize do
   # No-op: all requests permitted
 end</code></pre>
 
-<h3 class="l-ui-utility--mt-lg">Require sign-in (Devise)</h3>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+<h3 class="l-ui-mt-4">Require sign-in (Devise)</h3>
+<pre class="l-ui-surface l-ui-mt-3"><code>Layered::Assistant.authorize do
   redirect_to main_app.new_user_session_path unless user_signed_in?
 end</code></pre>
 
-<h3 class="l-ui-utility--mt-lg">Restrict to admins</h3>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.authorize do
+<h3 class="l-ui-mt-4">Restrict to admins</h3>
+<pre class="l-ui-surface l-ui-mt-3"><code>Layered::Assistant.authorize do
   head :forbidden unless current_user&amp;.admin?
 end</code></pre>
 
-<h3 class="l-ui-utility--mt-lg">Checking access in views</h3>
-<p class="l-ui-utility--mt-md">
+<h3 class="l-ui-mt-4">Checking access in views</h3>
+<p class="l-ui-mt-3">
   The <code>l_assistant_accessible?</code> helper evaluates the authorize block
   without side effects. Use it to conditionally show navigation or links to the engine:
 </p>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;% if l_assistant_accessible? %&gt;
+<pre class="l-ui-surface l-ui-mt-3"><code>&lt;% if l_assistant_accessible? %&gt;
   &lt;%= link_to "Assistant", layered_assistant.root_path %&gt;
 &lt;% end %&gt;</code></pre>
 
-<h2 class="l-ui-utility--mt-xl">Record scoping</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Record scoping</h2>
+<p class="l-ui-mt-3">
   By default, all records are visible to any authorised user. If your application is
   multi-tenant or you need to restrict which records a user can see, configure a
   <code>scope</code> block in the initialiser.
 </p>
-<p class="l-ui-utility--mt-md">
+<p class="l-ui-mt-3">
   The block receives the model class, runs in controller context, and must return an
   <code>ActiveRecord::Relation</code>. The following models are passed through the scope block:
 </p>
 
-<div class="l-ui-container--table l-ui-utility--mt-lg">
+<div class="l-ui-table-container l-ui-mt-4">
   <table class="l-ui-table">
     <caption class="l-ui-sr-only">Scopeable models reference</caption>
     <thead class="l-ui-table__header">
@@ -88,13 +88,13 @@ end</code></pre>
   </table>
 </div>
 
-<h3 class="l-ui-utility--mt-lg">Scope all owned resources to the current user</h3>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.scope do |model_class|
+<h3 class="l-ui-mt-4">Scope all owned resources to the current user</h3>
+<pre class="l-ui-surface l-ui-mt-3"><code>Layered::Assistant.scope do |model_class|
   model_class.where(owner: current_user)
 end</code></pre>
 
-<h3 class="l-ui-utility--mt-lg">Scope conversations only</h3>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>Layered::Assistant.scope do |model_class|
+<h3 class="l-ui-mt-4">Scope conversations only</h3>
+<pre class="l-ui-surface l-ui-mt-3"><code>Layered::Assistant.scope do |model_class|
   if model_class == Layered::Assistant::Conversation
     model_class.where(owner: current_user)
   else
@@ -102,17 +102,17 @@ end</code></pre>
   end
 end</code></pre>
 
-<p class="l-ui-utility--mt-md">
+<p class="l-ui-mt-3">
   When no scope block is configured, queries are unscoped. Record-level access control
   is the host application's responsibility; the scope block is the integration point for it.
 </p>
 
-<h2 class="l-ui-utility--mt-xl">Panel helpers</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Panel helpers</h2>
+<p class="l-ui-mt-3">
   Two helpers are available to wire the <code>layered-ui</code> panel to the assistant engine.
   Add these to your application layout's <code>content_for</code> blocks:
 </p>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;% content_for :l_ui_panel_heading do %&gt;
+<pre class="l-ui-surface l-ui-mt-3"><code>&lt;% content_for :l_ui_panel_heading do %&gt;
   &lt;%= layered_assistant_panel_header %&gt;
 &lt;% end %&gt;
 
@@ -121,10 +121,10 @@ end</code></pre>
 &lt;% end %&gt;
 
 &lt;%= render template: "layouts/layered_ui/application" %&gt;</code></pre>
-<p class="l-ui-utility--mt-lg">Both helpers accept keyword arguments forwarded as HTML attributes:</p>
-<pre class="l-ui-surface l-ui-utility--mt-md"><code>&lt;%= layered_assistant_panel_body data: { controller: "panel" } %&gt;</code></pre>
+<p class="l-ui-mt-4">Both helpers accept keyword arguments forwarded as HTML attributes:</p>
+<pre class="l-ui-surface l-ui-mt-3"><code>&lt;%= layered_assistant_panel_body data: { controller: "panel" } %&gt;</code></pre>
 
-<div class="l-ui-container--table l-ui-utility--mt-lg">
+<div class="l-ui-table-container l-ui-mt-4">
   <table class="l-ui-table">
     <caption class="l-ui-sr-only">Panel helpers reference</caption>
     <thead class="l-ui-table__header">
@@ -146,12 +146,12 @@ end</code></pre>
   </table>
 </div>
 
-<h2 class="l-ui-utility--mt-xl">Configuration</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Configuration</h2>
+<p class="l-ui-mt-3">
   Optional settings can be added to your initialiser (<code>config/initializers/layered_assistant.rb</code>):
 </p>
 
-<div class="l-ui-container--table l-ui-utility--mt-lg">
+<div class="l-ui-table-container l-ui-mt-4">
   <table class="l-ui-table">
     <caption class="l-ui-sr-only">Configuration options reference</caption>
     <thead class="l-ui-table__header">
@@ -181,35 +181,35 @@ end</code></pre>
   </table>
 </div>
 
-<pre class="l-ui-surface l-ui-utility--mt-lg"><code>Layered::Assistant.log_errors = true
+<pre class="l-ui-surface l-ui-mt-4"><code>Layered::Assistant.log_errors = true
 Layered::Assistant.skip_db_encryption = true</code></pre>
 
-<h2 class="l-ui-utility--mt-xl">Getting started</h2>
-<ol class="l-ui-list l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Getting started</h2>
+<ol class="l-ui-list l-ui-mt-3">
   <li><%= link_to "Create a provider", layered_assistant.new_provider_path %> (e.g. Anthropic or OpenAI) with your API key</li>
   <li>Add one or more models to the provider</li>
   <li><%= link_to "Create an assistant", layered_assistant.new_assistant_path %> and assign a default model</li>
   <li><%= link_to "Start a conversation", layered_assistant.new_conversation_path %></li>
 </ol>
 
-<h2 class="l-ui-utility--mt-xl">License</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">License</h2>
+<p class="l-ui-mt-3">
   Released under the <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/LICENSE">Apache 2.0 License</a>.
 </p>
-<p class="l-ui-utility--mt-md">
+<p class="l-ui-mt-3">
   Copyright 2026 LAYERED AI LIMITED (UK company number: 17056830).
   See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/NOTICE">NOTICE</a> for attribution details.
 </p>
 
-<h2 class="l-ui-utility--mt-xl">Trademarks</h2>
-<p class="l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Trademarks</h2>
+<p class="l-ui-mt-3">
   The source code is fully open, but the layered.ai name, logo, and brand assets are trademarks of LAYERED AI LIMITED.
   The Apache 2.0 license does not grant rights to use the layered.ai branding.
   Forks and redistributions must use a distinct name.
   See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/TRADEMARK.md">TRADEMARK.md</a> for the full policy.
 </p>
 
-<h2 class="l-ui-utility--mt-xl">Contributing</h2>
-<ul class="l-ui-list l-ui-utility--mt-md">
+<h2 class="l-ui-mt-6">Contributing</h2>
+<ul class="l-ui-list l-ui-mt-3">
   <li><a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/CLA.md">CLA.md</a> - contributor licence agreement</li>
 </ul>

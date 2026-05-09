@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Changed
 
+- Bump `layered-ui-rails` to `~> 0.13` and migrate engine views, JS, and the dummy app to the new BEM class names (utility/container/radio renames, notice/icon modifiers now require their base class)
 - Streaming render is now block-atomic: only fully-closed top-level markdown blocks are rendered, with a typing indicator standing in for the in-progress block. Each closed block fades in once when it arrives, replacing the previous per-token reconciliation
 
 ## [0.5.0] - 2026-05-03

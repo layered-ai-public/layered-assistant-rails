@@ -18,7 +18,7 @@
     <%= render "layered_ui/shared/field_error", object: conversation, field: :name %>
   </div>
 
-  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+  <div class="l-ui-spread l-ui-mt-8">
     <% if conversation.persisted? %>
       <%= link_to "Delete", layered_assistant.conversation_path(conversation), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>

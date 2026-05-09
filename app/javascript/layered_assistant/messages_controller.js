@@ -14,7 +14,7 @@ export default class extends Controller {
         const body = el.closest(".l-ui-message__body")
         el.remove()
         if (body && body.children.length === 0) {
-          body.insertAdjacentHTML("beforeend", '<div class="l-ui-notice--error" role="status">The response could not be completed.</div>')
+          body.insertAdjacentHTML("beforeend", '<div class="l-ui-notice l-ui-notice--error" role="status">The response could not be completed.</div>')
         }
       })
     }

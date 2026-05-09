@@ -1,0 +1,73 @@
+<% content_for :l_ui_body_class do %>l-ui-body--always-show-navigation<% end %>
+
+<%= l_ui_title_bar(
+  title: "layered-assistant-rails (v#{Layered::Assistant::VERSION})",
+  breadcrumbs: [
+    [ "Home" ]
+  ]
+) %>
+
+<p class="mt-4">
+  <%= Gem.loaded_specs["layered-assistant-rails"].description %>
+</p>
+
+<%= render "socials" %>
+
+<%= render "features" %>
+
+<h2 class="mt-6">Requirements</h2>
+<ul class="l-ui-list mt-4">
+  <li>Ruby on Rails >= 8.0</li>
+  <li><code>layered-ui-rails</code> gem</li>
+</ul>
+
+<h2 class="mt-6">Agent skill</h2>
+<p class="mt-4">
+  An <a href="https://agentskills.io" target="_blank" rel="noopener noreferrer">agent skill</a> is included so AI coding agents can work with <code>layered-assistant-rails</code> in your project. Once installed, the agent can handle the full setup - just ask it to add <code>layered-assistant-rails</code> to your app and it will install the gem, run the generator, and configure your layout.
+</p>
+<p class="mt-4"><strong>Project install</strong> - scoped to a single repo, available to all contributors:</p>
+<pre class="l-ui-surface mt-4"><code>bin/rails generate layered:assistant:install_agent_skill</code></pre>
+<p class="mt-4"><strong>Global install</strong> - available across all your projects:</p>
+<pre class="l-ui-surface mt-4"><code>./install-skill.sh
+# or install remotely without cloning the repo:
+curl -fsSL https://raw.githubusercontent.com/layered-ai-public/layered-assistant-rails/main/install-skill.sh | sh</code></pre>
+
+<h2 class="mt-6">Installation</h2>
+<p class="mt-4">Add to your Gemfile:</p>
+<pre class="l-ui-surface mt-4"><code>gem "layered-assistant-rails"</code></pre>
+<p class="mt-4">Then run:</p>
+<pre class="l-ui-surface mt-4"><code>bundle install</code></pre>
+
+<h2 class="mt-6">Setup</h2>
+<%= render "layered/assistant/setup/setup" %>
+
+<h2 class="mt-6">Configuration</h2>
+<p class="mt-4">Optional settings for <code>config/initializers/layered_assistant.rb</code>:</p>
+
+<table class="l-ui-table mt-4">
+  <caption class="l-ui-sr-only">Configuration options</caption>
+  <thead class="l-ui-table__header">
+    <tr>
+      <th scope="col" class="l-ui-table__header-cell">Option</th>
+      <th scope="col" class="l-ui-table__header-cell">Default</th>
+      <th scope="col" class="l-ui-table__header-cell">Description</th>
+    </tr>
+  </thead>
+  <tbody class="l-ui-table__body">
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>log_errors</code></th>
+      <td class="l-ui-table__cell"><code>false</code></td>
+      <td class="l-ui-table__cell">Log API errors to stdout.</td>
+    </tr>
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>api_request_timeout</code></th>
+      <td class="l-ui-table__cell"><code>210</code></td>
+      <td class="l-ui-table__cell">Total timeout in seconds for API requests, including the full streaming response. Increase for models with high max_tokens limits or slow providers.</td>
+    </tr>
+    <tr>
+      <th scope="row" class="l-ui-table__cell--primary"><code>skip_db_encryption</code></th>
+      <td class="l-ui-table__cell"><code>false</code></td>
+      <td class="l-ui-table__cell">Disable Active Record Encryption on <code>Provider#secret</code>. Development/test only.</td>
+    </tr>
+  </tbody>
+</table>
