@@ -22,6 +22,9 @@ module Layered
         encrypts :secret
       end
 
+      # Callbacks
+      after_create :create_default_models, if: -> { create_models == "1" }
+
       # Validations
       validates :name, :protocol, presence: true
       validates :url, format: { with: /\Ahttps?:\/\//i, message: "must start with http:// or https://" }, allow_blank: true
@@ -45,6 +48,12 @@ module Layered
       scope :owned_by, ->(user) { where(owner: user) }
       scope :enabled, -> { where(enabled: true) }
       scope :sorted, -> { order(position: :asc, name: :asc) }
+
+      private
+
+      def create_default_models
+        Models::CreateService.new(self).call
+      end
     end
   end
 end
