@@ -14,8 +14,20 @@ module Layered
             view.tag.span(label, class: css)
           }
         },
-        { attribute: :assistants_count, label: "Assistants" },
-        { attribute: :messages_count, label: "Messages" }
+        {
+          attribute: :assistants_count,
+          label: "Assistants",
+          render: ->(record, view) {
+            view.tag.span(record.assistants_count, class: "l-ui-badge--rounded")
+          }
+        },
+        {
+          attribute: :messages_count,
+          label: "Messages",
+          render: ->(record, view) {
+            view.tag.span(record.messages_count, class: "l-ui-badge--rounded")
+          }
+        }
       ]
 
       default_sort attribute: :position, direction: :asc
