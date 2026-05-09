@@ -8,7 +8,7 @@ module Layered
         { attribute: :description }
       ]
 
-      search_fields [:name]
+      search_fields [ :name ]
       default_sort attribute: :name, direction: :asc
 
       fields [

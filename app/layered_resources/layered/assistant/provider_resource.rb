@@ -30,7 +30,7 @@ module Layered
         }
       ]
 
-      search_fields [:name]
+      search_fields [ :name ]
       default_sort attribute: :position, direction: :asc
 
       fields [
