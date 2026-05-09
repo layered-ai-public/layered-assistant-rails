@@ -18,14 +18,14 @@ module Layered
           attribute: :assistants_count,
           label: "Assistants",
           render: ->(record, view) {
-            view.tag.span(record.assistants_count, class: "l-ui-badge--rounded")
+            view.tag.span(record.assistants_count, class: "l-ui-badge--default l-ui-badge--rounded")
           }
         },
         {
           attribute: :messages_count,
           label: "Messages",
           render: ->(record, view) {
-            view.tag.span(record.messages_count, class: "l-ui-badge--rounded")
+            view.tag.span(record.messages_count, class: "l-ui-badge--default l-ui-badge--rounded")
           }
         }
       ]
