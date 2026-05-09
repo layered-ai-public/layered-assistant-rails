@@ -13,13 +13,13 @@
     <%= render "layered_ui/shared/field_error", object: model, field: :identifier %>
   </div>
 
-  <label class="l-ui-switch l-ui-utility--mt-xl">
+  <label class="l-ui-switch l-ui-mt-6">
     <%= f.check_box :enabled, class: "l-ui-switch__input", role: "switch" %>
     <span class="l-ui-switch__track"></span>
     Enabled
   </label>
 
-  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+  <div class="l-ui-spread l-ui-mt-8">
     <% if model.persisted? %>
       <%= link_to "Delete", layered_assistant.provider_model_path(@provider, model), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>

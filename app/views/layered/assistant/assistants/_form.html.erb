@@ -36,7 +36,7 @@
       <legend class="l-ui-label">Skills</legend>
       <%= hidden_field_tag "assistant[skill_ids][]", "" %>
       <% @skills.each do |skill| %>
-        <div class="l-ui-container--checkbox">
+        <div class="l-ui-checkbox-container">
           <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}" }, skill.id, nil %>
           <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-label--checkbox"><%= skill.name %></label>
         </div>
@@ -44,13 +44,13 @@
     </fieldset>
   <% end %>
 
-  <label class="l-ui-switch l-ui-utility--mt-xl">
+  <label class="l-ui-switch l-ui-mt-6">
     <%= f.check_box :public, class: "l-ui-switch__input", role: "switch" %>
     <span class="l-ui-switch__track"></span>
     Public
   </label>
 
-  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+  <div class="l-ui-spread l-ui-mt-8">
     <% if assistant.persisted? %>
       <%= link_to "Delete", layered_assistant.assistant_path(assistant), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>

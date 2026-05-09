@@ -1,0 +1,31 @@
+<h2 class="mt-6">Features</h2>
+<div class="l-ui-grid mt-4">
+  <div class="l-ui-surface flex items-center gap-4">
+    <%= image_tag "icon_cloud.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
+    <div>
+      <h3>Multi-provider and model support</h3>
+      <p>Use cloud (Anthropic, OpenAI, Gemini, Mistral, Groq, OpenRouter) or local (Ollama or LM Studio) providers with configurable models.</p>
+    </div>
+  </div>
+  <div class="l-ui-surface flex items-center gap-4">
+    <%= image_tag "icon_bolt.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
+    <div>
+      <h3>Streaming responses</h3>
+      <p>Real-time streaming via Turbo Streams for a responsive chat experience with dynamic token fade-in and chunked markdown formatting.</p>
+    </div>
+  </div>
+  <div class="l-ui-surface flex items-center gap-4">
+    <%= image_tag "icon_chat.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
+    <div>
+      <h3>Conversation UI</h3>
+      <p>Full conversation interface with message history, model selection, and a slide-out panel mode.</p>
+    </div>
+  </div>
+  <div class="l-ui-surface flex items-center gap-4">
+    <%= image_tag "icon_lock.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
+    <div>
+      <h3>Encrypted secrets</h3>
+      <p>API keys are encrypted at rest using Active Record Encryption.</p>
+    </div>
+  </div>
+</div>

@@ -1,9 +1,9 @@
 <%= turbo_stream_from @conversation %>
 
 <div class="l-ui-conversation__container">
-  <div class="l-ui-form__group l-ui-utility--mt-0">
-    <div class="l-ui-select-wrapper l-ui-utility--mt-0">
-      <select class="l-ui-select l-ui-utility--mt-0" aria-label="Select conversation"
+  <div class="l-ui-form__group l-ui-mt-0">
+    <div class="l-ui-select-wrapper l-ui-mt-0">
+      <select class="l-ui-select l-ui-mt-0" aria-label="Select conversation"
               data-controller="conversation-select"
               data-action="change->conversation-select#navigate">
         <option value="<%= layered_assistant.public_assistant_path(@conversation.assistant) %>">+ New</option>
