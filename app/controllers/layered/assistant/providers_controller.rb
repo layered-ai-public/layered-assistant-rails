@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Providers"
-        @pagy, @providers = pagy(scoped(Provider).sorted)
+        @pagy, @providers = pagy(Provider.owned_by(l_ui_current_user).sorted)
       end
 
       def new
@@ -45,7 +45,7 @@ module Layered
       private
 
       def set_provider
-        @provider = scoped(Provider).find(params[:id])
+        @provider = Provider.owned_by(l_ui_current_user).find(params[:id])
       end
 
       def provider_params

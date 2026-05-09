@@ -42,6 +42,7 @@ module Layered
       }.freeze
 
       # Scopes
+      scope :owned_by, ->(user) { where(owner: user) }
       scope :enabled, -> { where(enabled: true) }
       scope :sorted, -> { order(position: :asc, name: :asc) }
     end
