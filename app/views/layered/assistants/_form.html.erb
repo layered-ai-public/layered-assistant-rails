@@ -52,7 +52,7 @@
 
   <div class="l-ui-spread l-ui-mt-8">
     <% if assistant.persisted? %>
-      <%= link_to "Delete", layered_assistant.assistant_path(assistant), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+      <%= link_to "Delete", layered_member_path(assistant), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>
       <span></span>
     <% end %>

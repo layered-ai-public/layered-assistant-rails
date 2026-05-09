@@ -9,7 +9,17 @@ module Layered
           attribute: :protocol,
           render: ->(record) { I18n.t("layered_assistant.protocols.#{record.protocol}") }
         },
-        { attribute: :models_count, label: "Models", link: :provider_models },
+        {
+          attribute: :models_count,
+          label: "Models",
+          link: :provider_models,
+          render: ->(record, view) {
+            view.tag.span(
+              record.models_count,
+              class: "l-ui-badge--default l-ui-badge--rounded"
+            )
+          }
+        },
         {
           attribute: :enabled,
           render: ->(record, view) {
