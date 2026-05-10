@@ -9,7 +9,7 @@ module Layered
       end
 
       test "should get index" do
-        get "/layered/assistant/conversations/#{@conversation.uid}/messages"
+        get "/layered/assistant/conversations/#{@conversation.id}/messages"
         assert_response :success
         assert_select "table.l-ui-table"
       end
@@ -17,7 +17,7 @@ module Layered
       test "should create message and enqueue ai response job" do
         assert_difference("Message.count", 2) do
           assert_enqueued_with(job: Messages::ResponseJob) do
-            post "/layered/assistant/conversations/#{@conversation.uid}/messages",
+            post "/layered/assistant/conversations/#{@conversation.id}/messages",
               params: { message: { content: "Hello", model_id: @model.id } },
               as: :turbo_stream
           end
@@ -36,10 +36,10 @@ module Layered
         message = layered_assistant_messages(:hello)
 
         assert_difference("Message.count", -1) do
-          delete "/layered/assistant/conversations/#{@conversation.uid}/messages/#{message.id}"
+          delete "/layered/assistant/conversations/#{@conversation.id}/messages/#{message.id}"
         end
 
-        assert_redirected_to "/layered/assistant/conversations/#{@conversation.uid}/messages"
+        assert_redirected_to "/layered/assistant/conversations/#{@conversation.id}/messages"
         assert_equal "Message was successfully deleted.", flash[:notice]
       end
     end

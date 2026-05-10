@@ -13,7 +13,7 @@ module Layered
       test "should get show" do
         conversation = layered_assistant_conversations(:greeting)
 
-        get "/layered/assistant/conversations/#{conversation.uid}"
+        get "/layered/assistant/conversations/#{conversation.id}"
         assert_response :success
         assert_select ".l-ui-message--sent .l-ui-message__bubble"
         assert_select ".l-ui-message .l-ui-message__author", text: "Assistant"
@@ -35,7 +35,7 @@ module Layered
         conversation = Conversation.order(:id).last
         assert_equal assistant, conversation.assistant
         assert_equal users(:one), conversation.owner
-        assert_redirected_to "/layered/assistant/conversations/#{conversation.uid}"
+        assert_redirected_to "/layered/assistant/conversations/#{conversation.id}"
       end
 
       test "should reject out-of-scope assistant_id on create" do
@@ -61,7 +61,7 @@ module Layered
       test "should get edit" do
         conversation = layered_assistant_conversations(:greeting)
 
-        get "/layered/assistant/conversations/#{conversation.uid}/edit"
+        get "/layered/assistant/conversations/#{conversation.id}/edit"
         assert_response :success
         assert_select "input[value=?]", conversation.name
       end
@@ -69,9 +69,9 @@ module Layered
       test "should update conversation with valid params" do
         conversation = layered_assistant_conversations(:greeting)
 
-        patch "/layered/assistant/conversations/#{conversation.uid}", params: { conversation: { name: "Updated Name" } }
+        patch "/layered/assistant/conversations/#{conversation.id}", params: { conversation: { name: "Updated Name" } }
         assert_redirected_to "/layered/assistant/conversations"
-        assert_equal "Conversation was successfully updated.", flash[:notice]
+        assert_equal "Conversation updated", flash[:notice]
 
         conversation.reload
         assert_equal "Updated Name", conversation.name
@@ -80,7 +80,7 @@ module Layered
       test "should not update conversation with invalid params" do
         conversation = layered_assistant_conversations(:greeting)
 
-        patch "/layered/assistant/conversations/#{conversation.uid}", params: { conversation: { name: "" } }
+        patch "/layered/assistant/conversations/#{conversation.id}", params: { conversation: { name: "" } }
         assert_response :unprocessable_entity
         assert_select ".l-ui-form__errors"
       end
@@ -94,7 +94,7 @@ module Layered
           model: layered_assistant_models(:sonnet)
         )
 
-        patch "/layered/assistant/conversations/#{conversation.uid}/stop"
+        patch "/layered/assistant/conversations/#{conversation.id}/stop"
         assert_response :ok
 
         assistant_message.reload
@@ -104,7 +104,7 @@ module Layered
       test "stop returns no content when nothing to stop" do
         conversation = layered_assistant_conversations(:coding)
 
-        patch "/layered/assistant/conversations/#{conversation.uid}/stop"
+        patch "/layered/assistant/conversations/#{conversation.id}/stop"
         assert_response :no_content
       end
 
@@ -112,11 +112,11 @@ module Layered
         conversation = layered_assistant_conversations(:greeting)
 
         assert_difference("Conversation.count", -1) do
-          delete "/layered/assistant/conversations/#{conversation.uid}"
+          delete "/layered/assistant/conversations/#{conversation.id}"
         end
 
         assert_redirected_to "/layered/assistant/conversations"
-        assert_equal "Conversation was successfully deleted.", flash[:notice]
+        assert_equal "Conversation deleted", flash[:notice]
       end
     end
   end

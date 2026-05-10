@@ -12,7 +12,7 @@ module Layered
 
           if @conversation.save
             add_conversation_to_session(@conversation)
-            redirect_to layered_assistant.public_conversation_path(@conversation)
+            redirect_to layered_assistant.public_conversation_path(@conversation.uid)
           else
             redirect_to layered_assistant.public_assistant_path(@assistant)
           end

@@ -21,7 +21,7 @@ module Layered
 
             if @conversation.save
               add_conversation_to_session(@conversation)
-              redirect_to layered_assistant.public_panel_conversation_path(@conversation)
+              redirect_to layered_assistant.public_panel_conversation_path(@conversation.uid)
             else
               render :new, status: :unprocessable_entity
             end
