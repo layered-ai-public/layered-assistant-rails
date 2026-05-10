@@ -3,5 +3,5 @@ Rails.application.routes.draw do
 
   mount Layered::Assistant::Engine => "/layered/assistant"
   devise_for :users, path: "/", path_names: { sign_in: "login", sign_up: "register", sign_out: "logout" }
-  root "pages#index"
+  root "pages#home"
 end

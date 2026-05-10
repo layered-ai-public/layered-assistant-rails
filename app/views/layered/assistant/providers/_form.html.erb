@@ -45,7 +45,7 @@
     </div>
   </div>
 
-  <label class="l-ui-switch l-ui-utility--mt-xl">
+  <label class="l-ui-switch l-ui-mt-6">
     <%= f.check_box :enabled, class: "l-ui-switch__input", role: "switch" %>
     <span class="l-ui-switch__track"></span>
     Enabled
@@ -54,7 +54,7 @@
   <% unless provider.persisted? %>
     <div class="l-ui-form__group">
       <label class="l-ui-label">Models</label>
-      <div class="l-ui-radio__group">
+      <div class="l-ui-radio">
         <div class="l-ui-radio__item">
           <%= f.radio_button :create_models, "1", class: "l-ui-radio__input", checked: true %>
           <%= f.label :create_models_1, "If available, automatically create popular models for this provider", class: "l-ui-radio__label" %>
@@ -70,7 +70,7 @@
     </div>
   <% end %>
 
-  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+  <div class="l-ui-spread l-ui-mt-8">
     <% if provider.persisted? %>
       <%= link_to "Delete", layered_assistant.provider_path(provider), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>

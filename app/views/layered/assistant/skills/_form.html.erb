@@ -19,7 +19,7 @@
     <%= render "layered_ui/shared/field_error", object: skill, field: :instructions %>
   </div>
 
-  <div class="l-ui-container--spread l-ui-utility--mt-2xl">
+  <div class="l-ui-spread l-ui-mt-8">
     <% if skill.persisted? %>
       <%= link_to "Delete", layered_assistant.skill_path(skill), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>

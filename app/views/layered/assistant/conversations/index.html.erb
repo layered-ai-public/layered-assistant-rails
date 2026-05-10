@@ -5,7 +5,7 @@
   <%= link_to "New", layered_assistant.new_conversation_path(conversation: @assistant ? { assistant_id: @assistant.id } : {}), class: "l-ui-button--primary" %>
 <% end %>
 
-<div class="l-ui-container--table l-ui-utility--mt-lg">
+<div class="l-ui-table-container l-ui-mt-4">
   <table class="l-ui-table">
     <caption class="l-ui-sr-only"><%= @assistant ? "Conversations for #{@assistant.name}" : "Conversations" %></caption>
     <thead class="l-ui-table__header">
@@ -54,7 +54,7 @@
     </tbody>
   </table>
 
-  <div class="l-ui-utility--mt-lg">
+  <div class="l-ui-mt-4">
     <%= l_ui_pagy(@pagy) %>
   </div>
 </div>

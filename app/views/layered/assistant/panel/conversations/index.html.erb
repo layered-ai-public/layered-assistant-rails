@@ -1,8 +1,8 @@
 <%= render "layered/assistant/panel/conversations/header", assistants: @assistants, conversations: @conversations, selected: layered_assistant.panel_conversations_path %>
 
 <%= turbo_frame_tag "assistant_panel" do %>
-  <div class="l-ui-container--table">
-      <table class="l-ui-table l-ui-utility--mt-0">
+  <div class="l-ui-table-container">
+      <table class="l-ui-table l-ui-mt-0">
         <caption class="l-ui-sr-only">Conversations in panel</caption>
         <thead class="l-ui-table__header">
           <tr>

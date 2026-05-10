@@ -34,7 +34,7 @@ function syncStreamingContent(target, markdown) {
   }
   if (target.children.length > 0) {
     const indicator = target.parentElement?.querySelector(".l-ui-typing-indicator")
-    indicator?.classList.add("l-ui-utility--mt-4")
+    indicator?.classList.add("l-ui-mt-4")
   }
 }
 
