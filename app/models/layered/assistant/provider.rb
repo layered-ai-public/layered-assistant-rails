@@ -23,7 +23,7 @@ module Layered
       end
 
       # Callbacks
-      after_create :create_default_models, if: -> { create_models == "1" }
+      after_commit :create_default_models, on: :create, if: -> { create_models == "1" }
 
       # Validations
       validates :name, :protocol, presence: true
