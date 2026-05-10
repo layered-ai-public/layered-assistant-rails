@@ -5,6 +5,7 @@ module Layered
 
       skip_before_action :load_layered_resource, only: [ :show, :stop ]
       skip_before_action :load_layered_member_record, only: [ :show, :stop ]
+      skip_before_action :set_layered_page_title, only: [ :show, :stop ]
 
       before_action :set_conversation, only: [ :show, :edit, :update, :destroy, :stop ]
       before_action :set_assistants, only: [ :new, :create ]
