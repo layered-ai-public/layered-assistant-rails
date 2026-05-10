@@ -25,34 +25,13 @@ end
 #   head :forbidden unless current_user&.admin?
 # end
 
-# Configure record scoping for layered-assistant-rails.
-# By default, all records are visible to any authorised user. Use the scope
-# block to restrict which records are returned from the engine's controllers.
+# Record scoping
 #
-# The block receives the model class and runs in controller context, so you
-# have access to current_user and other helpers. Return an ActiveRecord
-# relation (e.g. model_class.where(...) or model_class.all).
-#
-# Models passed through the scope block:
-#   - Layered::Assistant::Conversation (has polymorphic owner)
-#   - Layered::Assistant::Assistant    (has polymorphic owner)
-#   - Layered::Assistant::Provider     (has polymorphic owner)
-#
-# Scope all owned resources to the current user:
-#
-# Layered::Assistant.scope do |model_class|
-#   model_class.where(owner: current_user)
-# end
-#
-# Scope conversations only, leave others unscoped:
-#
-# Layered::Assistant.scope do |model_class|
-#   if model_class == Layered::Assistant::Conversation
-#     model_class.where(owner: current_user)
-#   else
-#     model_class.all
-#   end
-# end
+# Engine records are scoped to the signed-in user via a polymorphic `owner`
+# association on Assistant, Conversation, Provider, Persona and Skill. New
+# records are stamped with `owner = l_ui_current_user`, and reads are filtered
+# through `Model.owned_by(l_ui_current_user)`. Records owned by another user
+# (or unowned) return 404.
 
 # Optional settings (uncomment to enable):
 Layered::Assistant.log_errors = true                # log API errors to stdout

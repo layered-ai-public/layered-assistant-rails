@@ -25,7 +25,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/providers/#{@provider.id}/models"
-        assert_equal "Model was successfully created.", flash[:notice]
+        assert_equal "Model created", flash[:notice]
       end
 
       test "should not create model with invalid params" do
@@ -50,7 +50,7 @@ module Layered
 
         patch "/layered/assistant/providers/#{@provider.id}/models/#{model.id}", params: { model: { name: "Updated Name", identifier: "updated-id" } }
         assert_redirected_to "/layered/assistant/providers/#{@provider.id}/models"
-        assert_equal "Model was successfully updated.", flash[:notice]
+        assert_equal "Model updated", flash[:notice]
 
         model.reload
         assert_equal "Updated Name", model.name
@@ -73,7 +73,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/providers/#{@provider.id}/models"
-        assert_equal "Model was successfully deleted.", flash[:notice]
+        assert_equal "Model deleted", flash[:notice]
       end
 
       test "should not destroy model with assistants" do

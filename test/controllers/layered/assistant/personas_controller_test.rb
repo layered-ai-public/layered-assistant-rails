@@ -21,7 +21,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully created.", flash[:notice]
+        assert_equal "Persona created", flash[:notice]
       end
 
       test "should not create persona with invalid params" do
@@ -46,7 +46,7 @@ module Layered
 
         patch "/layered/assistant/personas/#{persona.id}", params: { persona: { name: "Updated Name", description: "New description" } }
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully updated.", flash[:notice]
+        assert_equal "Persona updated", flash[:notice]
 
         persona.reload
         assert_equal "Updated Name", persona.name
@@ -62,62 +62,44 @@ module Layered
       end
 
       test "should destroy persona without assistants" do
-        persona = Persona.create!(name: "Disposable", instructions: "Temporary.")
+        persona = Persona.create!(name: "Disposable", instructions: "Temporary.", owner: users(:one))
 
         assert_difference("Persona.count", -1) do
           delete "/layered/assistant/personas/#{persona.id}"
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona was successfully deleted.", flash[:notice]
+        assert_equal "Persona deleted", flash[:notice]
       end
 
       test "should return 404 for out-of-scope persona on edit" do
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         get "/layered/assistant/personas/#{persona.id}/edit"
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope persona on update" do
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         patch "/layered/assistant/personas/#{persona.id}", params: { persona: { name: "Hijacked" } }
         assert_response :not_found
 
         persona.reload
         assert_equal "Friendly", persona.name
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope persona on destroy" do
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         assert_no_difference("Persona.count") do
           delete "/layered/assistant/personas/#{persona.id}"
         end
 
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should not destroy persona with assistants" do
@@ -128,7 +110,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/personas"
-        assert_equal "Persona could not be deleted because it is assigned to assistants.", flash[:alert]
+        assert_match(/Persona could not be deleted/, flash[:alert])
       end
     end
   end

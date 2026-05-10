@@ -1,21 +1,14 @@
 module Layered
   module Assistant
-    class ConversationsController < ApplicationController
+    class ConversationsController < ResourcesController
       include StoppableResponse
+
+      skip_before_action :load_layered_resource, only: [ :show, :stop ]
+      skip_before_action :load_layered_member_record, only: [ :show, :stop ]
+      skip_before_action :set_layered_page_title, only: [ :show, :stop ]
 
       before_action :set_conversation, only: [ :show, :edit, :update, :destroy, :stop ]
       before_action :set_assistants, only: [ :new, :create ]
-
-      def index
-        if params[:assistant_id]
-          @assistant = scoped(Assistant).find(params[:assistant_id])
-          @page_title = "Conversations - #{@assistant.name}"
-          @pagy, @conversations = pagy(@assistant.conversations.merge(scoped(Conversation)).includes(:owner).by_created_at)
-        else
-          @page_title = "Conversations"
-          @pagy, @conversations = pagy(scoped(Conversation).includes(:assistant, :owner).by_created_at)
-        end
-      end
 
       def show
         @page_title = @conversation.name
@@ -24,48 +17,54 @@ module Layered
         @selected_model_id = @messages.last&.model_id || @conversation.assistant.default_model_id || @models.first&.id
       end
 
-      def new
-        @page_title = "New conversation"
-        @conversation = Conversation.new(params.permit(conversation: [ :assistant_id ])[:conversation])
-      end
-
       def create
-        @conversation = Conversation.new(conversation_params)
-        @conversation.owner = l_ui_current_user
-        @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
-        @conversation.name = Conversation.default_name if @conversation.name.blank?
-        if @conversation.save
-          redirect_to layered_assistant.conversation_path(@conversation)
+        @record = @resource.build_record(self)
+        @record.owner = l_ui_current_user
+        if conversation_params[:assistant_id].present?
+          @record.assistant = Assistant.owned_by(l_ui_current_user).find(conversation_params[:assistant_id])
+        end
+        @record.assign_attributes(conversation_params.except(:assistant_id))
+        @record.name = Conversation.default_name if @record.name.blank?
+
+        if @record.save
+          redirect_to layered_assistant.conversation_path(@record)
         else
+          @form_url = layered_collection_path
           render :new, status: :unprocessable_entity
         end
       end
 
       def edit
+        @record = @conversation
+        @form_url = layered_member_path(@conversation)
         @page_title = "Edit conversation"
       end
 
       def update
-        if @conversation.update(conversation_params)
-          redirect_to layered_assistant.conversations_path, notice: "Conversation was successfully updated."
+        if @conversation.update(conversation_params.except(:assistant_id))
+          redirect_to @resource.after_save_path(self, @conversation),
+            notice: t("layered.resource.flash.updated", model: @resource.model.model_name.human)
         else
+          @record = @conversation
+          @form_url = layered_member_path(@conversation)
           render :edit, status: :unprocessable_entity
         end
       end
 
       def destroy
         @conversation.destroy
-        redirect_to layered_assistant.conversations_path, notice: "Conversation was successfully deleted."
+        redirect_to @resource.after_save_path(self, @conversation),
+          notice: t("layered.resource.flash.deleted", model: @resource.model.model_name.human)
       end
 
       private
 
       def set_conversation
-        @conversation = scoped(Conversation).find_by!(uid: params[:id])
+        @conversation = Conversation.owned_by(l_ui_current_user).find(params[:id])
       end
 
       def set_assistants
-        @assistants = scoped(Assistant).by_name
+        @assistants = Assistant.owned_by(l_ui_current_user).by_name
       end
 
       def conversation_params

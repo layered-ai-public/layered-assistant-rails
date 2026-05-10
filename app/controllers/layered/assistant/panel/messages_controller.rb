@@ -32,7 +32,7 @@ module Layered
         private
 
         def set_conversation
-          @conversation = scoped(Conversation).find_by!(uid: params[:conversation_id])
+          @conversation = Conversation.owned_by(l_ui_current_user).find(params[:conversation_id])
         end
 
         def message_params

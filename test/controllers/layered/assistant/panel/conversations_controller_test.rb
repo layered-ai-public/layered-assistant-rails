@@ -14,7 +14,7 @@ module Layered
         test "should get show" do
           conversation = layered_assistant_conversations(:greeting)
 
-          get "/layered/assistant/panel/conversations/#{conversation.uid}"
+          get "/layered/assistant/panel/conversations/#{conversation.id}"
           assert_response :success
           assert_select "turbo-frame#assistant_panel"
           assert_select ".l-ui-conversation__container"
@@ -46,17 +46,11 @@ module Layered
           assistant = layered_assistant_assistants(:general)
           assistant.update!(owner: nil)
 
-          Layered::Assistant.scope do |model_class|
-            model_class.where(owner: l_ui_current_user)
-          end
-
           assert_no_difference("Conversation.count") do
             post "/layered/assistant/panel/conversations", params: { conversation: { assistant_id: assistant.id } }
           end
 
           assert_response :not_found
-        ensure
-          Layered::Assistant.class_variable_set(:@@scope_block, nil)
         end
 
         test "should stop responding assistant message" do
@@ -68,7 +62,7 @@ module Layered
             model: layered_assistant_models(:sonnet)
           )
 
-          patch "/layered/assistant/panel/conversations/#{conversation.uid}/stop"
+          patch "/layered/assistant/panel/conversations/#{conversation.id}/stop"
           assert_response :ok
 
           assistant_message.reload

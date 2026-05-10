@@ -26,8 +26,8 @@
                 <td class="l-ui-table__cell">
                   <%= conversation.created_at.to_fs(:short) %>
                 </td>
-                <th scope="row" class="l-ui-table__cell--primary">
-                  <%= link_to conversation.name, layered_assistant.public_panel_conversation_path(conversation), data: { turbo_frame: "assistant_panel" } %>
+                <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
+                  <%= link_to conversation.name, layered_assistant.public_panel_conversation_path(conversation.uid), data: { turbo_frame: "assistant_panel" } %>
                 </th>
                 <td class="l-ui-table__cell">
                   <%= conversation.messages_count || 0 %>
@@ -41,7 +41,7 @@
 
     <%= form_with url: layered_assistant.public_panel_conversations_path(assistant_id: @assistant.id), method: :post do |f| %>
       <div class="l-ui-mt-4">
-        <%= f.submit "Start conversation", class: "l-ui-button--primary" %>
+        <%= f.submit "Start conversation", class: "l-ui-button l-ui-button--primary" %>
       </div>
     <% end %>
   </div>

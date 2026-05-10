@@ -20,10 +20,10 @@
 
   <div class="l-ui-spread l-ui-mt-8">
     <% if conversation.persisted? %>
-      <%= link_to "Delete", layered_assistant.conversation_path(conversation), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+      <%= button_to "Delete", layered_member_path(conversation), method: :delete, class: "l-ui-button l-ui-button--outline-danger", data: { turbo_confirm: "Are you sure?" } %>
     <% else %>
       <span></span>
     <% end %>
-    <%= f.submit conversation.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+    <%= f.submit conversation.new_record? ? "Create" : "Update", class: "l-ui-button l-ui-button--primary" %>
   </div>
 <% end %>

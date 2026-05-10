@@ -1,15 +1,12 @@
 module Layered
   module Assistant
-    class MessagesController < ApplicationController
+    class MessagesController < ResourcesController
       include MessageCreation
 
-      before_action :set_conversation
-      before_action :set_message, only: [ :destroy ]
+      skip_before_action :require_layered_fields, only: [ :create ]
 
-      def index
-        @page_title = "Messages"
-        @pagy, @messages = pagy(@conversation.messages.includes(:model).by_created_at)
-      end
+      before_action :set_conversation, only: [ :create, :destroy ]
+      before_action :set_message, only: [ :destroy ]
 
       def create
         result = create_messages_for(
@@ -42,7 +39,7 @@ module Layered
       private
 
       def set_conversation
-        @conversation = scoped(Conversation).find_by!(uid: params[:conversation_id])
+        @conversation = Conversation.owned_by(l_ui_current_user).find(params[:conversation_id])
       end
 
       def set_message

@@ -72,10 +72,10 @@
 
   <div class="l-ui-spread l-ui-mt-8">
     <% if provider.persisted? %>
-      <%= link_to "Delete", layered_assistant.provider_path(provider), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+      <%= link_to "Delete", layered_member_path(provider), class: "l-ui-button l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>
       <span></span>
     <% end %>
-    <%= f.submit f.object.new_record? ? 'Create' : 'Update', class: "l-ui-button--primary" %>
+    <%= f.submit f.object.new_record? ? 'Create' : 'Update', class: "l-ui-button l-ui-button--primary" %>
   </div>
 <% end %>

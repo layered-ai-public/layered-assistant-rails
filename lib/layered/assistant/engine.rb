@@ -3,6 +3,10 @@ module Layered
     class Engine < ::Rails::Engine
       isolate_namespace Layered::Assistant
 
+      initializer "layered-assistant-rails.layered_resources", before: :set_autoload_paths do |app|
+        app.config.autoload_paths += [ Engine.root.join("app/layered_resources").to_s ]
+      end
+
       initializer "layered-assistant-rails.inflections", before: :set_autoload_paths do
         ActiveSupport::Inflector.inflections do |inflect|
           inflect.acronym "OpenAI"
