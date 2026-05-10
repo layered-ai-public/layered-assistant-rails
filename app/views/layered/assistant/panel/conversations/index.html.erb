@@ -10,7 +10,7 @@
             <th scope="col" class="l-ui-table__header-cell">Name</th>
             <th scope="col" class="l-ui-table__header-cell">Messages</th>
             <th scope="col" class="l-ui-table__header-cell">Tokens</th>
-            <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+            <th scope="col" class="l-ui-table__header-cell l-ui-table__header-cell--action">Actions</th>
           </tr>
         </thead>
 
@@ -21,7 +21,7 @@
                 <td class="l-ui-table__cell">
                   <%= conversation.created_at.to_fs(:short) %>
                 </td>
-                <th scope="row" class="l-ui-table__cell--primary">
+                <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
                   <%= link_to conversation.name, layered_assistant.panel_conversation_path(conversation), data: { turbo_frame: "assistant_panel" } %>
                 </th>
                 <td class="l-ui-table__cell">
@@ -30,8 +30,8 @@
                 <td class="l-ui-table__cell">
                   <%= number_with_delimiter(conversation.token_estimate.to_i) %>
                 </td>
-                <td class="l-ui-table__cell--action">
-                  <%= button_to "Delete", layered_assistant.panel_conversation_path(conversation), method: :delete, class: "l-ui-table__action--danger", data: { turbo_confirm: "Delete this conversation?" } %>
+                <td class="l-ui-table__cell l-ui-table__cell--action">
+                  <%= button_to "Delete", layered_assistant.panel_conversation_path(conversation), method: :delete, class: "l-ui-button l-ui-button--outline-danger l-ui-button--small", data: { turbo_confirm: "Delete this conversation?" } %>
                 </td>
               </tr>
             <% end %>

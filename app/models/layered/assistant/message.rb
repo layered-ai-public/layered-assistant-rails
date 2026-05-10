@@ -24,6 +24,19 @@ module Layered
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
 
+      # Derived metrics
+      MIN_RESPONSE_MS_FOR_TPS = 100
+
+      def total_tokens
+        input_tokens.to_i + output_tokens.to_i
+      end
+
+      def tokens_per_second
+        return unless output_tokens.to_i > 0 && response_ms.to_i >= MIN_RESPONSE_MS_FOR_TPS
+
+        (output_tokens * 1000.0 / response_ms).round(1)
+      end
+
       # Broadcasting
       def broadcast_created
         broadcast_append_to conversation,

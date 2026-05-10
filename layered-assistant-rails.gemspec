@@ -34,7 +34,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "pagy", "~> 43.2"
   spec.add_dependency "ruby-anthropic", "~> 0.4"
   spec.add_dependency "ruby-openai", "~> 7.0"
-  spec.add_dependency "layered-ui-rails", "~> 0.13"
+  spec.add_dependency "layered-ui-rails", "~> 0.14"
   spec.add_dependency "layered-resource-rails", "~> 0.1"
   spec.add_development_dependency "propshaft", "~> 1.0"
   spec.add_development_dependency "tailwindcss-rails", "~> 4.0"

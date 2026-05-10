@@ -37,8 +37,8 @@
       <%= hidden_field_tag "assistant[skill_ids][]", "" %>
       <% @skills.each do |skill| %>
         <div class="l-ui-checkbox-container">
-          <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}" }, skill.id, nil %>
-          <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-label--checkbox"><%= skill.name %></label>
+          <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}", class: "l-ui-checkbox" }, skill.id, nil %>
+          <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-checkbox-container__label"><%= skill.name %></label>
         </div>
       <% end %>
     </fieldset>
@@ -52,10 +52,10 @@
 
   <div class="l-ui-spread l-ui-mt-8">
     <% if assistant.persisted? %>
-      <%= link_to "Delete", layered_member_path(assistant), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+      <%= link_to "Delete", layered_member_path(assistant), class: "l-ui-button l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>
       <span></span>
     <% end %>
-    <%= f.submit assistant.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+    <%= f.submit assistant.new_record? ? "Create" : "Update", class: "l-ui-button l-ui-button--primary" %>
   </div>
 <% end %>

@@ -43,7 +43,7 @@ module Layered
         private
 
         def set_conversation
-          @conversation = Conversation.owned_by(l_ui_current_user).find_by!(uid: params[:id])
+          @conversation = Conversation.owned_by(l_ui_current_user).find(params[:id])
         end
 
         def set_assistants

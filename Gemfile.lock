@@ -1,10 +1,10 @@
 GIT
   remote: https://github.com/layered-ai-public/layered-resource-rails.git
-  revision: 49dd68734142505cec26f3a8ed013775bba037d5
+  revision: b36440d17bd7b42b48f776acb7c330cd2722e173
   specs:
     layered-resource-rails (0.1.0)
       concurrent-ruby (>= 1.0)
-      layered-ui-rails (~> 0.13)
+      layered-ui-rails (~> 0.14)
       pagy (~> 43.2)
       rails (~> 8.0)
       ransack (~> 4.0)
@@ -14,7 +14,7 @@ PATH
   specs:
     layered-assistant-rails (0.5.0)
       layered-resource-rails (~> 0.1)
-      layered-ui-rails (~> 0.13)
+      layered-ui-rails (~> 0.14)
       pagy (~> 43.2)
       positioning (~> 0.4)
       rails (~> 8.0)
@@ -154,7 +154,7 @@ GEM
       reline (>= 0.4.2)
     json (2.19.5)
     language_server-protocol (3.17.0.5)
-    layered-ui-rails (0.13.0)
+    layered-ui-rails (0.14.0)
       rails (~> 8.0)
       tailwindcss-rails (~> 4.0)
     lint_roller (1.1.0)

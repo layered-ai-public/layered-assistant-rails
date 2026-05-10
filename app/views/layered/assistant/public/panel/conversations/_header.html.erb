@@ -1,6 +1,6 @@
 <%= turbo_frame_tag "assistant_panel_header" do %>
   <div class="l-ui-form__group l-ui-mt-0">
-    <div class="l-ui-select-wrapper l-ui-mt-0 l-ui--mr-2">
+    <div class="l-ui-select-container l-ui-mt-0">
       <select name="conversation_id" class="l-ui-select" aria-label="Select conversation"
               data-controller="panel-nav"
               data-action="change->panel-nav#navigate"
@@ -8,7 +8,7 @@
         <option value="<%= layered_assistant.public_panel_conversations_path(assistant_id: assistant.id) %>" <%= "selected" if selected == :index %>>Conversations</option>
         <option value="new" <%= "selected" if selected == :new %>>+ New</option>
         <% conversations.each do |c| %>
-          <option value="<%= layered_assistant.public_panel_conversation_path(c) %>" <%= "selected" if selected == c.id %> class="<%= dom_id(c) %>_name"><%= c.name %></option>
+          <option value="<%= layered_assistant.public_panel_conversation_path(c.uid) %>" <%= "selected" if selected == c.id %> class="<%= dom_id(c) %>_name"><%= c.name %></option>
         <% end %>
       </select>
     </div>

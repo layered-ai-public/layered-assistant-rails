@@ -11,7 +11,7 @@ module Layered
         def show
           conversation = @assistant.conversations.create!(name: Conversation.default_name)
           add_conversation_to_session(conversation)
-          redirect_to layered_assistant.public_conversation_path(conversation)
+          redirect_to layered_assistant.public_conversation_path(conversation.uid)
         end
       end
     end

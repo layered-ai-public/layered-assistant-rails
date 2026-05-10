@@ -1,0 +1,13 @@
+<div class="l-ui-spread">
+  <div>
+    <%= l_ui_breadcrumbs do %>
+      <%= l_ui_breadcrumb_item @model.model_name.human.pluralize, layered_collection_path %>
+    <% end %>
+
+    <h1 class="l-ui-heading">New <%= @model.model_name.human.downcase %></h1>
+  </div>
+</div>
+
+<div class="l-ui-mt-2">
+  <%= render "layered/conversations/form", conversation: @record, url: @form_url %>
+</div>

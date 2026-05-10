@@ -7,18 +7,30 @@ Layered::Assistant::Engine.routes.draw do
   layered_resources :assistants, except: [ :show ],
     namespace: "Layered::Assistant",
     controller: "/layered/assistant/assistants"
-  resources :assistants, only: [] do
-    resources :conversations, only: [ :index ]
-  end
 
   layered_resources :providers, except: [ :show ], namespace: "Layered::Assistant"
   resources :providers, only: [] do
     layered_resources :models, except: [ :show ], namespace: "Layered::Assistant"
   end
 
-  resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
+  layered_resources :conversations, except: [ :show ],
+    namespace: "Layered::Assistant",
+    controller: "/layered/assistant/conversations"
+
+  resources :assistants, only: [] do
+    layered_resources :conversations, only: [ :index ],
+      namespace: "Layered::Assistant",
+      controller: "/layered/assistant/conversations"
+  end
+
+  resources :conversations, only: [ :show ] do
     patch :stop, on: :member
-    resources :messages, only: [ :index, :create, :destroy ]
+  end
+
+  resources :conversations, only: [] do
+    layered_resources :messages, only: [ :index, :create, :destroy ],
+      namespace: "Layered::Assistant",
+      controller: "/layered/assistant/messages"
   end
 
   namespace :panel do
