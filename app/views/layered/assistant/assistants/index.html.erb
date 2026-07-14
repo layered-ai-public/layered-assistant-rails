@@ -1,5 +1,5 @@
 <%= l_ui_title_bar(title: "Assistants") do %>
-  <%= link_to "New", layered_assistant.new_assistant_path, class: "l-ui-button--primary" %>
+  <%= link_to "New", layered_assistant.new_assistant_path, class: "l-ui-button l-ui-button--primary" %>
 <% end %>
 
 <div class="l-ui-table-container l-ui-mt-4">
@@ -13,14 +13,14 @@
         <th scope="col" class="l-ui-table__header-cell">Persona</th>
         <th scope="col" class="l-ui-table__header-cell">Skills</th>
         <th scope="col" class="l-ui-table__header-cell">Conversations</th>
-        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+        <th scope="col" class="l-ui-table__header-cell l-ui-table__header-cell--action">Actions</th>
       </tr>
     </thead>
 
     <tbody class="l-ui-table__body">
       <% @assistants.each do |assistant| %>
         <tr>
-          <th scope="row" class="l-ui-table__cell--primary">
+          <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
             <%= link_to assistant.name, layered_assistant.assistant_conversations_path(assistant) %>
           </th>
           <td class="l-ui-table__cell">
@@ -38,8 +38,8 @@
           <td class="l-ui-table__cell">
             <%= link_to assistant.conversations_count, layered_assistant.assistant_conversations_path(assistant) %>
           </td>
-          <td class="l-ui-table__cell--action">
-            <%= link_to "Edit", layered_assistant.edit_assistant_path(assistant) %>
+          <td class="l-ui-table__cell l-ui-table__cell--action">
+            <%= link_to "Edit", layered_assistant.edit_assistant_path(assistant), class: "l-ui-table__action" %>
           </td>
         </tr>
       <% end %>

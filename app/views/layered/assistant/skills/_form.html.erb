@@ -21,10 +21,10 @@
 
   <div class="l-ui-spread l-ui-mt-8">
     <% if skill.persisted? %>
-      <%= link_to "Delete", layered_assistant.skill_path(skill), class: "l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+      <%= link_to "Delete", layered_assistant.skill_path(skill), class: "l-ui-button l-ui-button--outline-danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
     <% else %>
       <span></span>
     <% end %>
-    <%= f.submit skill.new_record? ? "Create" : "Update", class: "l-ui-button--primary" %>
+    <%= f.submit skill.new_record? ? "Create" : "Update", class: "l-ui-button l-ui-button--primary" %>
   </div>
 <% end %>

@@ -78,7 +78,6 @@ export default class extends Controller {
 
     const empty = this.inputTarget.value.trim() === ""
     this.sendButtonTarget.disabled = empty
-    this.sendButtonTarget.classList.toggle("l-ui-button--disabled", empty)
   }
 
   // Toggle visibility of the Send and Stop buttons. While responding a

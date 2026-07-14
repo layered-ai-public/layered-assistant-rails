@@ -2,7 +2,7 @@
   title: @assistant ? "Conversations - #{@assistant.name}" : "Conversations",
   breadcrumbs: @assistant ? [["Assistants", layered_assistant.assistants_path]] : []
 ) do %>
-  <%= link_to "New", layered_assistant.new_conversation_path(conversation: @assistant ? { assistant_id: @assistant.id } : {}), class: "l-ui-button--primary" %>
+  <%= link_to "New", layered_assistant.new_conversation_path(conversation: @assistant ? { assistant_id: @assistant.id } : {}), class: "l-ui-button l-ui-button--primary" %>
 <% end %>
 
 <div class="l-ui-table-container l-ui-mt-4">
@@ -18,14 +18,14 @@
         <th scope="col" class="l-ui-table__header-cell">Tokens</th>
         <th scope="col" class="l-ui-table__header-cell">User</th>
         <th scope="col" class="l-ui-table__header-cell">Created</th>
-        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+        <th scope="col" class="l-ui-table__header-cell l-ui-table__header-cell--action">Actions</th>
       </tr>
     </thead>
 
     <tbody class="l-ui-table__body">
       <% @conversations.each do |conversation| %>
         <tr>
-          <th scope="row" class="l-ui-table__cell--primary">
+          <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
             <%= link_to conversation.name, layered_assistant.conversation_path(conversation) %>
           </th>
           <% unless @assistant %>
@@ -46,8 +46,8 @@
           <td class="l-ui-table__cell">
             <%= conversation.created_at.to_fs(:short) %>
           </td>
-          <td class="l-ui-table__cell--action">
-            <%= link_to "Edit", layered_assistant.edit_conversation_path(conversation) %>
+          <td class="l-ui-table__cell l-ui-table__cell--action">
+            <%= link_to "Edit", layered_assistant.edit_conversation_path(conversation), class: "l-ui-table__action" %>
           </td>
         </tr>
       <% end %>

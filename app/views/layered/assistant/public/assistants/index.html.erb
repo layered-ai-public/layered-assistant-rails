@@ -14,7 +14,7 @@
       <tbody class="l-ui-table__body">
         <% @assistants.each do |assistant| %>
           <tr>
-            <th scope="row" class="l-ui-table__cell--primary">
+            <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
               <%= link_to assistant.name, layered_assistant.public_assistant_path(assistant) %>
             </th>
             <td class="l-ui-table__cell">

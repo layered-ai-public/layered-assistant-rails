@@ -15,14 +15,14 @@
         <th scope="col" class="l-ui-table__header-cell">Tok/s</th>
         <th scope="col" class="l-ui-table__header-cell">TTFT</th>
         <th scope="col" class="l-ui-table__header-cell">Created</th>
-        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+        <th scope="col" class="l-ui-table__header-cell l-ui-table__header-cell--action">Actions</th>
       </tr>
     </thead>
 
     <tbody class="l-ui-table__body">
       <% @messages.each do |message| %>
         <tr>
-          <th scope="row" class="l-ui-table__cell--primary">
+          <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
             <%= message.role %>
           </th>
           <td class="l-ui-table__cell">
@@ -49,8 +49,8 @@
           <td class="l-ui-table__cell">
             <%= message.created_at.to_fs(:short) %>
           </td>
-          <td class="l-ui-table__cell--action">
-            <%= link_to "Delete", layered_assistant.conversation_message_path(@conversation, message), data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
+          <td class="l-ui-table__cell l-ui-table__cell--action">
+            <%= link_to "Delete", layered_assistant.conversation_message_path(@conversation, message), class: "l-ui-table__action l-ui-table__action--danger", data: { turbo_method: :delete, turbo_confirm: "Are you sure?" } %>
           </td>
         </tr>
       <% end %>
