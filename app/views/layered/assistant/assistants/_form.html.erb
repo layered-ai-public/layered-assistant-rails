@@ -38,7 +38,7 @@
       <% @skills.each do |skill| %>
         <div class="l-ui-checkbox-container">
           <%= f.check_box :skill_ids, { multiple: true, checked: assistant.skill_ids.include?(skill.id), id: "assistant_skill_ids_#{skill.id}" }, skill.id, nil %>
-          <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-label--checkbox"><%= skill.name %></label>
+          <label for="assistant_skill_ids_<%= skill.id %>" class="l-ui-checkbox-container__label"><%= skill.name %></label>
         </div>
       <% end %>
     </fieldset>

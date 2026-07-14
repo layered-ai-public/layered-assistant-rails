@@ -7,7 +7,7 @@
 
 <% if local_assigns[:models]&.any? %>
   <div class="l-ui-form__group">
-    <div class="l-ui-select-wrapper">
+    <div class="l-ui-select-container">
       <%= f.select :model_id, options_for_select(models.map { |m| ["#{m.provider.name}: #{m.name}", m.id] }, selected_model_id), {}, name: "message[model_id]", class: "l-ui-select", "aria-label": "AI model" %>
     </div>
   </div>

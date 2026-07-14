@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. This projec
 ### Changed
 
 - Bump `layered-ui-rails` to `~> 0.13` and migrate engine views, JS, and the dummy app to the new BEM class names (utility/container/radio renames, notice/icon modifiers now require their base class)
+- Bump `layered-ui-rails` to `~> 0.22` and migrate the remaining renamed classes (`l-ui-select-wrapper` → `l-ui-select-container`, `l-ui-label--checkbox` → `l-ui-checkbox-container__label`, removed `l-ui--mr-2`). The dummy app now imports the UI stylesheet from the engine's `builds/tailwind` path and regenerates `layered_ui_overrides.css` from v0.22.0, replacing the generator-copied local stylesheet
 - Streaming render is now block-atomic: only fully-closed top-level markdown blocks are rendered, with a typing indicator standing in for the in-progress block. Each closed block fades in once when it arrives, replacing the previous per-token reconciliation
 
 ## [0.5.0] - 2026-05-03
