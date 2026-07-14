@@ -13,12 +13,13 @@ module Layered
         test "creates models for a matching provider" do
           stub_request(:get, CreateService::MODELS_URL).to_return(status: 200, body: @models_json)
 
-          assert_difference("@provider.models.count", 3) do
+          assert_difference("@provider.models.count", 4) do
             CreateService.new(@provider).call
           end
 
-          assert @provider.models.exists?(identifier: "claude-opus-4-7")
-          assert @provider.models.exists?(identifier: "claude-sonnet-4-6")
+          assert @provider.models.exists?(identifier: "claude-fable-5")
+          assert @provider.models.exists?(identifier: "claude-opus-4-8")
+          assert @provider.models.exists?(identifier: "claude-sonnet-5")
           assert @provider.models.exists?(identifier: "claude-haiku-4-5")
         end
 
