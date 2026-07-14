@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    layered-assistant-rails (0.5.0)
+    layered-assistant-rails (0.6.0)
       layered-ui-rails (~> 0.22)
       pagy (~> 43.2)
       positioning (~> 0.4)

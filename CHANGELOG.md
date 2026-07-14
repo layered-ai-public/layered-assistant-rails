@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-14
+
 ### Added
 
 - RuboCop linting via `rubocop-rails-omakase`, with a `lint` job in CI
