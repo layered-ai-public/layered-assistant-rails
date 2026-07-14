@@ -13,7 +13,7 @@
 </ul>
 <p class="l-ui-mt-3">All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.</p>
 
-<h2 class="l-ui-mt-6">Authorization</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Authorization</h2>
 <p class="l-ui-mt-3">
   All non-public engine routes are blocked by default (403 Forbidden) until you configure an
   <code>authorize</code> block in <code>config/initializers/layered_assistant.rb</code>.
@@ -51,7 +51,7 @@ end</code></pre>
   &lt;%= link_to "Assistant", layered_assistant.root_path %&gt;
 &lt;% end %&gt;</code></pre>
 
-<h2 class="l-ui-mt-6">Record scoping</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Record scoping</h2>
 <p class="l-ui-mt-3">
   By default, all records are visible to any authorised user. If your application is
   multi-tenant or you need to restrict which records a user can see, configure a
@@ -73,15 +73,15 @@ end</code></pre>
     </thead>
     <tbody class="l-ui-table__body">
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Conversation</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Conversation</code></th>
         <td class="l-ui-table__cell">User conversations (has polymorphic <code>owner</code>)</td>
       </tr>
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Assistant</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Assistant</code></th>
         <td class="l-ui-table__cell">Assistant configurations (has polymorphic <code>owner</code>)</td>
       </tr>
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Provider</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>Layered::Assistant::Provider</code></th>
         <td class="l-ui-table__cell">API provider credentials (has polymorphic <code>owner</code>)</td>
       </tr>
     </tbody>
@@ -107,7 +107,7 @@ end</code></pre>
   is the host application's responsibility; the scope block is the integration point for it.
 </p>
 
-<h2 class="l-ui-mt-6">Panel helpers</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Panel helpers</h2>
 <p class="l-ui-mt-3">
   Two helpers are available to wire the <code>layered-ui</code> panel to the assistant engine.
   Add these to your application layout's <code>content_for</code> blocks:
@@ -135,18 +135,18 @@ end</code></pre>
     </thead>
     <tbody class="l-ui-table__body">
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_header</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_header</code></th>
         <td class="l-ui-table__cell">Empty Turbo Frame populated by the engine's panel views</td>
       </tr>
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_body</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>layered_assistant_panel_body</code></th>
         <td class="l-ui-table__cell">Turbo Frame that loads the conversation list from the engine's panel routes</td>
       </tr>
     </tbody>
   </table>
 </div>
 
-<h2 class="l-ui-mt-6">Configuration</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Configuration</h2>
 <p class="l-ui-mt-3">
   Optional settings can be added to your initialiser (<code>config/initializers/layered_assistant.rb</code>):
 </p>
@@ -163,17 +163,17 @@ end</code></pre>
     </thead>
     <tbody class="l-ui-table__body">
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>log_errors</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>log_errors</code></th>
         <td class="l-ui-table__cell"><code>false</code></td>
         <td class="l-ui-table__cell">Log API errors to stdout from the AI API clients</td>
       </tr>
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>api_request_timeout</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>api_request_timeout</code></th>
         <td class="l-ui-table__cell"><code>210</code></td>
         <td class="l-ui-table__cell">Timeout in seconds for AI API requests</td>
       </tr>
       <tr>
-        <th class="l-ui-table__cell--primary" scope="row"><code>skip_db_encryption</code></th>
+        <th class="l-ui-table__cell l-ui-table__cell--primary" scope="row"><code>skip_db_encryption</code></th>
         <td class="l-ui-table__cell"><code>false</code></td>
         <td class="l-ui-table__cell">Disable Active Record Encryption on <code>Provider#secret</code>. Only for development/test environments without encryption keys configured</td>
       </tr>
@@ -184,7 +184,7 @@ end</code></pre>
 <pre class="l-ui-surface l-ui-mt-4"><code>Layered::Assistant.log_errors = true
 Layered::Assistant.skip_db_encryption = true</code></pre>
 
-<h2 class="l-ui-mt-6">Getting started</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Getting started</h2>
 <ol class="l-ui-list l-ui-mt-3">
   <li><%= link_to "Create a provider", layered_assistant.new_provider_path %> (e.g. Anthropic or OpenAI) with your API key</li>
   <li>Add one or more models to the provider</li>
@@ -192,7 +192,7 @@ Layered::Assistant.skip_db_encryption = true</code></pre>
   <li><%= link_to "Start a conversation", layered_assistant.new_conversation_path %></li>
 </ol>
 
-<h2 class="l-ui-mt-6">License</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">License</h2>
 <p class="l-ui-mt-3">
   Released under the <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/LICENSE">Apache 2.0 License</a>.
 </p>
@@ -201,7 +201,7 @@ Layered::Assistant.skip_db_encryption = true</code></pre>
   See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/NOTICE">NOTICE</a> for attribution details.
 </p>
 
-<h2 class="l-ui-mt-6">Trademarks</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Trademarks</h2>
 <p class="l-ui-mt-3">
   The source code is fully open, but the layered.ai name, logo, and brand assets are trademarks of LAYERED AI LIMITED.
   The Apache 2.0 license does not grant rights to use the layered.ai branding.
@@ -209,7 +209,7 @@ Layered::Assistant.skip_db_encryption = true</code></pre>
   See <a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/TRADEMARK.md">TRADEMARK.md</a> for the full policy.
 </p>
 
-<h2 class="l-ui-mt-6">Contributing</h2>
+<h2 class="l-ui-heading--section l-ui-mt-6">Contributing</h2>
 <ul class="l-ui-list l-ui-mt-3">
   <li><a href="https://github.com/layered-ai-public/layered-assistant-rails/blob/main/CLA.md">CLA.md</a> - contributor licence agreement</li>
 </ul>

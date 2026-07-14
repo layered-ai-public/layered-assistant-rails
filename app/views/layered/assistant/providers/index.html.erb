@@ -1,5 +1,5 @@
 <%= l_ui_title_bar(title: "Providers") do %>
-  <%= link_to "New", layered_assistant.new_provider_path, class: "l-ui-button--primary" %>
+  <%= link_to "New", layered_assistant.new_provider_path, class: "l-ui-button l-ui-button--primary" %>
 <% end %>
 
 <div class="l-ui-table-container l-ui-mt-4">
@@ -11,14 +11,14 @@
         <th scope="col" class="l-ui-table__header-cell">Protocol</th>
         <th scope="col" class="l-ui-table__header-cell">Models</th>
         <th scope="col" class="l-ui-table__header-cell">Enabled</th>
-        <th scope="col" class="l-ui-table__header-cell--action">Actions</th>
+        <th scope="col" class="l-ui-table__header-cell l-ui-table__header-cell--action">Actions</th>
       </tr>
     </thead>
 
     <tbody class="l-ui-table__body">
       <% @providers.each do |provider| %>
         <tr>
-          <td class="l-ui-table__cell--primary">
+          <td class="l-ui-table__cell l-ui-table__cell--primary">
             <%= provider.name %>
           </td>
           <td class="l-ui-table__cell">
@@ -32,8 +32,8 @@
               <%= provider.enabled? ? "Enabled" : "Disabled" %>
             </span>
           </td>
-          <td class="l-ui-table__cell--action">
-            <%= link_to "Edit", layered_assistant.edit_provider_path(provider) %>
+          <td class="l-ui-table__cell l-ui-table__cell--action">
+            <%= link_to "Edit", layered_assistant.edit_provider_path(provider), class: "l-ui-table__action" %>
           </td>
         </tr>
       <% end %>
