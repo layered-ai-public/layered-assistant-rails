@@ -1,11 +1,12 @@
 module Layered
   module Assistant
     class Assistant < ApplicationRecord
+      include Ownable
+
       # UID
       has_secure_token :uid
 
       # Associations
-      belongs_to :owner, polymorphic: true, optional: true
       belongs_to :default_model, class_name: "Layered::Assistant::Model", optional: true, counter_cache: :assistants_count
       belongs_to :persona, optional: true, counter_cache: :assistants_count
       has_many :assistant_skills, dependent: :destroy
@@ -17,7 +18,6 @@ module Layered
       validates :default_model, presence: true, if: :public?
 
       # Scopes
-      scope :owned_by, ->(user) { user ? where(owner: user) : none }
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
       scope :by_created_at, -> { order(created_at: :desc) }
       scope :publicly_available, -> { where(public: true) }

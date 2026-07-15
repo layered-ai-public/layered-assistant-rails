@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Skills"
-        @pagy, @skills = pagy(Skill.owned_by(l_ui_current_user).by_name)
+        @pagy, @skills = pagy(scoped(Skill).by_name)
       end
 
       def new
@@ -15,7 +15,7 @@ module Layered
 
       def create
         @skill = Skill.new(skill_params)
-        @skill.owner = l_ui_current_user
+        @skill.owner = current_owner
 
         if @skill.save
           redirect_to layered_assistant.skills_path, notice: "Skill was successfully created."
@@ -49,7 +49,7 @@ module Layered
       private
 
       def set_skill
-        @skill = Skill.owned_by(l_ui_current_user).find(params[:id])
+        @skill = scoped(Skill).find(params[:id])
       end
 
       def skill_params

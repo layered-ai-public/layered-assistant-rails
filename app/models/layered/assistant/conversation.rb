@@ -1,12 +1,13 @@
 module Layered
   module Assistant
     class Conversation < ApplicationRecord
+      include Ownable
+
       # UID
       has_secure_token :uid
 
       # Associations
       belongs_to :assistant, counter_cache: true
-      belongs_to :owner, polymorphic: true, optional: true
       belongs_to :subject, polymorphic: true, optional: true
       has_many :messages, dependent: :destroy
 
@@ -17,7 +18,6 @@ module Layered
       validates :name, presence: true
 
       # Scopes
-      scope :owned_by, ->(user) { user ? where(owner: user) : none }
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
       scope :by_created_at, -> { order(created_at: :desc) }
 

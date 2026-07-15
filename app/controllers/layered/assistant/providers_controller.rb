@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Providers"
-        @pagy, @providers = pagy(Provider.owned_by(l_ui_current_user).sorted)
+        @pagy, @providers = pagy(scoped(Provider).sorted)
       end
 
       def new
@@ -15,7 +15,7 @@ module Layered
 
       def create
         @provider = Provider.new(provider_params)
-        @provider.owner = l_ui_current_user
+        @provider.owner = current_owner
 
         if @provider.save
           Models::CreateService.new(@provider).call if params[:provider][:create_models] == "1"
@@ -45,7 +45,7 @@ module Layered
       private
 
       def set_provider
-        @provider = Provider.owned_by(l_ui_current_user).find(params[:id])
+        @provider = scoped(Provider).find(params[:id])
       end
 
       def provider_params

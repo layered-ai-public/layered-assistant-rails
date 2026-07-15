@@ -5,7 +5,7 @@ module Layered
 
       def index
         @page_title = "Personas"
-        @pagy, @personas = pagy(Persona.owned_by(l_ui_current_user).by_name)
+        @pagy, @personas = pagy(scoped(Persona).by_name)
       end
 
       def new
@@ -15,7 +15,7 @@ module Layered
 
       def create
         @persona = Persona.new(persona_params)
-        @persona.owner = l_ui_current_user
+        @persona.owner = current_owner
 
         if @persona.save
           redirect_to layered_assistant.personas_path, notice: "Persona was successfully created."
@@ -49,7 +49,7 @@ module Layered
       private
 
       def set_persona
-        @persona = Persona.owned_by(l_ui_current_user).find(params[:id])
+        @persona = scoped(Persona).find(params[:id])
       end
 
       def persona_params

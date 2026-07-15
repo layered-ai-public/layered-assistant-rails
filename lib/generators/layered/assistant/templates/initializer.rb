@@ -29,14 +29,25 @@
 #
 # Engine records are scoped to the signed-in user via a polymorphic `owner`
 # association on Assistant, Conversation, Provider, Persona and Skill. New
-# records are stamped with `owner = l_ui_current_user`, and reads are filtered
-# through `Model.owned_by(l_ui_current_user)`. Records owned by another user
-# (or unowned) return 404. When `l_ui_current_user` is nil (no signed-in user),
-# no records are returned - your authorize block above should still ensure
-# engine routes are only reachable by authenticated users.
+# records are stamped with the controller's `current_owner` (defaulting to
+# `l_ui_current_user`), and reads are filtered through
+# `Model.owned_by(current_owner)`. Records owned by another owner (or unowned)
+# return 404. When `current_owner` is nil (no signed-in user), no records are
+# returned - your authorize block above should still ensure engine routes are
+# only reachable by authenticated users.
 #
-# To customise (e.g. team-based scoping, admins see all), override
-# `l_ui_current_user` or subclass the engine's controllers.
+# To scope records to something other than the signed-in user (e.g. their
+# organisation), override `current_owner`:
+#
+# Rails.application.config.to_prepare do
+#   Layered::Assistant::ApplicationController.class_eval do
+#     private
+#
+#     def current_owner
+#       current_user&.organisation
+#     end
+#   end
+# end
 
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout

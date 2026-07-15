@@ -92,12 +92,34 @@ end</code></pre>
 </div>
 
 <p class="l-ui-mt-3">
-  New records are stamped with <code>owner = l_ui_current_user</code> on create, and reads
-  are filtered through <code>Model.owned_by(l_ui_current_user)</code>. Records owned by another
-  user (or unowned) return 404, and when <code>l_ui_current_user</code> is nil (no signed-in
-  user) no records are returned at all - so make sure your authorize block only admits
-  authenticated users. To customise (e.g. team-based scoping, admins see all),
-  override <code>l_ui_current_user</code> in your app or subclass the engine's controllers.
+  New records are stamped with the controller's <code>current_owner</code> on create
+  (defaulting to <code>l_ui_current_user</code>), and reads are filtered through
+  <code>Model.owned_by(current_owner)</code>. Records owned by another owner (or unowned)
+  return 404, and when <code>current_owner</code> is nil (no signed-in user) no records are
+  returned at all - so make sure your authorize block only admits authenticated users.
+</p>
+
+<h3 class="l-ui-mt-4">Changing the owner</h3>
+<p class="l-ui-mt-3">
+  To scope records to something other than the signed-in user - for example their
+  organisation - override <code>current_owner</code> on the engine's
+  <code>ApplicationController</code>. Any model responding to a polymorphic
+  <code>owner</code> association works:
+</p>
+<pre class="l-ui-surface l-ui-mt-3"><code># config/initializers/layered_assistant.rb
+Rails.application.config.to_prepare do
+  Layered::Assistant::ApplicationController.class_eval do
+    private
+
+    def current_owner
+      current_user&amp;.organisation
+    end
+  end
+end</code></pre>
+<p class="l-ui-mt-3">
+  Both owner stamping and read filtering go through <code>current_owner</code>, so this
+  single override changes the ownership boundary everywhere. Note that existing records
+  keep their original owner - switching owner type requires a data migration.
 </p>
 
 <h2 class="l-ui-heading--section l-ui-mt-6">Panel helpers</h2>

@@ -8,7 +8,7 @@ module Layered
 
       def index
         @page_title = "Assistants"
-        @pagy, @assistants = pagy(Assistant.owned_by(l_ui_current_user).includes(:persona).by_name)
+        @pagy, @assistants = pagy(scoped(Assistant).includes(:persona).by_name)
       end
 
       def new
@@ -18,8 +18,8 @@ module Layered
 
       def create
         @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
-        @assistant.owner = l_ui_current_user
-        @assistant.persona = Persona.owned_by(l_ui_current_user).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
+        @assistant.owner = current_owner
+        @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
 
         if @assistant.save
           assign_skills
@@ -35,7 +35,7 @@ module Layered
 
       def update
         if assistant_params.key?(:persona_id)
-          @assistant.persona = assistant_params[:persona_id].present? ? Persona.owned_by(l_ui_current_user).find(assistant_params[:persona_id]) : nil
+          @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
         end
 
         if @assistant.update(assistant_params.except(:persona_id, :skill_ids))
@@ -54,7 +54,7 @@ module Layered
       private
 
       def set_assistant
-        @assistant = Assistant.owned_by(l_ui_current_user).find(params[:id])
+        @assistant = scoped(Assistant).find(params[:id])
       end
 
       def set_models
@@ -62,17 +62,17 @@ module Layered
       end
 
       def set_personas
-        @personas = Persona.owned_by(l_ui_current_user).by_name
+        @personas = scoped(Persona).by_name
       end
 
       def set_skills
-        @skills = Skill.owned_by(l_ui_current_user).by_name
+        @skills = scoped(Skill).by_name
       end
 
       def assign_skills
         if assistant_params.key?(:skill_ids)
           skill_ids = Array(assistant_params[:skill_ids]).compact_blank
-          @assistant.skills = Skill.owned_by(l_ui_current_user).where(id: skill_ids)
+          @assistant.skills = scoped(Skill).where(id: skill_ids)
         end
       end
 
