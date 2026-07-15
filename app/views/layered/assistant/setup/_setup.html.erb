@@ -102,23 +102,17 @@ end</code></pre>
 <h3 class="l-ui-mt-4">Changing the owner</h3>
 <p class="l-ui-mt-3">
   To scope records to something other than the signed-in user - for example their
-  organisation - override <code>current_owner</code> on the engine's
-  <code>ApplicationController</code>. Any model responding to a polymorphic
-  <code>owner</code> association works:
+  organisation - configure an owner block in the initialiser. Like the authorize
+  block, it runs in controller context; it must return the record ownership is
+  stamped with on create and filtered by on reads:
 </p>
 <pre class="l-ui-surface l-ui-mt-3"><code># config/initializers/layered_assistant.rb
-Rails.application.config.to_prepare do
-  Layered::Assistant::ApplicationController.class_eval do
-    private
-
-    def current_owner
-      current_user&amp;.organisation
-    end
-  end
+Layered::Assistant.owner do
+  current_user&amp;.organisation
 end</code></pre>
 <p class="l-ui-mt-3">
-  Both owner stamping and read filtering go through <code>current_owner</code>, so this
-  single override changes the ownership boundary everywhere. Note that existing records
+  Both owner stamping and read filtering go through the owner block, so this single
+  setting changes the ownership boundary everywhere. Note that existing records
   keep their original owner - switching owner type requires a data migration.
 </p>
 

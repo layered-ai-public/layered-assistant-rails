@@ -37,16 +37,12 @@
 # only reachable by authenticated users.
 #
 # To scope records to something other than the signed-in user (e.g. their
-# organisation), override `current_owner`:
+# organisation), configure an owner block. Like the authorize block, it runs
+# in controller context; it must return the record ownership is stamped with
+# on create and filtered by on reads.
 #
-# Rails.application.config.to_prepare do
-#   Layered::Assistant::ApplicationController.class_eval do
-#     private
-#
-#     def current_owner
-#       current_user&.organisation
-#     end
-#   end
+# Layered::Assistant.owner do
+#   current_user&.organisation
 # end
 
 # Optional settings (uncomment to enable):

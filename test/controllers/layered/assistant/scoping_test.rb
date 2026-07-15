@@ -22,6 +22,18 @@ module Layered
         get "/layered/assistant/conversations/#{conversation.uid}"
         assert_response :not_found
       end
+
+      test "owner block redirects the ownership boundary" do
+        other = users(:other)
+        Layered::Assistant.owner { other }
+
+        conversation = layered_assistant_conversations(:greeting)
+        conversation.update!(owner: users(:other))
+        get "/layered/assistant/conversations/#{conversation.uid}"
+        assert_response :success
+      ensure
+        Layered::Assistant.class_variable_set(:@@owner_block, nil)
+      end
     end
   end
 end

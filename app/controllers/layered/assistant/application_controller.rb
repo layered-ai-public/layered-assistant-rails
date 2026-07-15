@@ -11,10 +11,12 @@ module Layered
       private
 
       # The record ownership is stamped with on create and filtered by on
-      # reads. Override to scope records to something other than the
-      # signed-in user (e.g. their organisation).
+      # reads. Configure an owner block in the initialiser to scope records
+      # to something other than the signed-in user (e.g. their organisation).
       def current_owner
-        l_ui_current_user
+        block = Layered::Assistant.owner_block
+
+        block ? instance_exec(&block) : l_ui_current_user
       end
 
       def scoped(model_class)
