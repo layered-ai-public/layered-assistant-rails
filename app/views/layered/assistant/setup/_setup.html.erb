@@ -95,8 +95,10 @@ end</code></pre>
   New records are stamped with the controller's <code>current_owner</code> on create
   (defaulting to <code>l_ui_current_user</code>), and reads are filtered through
   <code>Model.owned_by(current_owner)</code>. Records owned by another owner (or unowned)
-  return 404, and when <code>current_owner</code> is nil (no signed-in user) no records are
-  returned at all - so make sure your authorize block only admits authenticated users.
+  return 404. When <code>current_owner</code> is nil (no signed-in user) reads return no
+  records and create actions raise <code>Layered::Assistant::MissingOwnerError</code> rather
+  than persisting an invisible unowned record - so make sure your authorize block only
+  admits authenticated users.
 </p>
 
 <h3 class="l-ui-mt-4">Changing the owner</h3>

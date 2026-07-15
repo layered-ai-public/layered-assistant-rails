@@ -18,7 +18,7 @@ module Layered
 
       def create
         @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
-        @assistant.owner = current_owner
+        @assistant.owner = current_owner!
         @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
 
         if @assistant.save

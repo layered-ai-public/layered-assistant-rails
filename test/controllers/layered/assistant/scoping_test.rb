@@ -23,6 +23,18 @@ module Layered
         assert_response :not_found
       end
 
+      test "create raises when the owner resolves to nil" do
+        Layered::Assistant.owner { nil }
+
+        assert_no_difference("Layered::Assistant::Conversation.count") do
+          assert_raises(Layered::Assistant::MissingOwnerError) do
+            post "/layered/assistant/conversations", params: { conversation: { name: "Orphan" } }
+          end
+        end
+      ensure
+        Layered::Assistant.class_variable_set(:@@owner_block, nil)
+      end
+
       test "owner block redirects the ownership boundary" do
         other = users(:other)
         Layered::Assistant.owner { other }

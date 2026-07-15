@@ -32,9 +32,10 @@ end
 # records are stamped with the controller's `current_owner` (defaulting to
 # `l_ui_current_user`), and reads are filtered through
 # `Model.owned_by(current_owner)`. Records owned by another owner (or unowned)
-# return 404. When `current_owner` is nil (no signed-in user), no records are
-# returned - your authorize block above should still ensure engine routes are
-# only reachable by authenticated users.
+# return 404. When `current_owner` is nil (no signed-in user), reads return no
+# records and create actions raise Layered::Assistant::MissingOwnerError rather
+# than persisting an invisible unowned record - your authorize block above
+# should still ensure engine routes are only reachable by authenticated users.
 #
 # To scope records to something other than the signed-in user (e.g. their
 # organisation), configure an owner block. Like the authorize block, it runs

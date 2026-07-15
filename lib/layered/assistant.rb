@@ -9,6 +9,8 @@ require "layered/assistant/engine"
 
 module Layered
   module Assistant
+    class MissingOwnerError < StandardError; end
+
     mattr_reader :authorize_block
     mattr_reader :owner_block
     mattr_accessor :log_errors, default: false

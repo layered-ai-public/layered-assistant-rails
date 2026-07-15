@@ -19,6 +19,13 @@ module Layered
         block ? instance_exec(&block) : l_ui_current_user
       end
 
+      # Owner stamping on create goes through this bang variant: persisting
+      # a record with a nil owner would leave it invisible to every scoped
+      # read, so a missing owner fails loudly instead.
+      def current_owner!
+        current_owner || raise(MissingOwnerError, "current_owner is nil - the authorize block admitted a request without a signed-in user, or the owner block returned nil")
+      end
+
       def scoped(model_class)
         model_class.owned_by(current_owner)
       end
