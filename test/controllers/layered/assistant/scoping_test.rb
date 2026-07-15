@@ -18,8 +18,7 @@ module Layered
 
       test "conversation owned by another user returns 404" do
         conversation = layered_assistant_conversations(:greeting)
-        other = User.create!(name: "Other", email: "other@example.com", password: "password")
-        conversation.update!(owner: other)
+        conversation.update!(owner: users(:other))
         get "/layered/assistant/conversations/#{conversation.uid}"
         assert_response :not_found
       end

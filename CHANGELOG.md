@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Breaking
 
-- Removed `Layered::Assistant.scope` configuration block. Engine records are now scoped to the signed-in user via a polymorphic `owner` association on every owner-bearing model (`Assistant`, `Conversation`, `Provider`, `Persona`, `Skill`), with reads filtered through `Model.owned_by(l_ui_current_user)`. Hosts that previously customised the scope block should override `l_ui_current_user` or subclass the engine's controllers instead
+- Removed `Layered::Assistant.scope` configuration block. Engine records are now scoped to the signed-in user via a polymorphic `owner` association on every owner-bearing model (`Assistant`, `Conversation`, `Provider`, `Persona`, `Skill`), with reads filtered through `Model.owned_by(l_ui_current_user)`; when there is no signed-in user, `owned_by(nil)` returns no records rather than exposing unowned ones. Hosts that previously customised the scope block should override `l_ui_current_user` or subclass the engine's controllers instead
 
 ## [0.6.0] - 2026-07-14
 

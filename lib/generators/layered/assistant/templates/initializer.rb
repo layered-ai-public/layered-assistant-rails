@@ -31,7 +31,9 @@
 # association on Assistant, Conversation, Provider, Persona and Skill. New
 # records are stamped with `owner = l_ui_current_user`, and reads are filtered
 # through `Model.owned_by(l_ui_current_user)`. Records owned by another user
-# (or unowned) return 404.
+# (or unowned) return 404. When `l_ui_current_user` is nil (no signed-in user),
+# no records are returned - your authorize block above should still ensure
+# engine routes are only reachable by authenticated users.
 #
 # To customise (e.g. team-based scoping, admins see all), override
 # `l_ui_current_user` or subclass the engine's controllers.
