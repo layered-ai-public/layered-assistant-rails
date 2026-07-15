@@ -1,6 +1,8 @@
 module Layered
   module Assistant
     class Provider < ApplicationRecord
+      include Ownable
+
       # Virtual attributes
       attr_accessor :create_models
 
@@ -9,7 +11,6 @@ module Layered
 
       # Associations
       has_many :models, dependent: :destroy
-      belongs_to :owner, polymorphic: true, optional: true
 
       # Enums
       enum :protocol, {

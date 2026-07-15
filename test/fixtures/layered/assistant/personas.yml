@@ -3,14 +3,17 @@ friendly:
   name: Friendly
   description: A warm and approachable persona.
   instructions: You are friendly and approachable. Use a warm tone and be encouraging.
+  owner: one (User)
 
 formal:
   uid: per_formal_fixture_002
   name: Formal
   description: A professional and formal persona.
   instructions: You are professional and formal. Use precise language and maintain a business-like tone.
+  owner: one (User)
 
 empty:
   uid: per_empty_fixture_003
   name: Empty persona
   description: A minimal persona with no assistants.
+  owner: one (User)

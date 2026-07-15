@@ -6,6 +6,7 @@ general:
   default_model: sonnet
   persona: friendly
   public: true
+  owner: one (User)
 
 coding:
   uid: ast_coding_fixture_002
@@ -14,9 +15,11 @@ coding:
   instructions: You are an expert programmer. Help the user write clean, well-tested code.
   default_model: sonnet
   public: true
+  owner: one (User)
 
 private:
   uid: ast_private_fixture_003
   name: Private assistant
   description: A private assistant for internal use.
   instructions: You are a private assistant.
+  owner: one (User)

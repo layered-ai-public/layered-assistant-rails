@@ -4,6 +4,7 @@ anthropic:
   enabled: true
   secret: sk-ant-test
   position: 1
+  owner: one (User)
 
 openai:
   name: OpenAI
@@ -11,6 +12,7 @@ openai:
   enabled: true
   secret: sk-oai-test
   position: 2
+  owner: one (User)
 
 disabled:
   name: Disabled Provider
@@ -18,3 +20,4 @@ disabled:
   enabled: false
   secret: sk-disabled
   position: 3
+  owner: one (User)

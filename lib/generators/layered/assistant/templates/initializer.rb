@@ -25,31 +25,25 @@
 #   head :forbidden unless current_user&.admin?
 # end
 
-# Configure record scoping for layered-assistant-rails.
-# By default, all records are visible to any authorised user. Use the scope
-# block to restrict which records are returned from the engine's controllers.
+# Record scoping
 #
-# The block receives the model class and runs in controller context, so you
-# have access to current_user and other helpers. Return an ActiveRecord
-# relation (e.g. model_class.where(...) or model_class.all).
+# Engine records are scoped to the signed-in user via a polymorphic `owner`
+# association on Assistant, Conversation, Provider, Persona and Skill. New
+# records are stamped with the controller's `current_owner` (defaulting to
+# `l_ui_current_user`), and reads are filtered through
+# `Model.owned_by(current_owner)`. Records owned by another owner (or unowned)
+# return 404. When `current_owner` is nil (no signed-in user), reads return no
+# records and create actions raise Layered::Assistant::MissingOwnerError rather
+# than persisting an invisible unowned record - your authorize block above
+# should still ensure engine routes are only reachable by authenticated users.
 #
-# All engine models with a polymorphic owner association are passed through
-# the scope block.
+# To scope records to something other than the signed-in user (e.g. their
+# organisation), configure an owner block. Like the authorize block, it runs
+# in controller context; it must return the record ownership is stamped with
+# on create and filtered by on reads.
 #
-# Scope all owned resources to the current user:
-#
-# Layered::Assistant.scope do |model_class|
-#   model_class.where(owner: current_user)
-# end
-#
-# Scope conversations only, leave others unscoped:
-#
-# Layered::Assistant.scope do |model_class|
-#   if model_class == Layered::Assistant::Conversation
-#     model_class.where(owner: current_user)
-#   else
-#     model_class.all
-#   end
+# Layered::Assistant.owner do
+#   current_user&.organisation
 # end
 
 # Optional settings (uncomment to enable):

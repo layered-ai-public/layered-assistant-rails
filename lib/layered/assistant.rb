@@ -9,8 +9,10 @@ require "layered/assistant/engine"
 
 module Layered
   module Assistant
+    class MissingOwnerError < StandardError; end
+
     mattr_reader :authorize_block
-    mattr_reader :scope_block
+    mattr_reader :owner_block
     mattr_accessor :log_errors, default: false
     mattr_accessor :api_request_timeout, default: 210
     mattr_accessor :skip_db_encryption, default: false
@@ -19,8 +21,8 @@ module Layered
       @@authorize_block = block
     end
 
-    def self.scope(&block)
-      @@scope_block = block
+    def self.owner(&block)
+      @@owner_block = block
     end
   end
 end

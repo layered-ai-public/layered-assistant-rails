@@ -62,7 +62,7 @@ module Layered
       end
 
       test "should destroy skill without assistants" do
-        skill = Skill.create!(name: "Disposable")
+        skill = Skill.create!(name: "Disposable", owner: users(:one))
 
         assert_difference("Skill.count", -1) do
           delete "/layered/assistant/skills/#{skill.id}"
@@ -76,48 +76,30 @@ module Layered
         skill = layered_assistant_skills(:research)
         skill.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         get "/layered/assistant/skills/#{skill.id}/edit"
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope skill on update" do
         skill = layered_assistant_skills(:research)
         skill.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         patch "/layered/assistant/skills/#{skill.id}", params: { skill: { name: "Hijacked" } }
         assert_response :not_found
 
         skill.reload
         assert_equal "Research", skill.name
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope skill on destroy" do
         skill = layered_assistant_skills(:research)
         skill.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         assert_no_difference("Skill.count") do
           delete "/layered/assistant/skills/#{skill.id}"
         end
 
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should not destroy skill with assistants" do

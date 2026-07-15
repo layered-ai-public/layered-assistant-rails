@@ -15,7 +15,7 @@ module Layered
 
       def create
         @provider = Provider.new(provider_params)
-        @provider.owner = l_ui_current_user
+        @provider.owner = current_owner!
 
         if @provider.save
           Models::CreateService.new(@provider).call if params[:provider][:create_models] == "1"

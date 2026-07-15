@@ -3,6 +3,15 @@ return if Rails.env.test?
 
 credentials = Rails.application.credentials
 
+# User
+#
+# Create the seed user first so we can stamp ownership onto every record.
+user = User.find_or_create_by!(email: "test.user@example.com") do |u|
+  u.name = "Test User"
+  u.password = "notasecret123"
+  u.password_confirmation = "notasecret123"
+end
+
 # Providers
 anthropic_key = credentials.dig(:providers, :anthropic_api_key) || ENV["ANTHROPIC_API_KEY"]
 if anthropic_key.present?
@@ -248,9 +257,15 @@ else
   Rails.logger.warn "No Sonnet model found - skipping skilled assistants"
 end
 
-# User
-user = User.find_or_create_by!(email: "test.user@example.com") do |u|
-  u.name = "Test User"
-  u.password = "notasecret123"
-  u.password_confirmation = "notasecret123"
+# Backfill ownership on any records that pre-date the seed user. Records
+# created without an owner are invisible to the owner-scoped controllers,
+# so stamp every engine record with the seed user as owner.
+[
+  Layered::Assistant::Provider,
+  Layered::Assistant::Persona,
+  Layered::Assistant::Skill,
+  Layered::Assistant::Assistant,
+  Layered::Assistant::Conversation
+].each do |klass|
+  klass.where(owner_id: nil).update_all(owner_id: user.id, owner_type: "User")
 end
