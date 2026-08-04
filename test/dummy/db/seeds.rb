@@ -111,6 +111,19 @@ if mistral_key.present?
   Layered::Assistant::Models::CreateService.new(mistral).call
 end
 
+fireworks_key = credentials.dig(:providers, :fireworks_api_key) || ENV["FIREWORKS_API_KEY"]
+if fireworks_key.present?
+  fireworks = Layered::Assistant::Provider.find_or_create_by!(
+    protocol: :openai,
+    name: "Fireworks"
+  ) do |provider|
+    provider.url = "https://api.fireworks.ai/inference/v1"
+    provider.secret = fireworks_key
+  end
+
+  Layered::Assistant::Models::CreateService.new(fireworks).call
+end
+
 # Personas
 personas_data = [
   {

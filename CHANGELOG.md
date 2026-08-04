@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Added
+
+- Fireworks provider template (OpenAI-compatible, `https://api.fireworks.ai/inference/v1`), with a matching model catalogue entry, dummy app seed block, and `FIREWORKS_API_KEY` in `.env.example`
+
+### Changed
+
+- Updated `data/models.json` with the latest models for each provider, ordered by recency and popularity
+
 ### Breaking
 
 - Removed `Layered::Assistant.scope` configuration block. Engine records are now scoped to the signed-in user via a polymorphic `owner` association on every owner-bearing model (`Assistant`, `Conversation`, `Provider`, `Persona`, `Skill`), with reads filtered through `Model.owned_by(current_owner)` in controllers; when there is no signed-in user, `owned_by(nil)` returns no records rather than exposing unowned ones, and create actions raise `Layered::Assistant::MissingOwnerError` rather than persisting an invisible unowned record. The owner defaults to `l_ui_current_user` and hosts that want a different ownership boundary (e.g. an organisation) - including those that previously customised the scope block - should configure a `Layered::Assistant.owner` block in the initialiser instead
