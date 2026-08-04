@@ -1,11 +1,12 @@
 module Layered
   module Assistant
     class Skill < ApplicationRecord
+      include Ownable
+
       # UID
       has_secure_token :uid
 
       # Associations
-      belongs_to :owner, polymorphic: true, optional: true
       has_many :assistant_skills, dependent: :restrict_with_error
       has_many :assistants, through: :assistant_skills
 

@@ -15,7 +15,7 @@ module Layered
 
       def create
         @skill = Skill.new(skill_params)
-        @skill.owner = l_ui_current_user
+        @skill.owner = current_owner!
 
         if @skill.save
           redirect_to layered_assistant.skills_path, notice: "Skill was successfully created."

@@ -59,25 +59,17 @@ Until configured, every request returns 403. Public routes under `/layered/assis
 
 ## Scoping (multi-tenant ownership)
 
-Engine models with a polymorphic `owner` association (assistants, personas, providers, models, skills, conversations) can be scoped per request. The block receives the model class and returns an `ActiveRecord::Relation`:
+Assistants, personas, providers, skills and conversations include `Ownable`, giving them a polymorphic `owner` and an `owned_by` scope. Controllers stamp the owner on create and filter by it on read, defaulting to the signed-in user - no configuration required.
+
+To move the boundary elsewhere, e.g. to an organisation:
 
 ```ruby
-Layered::Assistant.scope do |model_class|
-  model_class.where(owner: current_user)
+Layered::Assistant.owner do
+  current_user.organisation
 end
 ```
 
-Scope only conversations, leave the rest unscoped:
-
-```ruby
-Layered::Assistant.scope do |model_class|
-  if model_class == Layered::Assistant::Conversation
-    model_class.where(owner: current_user)
-  else
-    model_class.all
-  end
-end
-```
+A nil owner means reads return no records and creates raise `Layered::Assistant::MissingOwnerError`, rather than persisting a record that every scoped read would hide.
 
 Ownership is enforced **at the controller layer via `scoped()`**, not via model validations. Out-of-scope IDs return 404.
 
@@ -199,7 +191,7 @@ The engine renders inside `layered-ui-rails` layouts and uses only `l-ui-` class
 - **Provider creation fails with encryption error** - run `bin/rails db:encryption:init` and add the keys to credentials, or set `Layered::Assistant.skip_db_encryption = true` for dev/test.
 - **Panel body never loads** - `turbo-rails` must be installed and `layered-ui-rails` must be mounted in the layout. Check `import "@hotwired/turbo-rails"` is present.
 - **`layered_assistant` JS controllers missing** - ensure `import "layered_assistant"` is in `app/javascript/application.js` (added by the install generator, after the `layered_ui` import).
-- **Cross-tenant records visible** - configure `Layered::Assistant.scope` to filter by `owner`.
+- **No records visible, or `MissingOwnerError` on create** - `current_owner` is nil. Check the authorize block only admits signed-in users, and that any `Layered::Assistant.owner` block returns a record.
 
 ## Further reference
 

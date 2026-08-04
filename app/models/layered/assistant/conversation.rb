@@ -1,12 +1,13 @@
 module Layered
   module Assistant
     class Conversation < ApplicationRecord
+      include Ownable
+
       # UID
       has_secure_token :uid
 
       # Associations
       belongs_to :assistant, counter_cache: true
-      belongs_to :owner, polymorphic: true, optional: true
       belongs_to :subject, polymorphic: true, optional: true
       has_many :messages, dependent: :destroy
 

@@ -120,31 +120,27 @@ The `l_assistant_accessible?` helper evaluates the authorize block without side 
 
 ## Record scoping
 
-By default, all records are visible to any authorised user. If your application is multi-tenant or you need to restrict which records a user can see, configure a `scope` block in the initialiser.
+Engine records are owned. Assistants, conversations, personas, providers and skills are stamped with an owner on create and filtered by it on read, so users only see their own records. The owner defaults to the signed-in user, so multi-tenant apps need no configuration.
 
-The block receives the model class, runs in controller context, and must return an `ActiveRecord::Relation`. All engine models with a polymorphic `owner` association are passed through the scope block.
+### Changing the ownership boundary
 
-### Scope all owned resources to the current user
+To scope records to something other than the signed-in user - their organisation, say - configure an `owner` block in the initialiser:
 
 ```ruby
-Layered::Assistant.scope do |model_class|
-  model_class.where(owner: current_user)
+Layered::Assistant.owner do
+  current_user.organisation
 end
 ```
 
-### Scope conversations only
+The block runs in controller context. Whatever it returns is used as the owner for both reads and creates.
 
-```ruby
-Layered::Assistant.scope do |model_class|
-  if model_class == Layered::Assistant::Conversation
-    model_class.where(owner: current_user)
-  else
-    model_class.all
-  end
-end
-```
+### When there is no owner
 
-When no scope block is configured, queries are unscoped. Record-level access control is the host application's responsibility; the scope block is the integration point for it.
+Reads return no records, and create actions raise `Layered::Assistant::MissingOwnerError` rather than persisting a record that every scoped read would then hide. Make sure your authorize block only admits authenticated users.
+
+If you configure an owner block, it must return a record for every request your authorize block admits - not just for signed-in users. `current_user.organisation` returns nil for someone who has not created an organisation yet, and that user will hit `MissingOwnerError` on their first create. Either give the block a fallback, or have your authorize block send those users somewhere to set one up first.
+
+Ownership is enforced at the controller layer, not by model validations. Out-of-scope IDs return 404.
 
 ## Panel helpers
 

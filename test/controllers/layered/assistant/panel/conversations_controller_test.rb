@@ -46,17 +46,11 @@ module Layered
           assistant = layered_assistant_assistants(:general)
           assistant.update!(owner: nil)
 
-          Layered::Assistant.scope do |model_class|
-            model_class.where(owner: l_ui_current_user)
-          end
-
           assert_no_difference("Conversation.count") do
             post "/layered/assistant/panel/conversations", params: { conversation: { assistant_id: assistant.id } }
           end
 
           assert_response :not_found
-        ensure
-          Layered::Assistant.class_variable_set(:@@scope_block, nil)
         end
 
         test "should stop responding assistant message" do

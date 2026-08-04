@@ -62,7 +62,7 @@ module Layered
       end
 
       test "should destroy persona without assistants" do
-        persona = Persona.create!(name: "Disposable", instructions: "Temporary.")
+        persona = Persona.create!(name: "Disposable", instructions: "Temporary.", owner: users(:one))
 
         assert_difference("Persona.count", -1) do
           delete "/layered/assistant/personas/#{persona.id}"
@@ -76,48 +76,30 @@ module Layered
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         get "/layered/assistant/personas/#{persona.id}/edit"
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope persona on update" do
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         patch "/layered/assistant/personas/#{persona.id}", params: { persona: { name: "Hijacked" } }
         assert_response :not_found
 
         persona.reload
         assert_equal "Friendly", persona.name
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should return 404 for out-of-scope persona on destroy" do
         persona = layered_assistant_personas(:friendly)
         persona.update!(owner: nil)
 
-        Layered::Assistant.scope do |model_class|
-          model_class.where(owner: l_ui_current_user)
-        end
-
         assert_no_difference("Persona.count") do
           delete "/layered/assistant/personas/#{persona.id}"
         end
 
         assert_response :not_found
-      ensure
-        Layered::Assistant.class_variable_set(:@@scope_block, nil)
       end
 
       test "should not destroy persona with assistants" do

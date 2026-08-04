@@ -7,6 +7,12 @@ module Layered
         assert_equal "New conversation", Conversation.default_name
       end
 
+      test "owned_by returns nothing for a nil user even when unowned records exist" do
+        layered_assistant_conversations(:greeting).update!(owner: nil)
+
+        assert_empty Conversation.owned_by(nil)
+      end
+
       test "update_name_from_content! sets name from first message" do
         assistant = layered_assistant_assistants(:general)
         conversation = Conversation.create!(name: Conversation.default_name, assistant: assistant)
