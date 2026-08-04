@@ -257,9 +257,9 @@ else
   Rails.logger.warn "No Sonnet model found - skipping skilled assistants"
 end
 
-# Backfill ownership on any records that pre-date the seed user. Records
-# created without an owner are invisible to the owner-scoped controllers,
-# so stamp every engine record with the seed user as owner.
+# Stamp ownership onto every engine record. Records without an owner are
+# invisible to the owner-scoped controllers, so this must stay the last step
+# in the file - anything seeded below it would be left unowned.
 [
   Layered::Assistant::Provider,
   Layered::Assistant::Persona,
