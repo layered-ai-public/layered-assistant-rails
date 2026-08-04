@@ -138,6 +138,8 @@ The block runs in controller context. Whatever it returns is used as the owner f
 
 Reads return no records, and create actions raise `Layered::Assistant::MissingOwnerError` rather than persisting a record that every scoped read would then hide. Make sure your authorize block only admits authenticated users.
 
+If you configure an owner block, it must return a record for every request your authorize block admits - not just for signed-in users. `current_user.organisation` returns nil for someone who has not created an organisation yet, and that user will hit `MissingOwnerError` on their first create. Either give the block a fallback, or have your authorize block send those users somewhere to set one up first.
+
 Ownership is enforced at the controller layer, not by model validations. Out-of-scope IDs return 404.
 
 ## Panel helpers

@@ -117,6 +117,14 @@ end</code></pre>
   setting changes the ownership boundary everywhere. Note that existing records
   keep their original owner - switching owner type requires a data migration.
 </p>
+<p class="l-ui-mt-3">
+  The block must return a record for every request your authorize block admits, not
+  just for signed-in users. The example above returns nil for a user who has not
+  created an organisation yet, and that user will hit
+  <code>MissingOwnerError</code> on their first create. Either give the block a
+  fallback, or have your authorize block send those users somewhere to set one up
+  first.
+</p>
 
 <h2 class="l-ui-heading--section l-ui-mt-6">Panel helpers</h2>
 <p class="l-ui-mt-3">

@@ -45,6 +45,12 @@
 # Layered::Assistant.owner do
 #   current_user&.organisation
 # end
+#
+# The block must return a record for every request your authorize block admits,
+# not just for signed-in users. The example above returns nil for a user who has
+# not created an organisation yet, and that user will hit MissingOwnerError on
+# their first create. Either give the block a fallback, or have your authorize
+# block send those users somewhere to set one up first.
 
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout
