@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. This projec
 ### Added
 
 - Fireworks provider template (OpenAI-compatible, `https://api.fireworks.ai/inference/v1`), with a matching model catalogue entry, dummy app seed block, and `FIREWORKS_API_KEY` in `.env.example`
+- Assistant messages record the model that actually served the response in a new `resolved_model` column, shown alongside the requested model in the message footer when the two differ. This makes routing models such as OpenRouter's Auto Router (`openrouter/auto-beta`) usable without losing track of what answered
 
 ### Changed
 

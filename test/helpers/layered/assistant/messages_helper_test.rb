@@ -13,6 +13,28 @@ module Layered
 
       public
 
+      # --- message_model_label ---
+
+      test "model label is the model name when no resolved model is recorded" do
+        message = build_message(role: :assistant, content: "Hi")
+        message.model = layered_assistant_models(:sonnet)
+        assert_equal message.model.name, message_model_label(message)
+      end
+
+      test "model label is the model name when the resolved model matches" do
+        message = build_message(role: :assistant, content: "Hi")
+        message.model = layered_assistant_models(:sonnet)
+        message.resolved_model = message.model.identifier
+        assert_equal message.model.name, message_model_label(message)
+      end
+
+      test "model label names both models when the resolved model differs" do
+        message = build_message(role: :assistant, content: "Hi")
+        message.model = layered_assistant_models(:sonnet)
+        message.resolved_model = "z-ai/glm-5.2"
+        assert_equal "#{message.model.name} · z-ai/glm-5.2", message_model_label(message)
+      end
+
       # --- message_metadata_title ---
 
       test "metadata title includes token count" do
