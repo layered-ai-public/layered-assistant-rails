@@ -260,6 +260,22 @@ module Layered
         assert_equal "Hello there", message.reload.content
       end
 
+      test "records TTFT from the first reasoning token, not from the finish chunk" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+        service.mark_started!
+
+        service.call({ "choices" => [ { "delta" => { "content" => "", "reasoning" => "Hello" } } ] })
+        sleep 0.05
+        service.call({ "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ] })
+
+        message.reload
+        assert_not_nil message.ttft_ms
+        assert_operator message.response_ms - message.ttft_ms, :>=, 40,
+          "TTFT should be recorded when reasoning arrives, not at the end of the response"
+      end
+
       test "ignores reasoning when the model also sends content" do
         conversation = layered_assistant_conversations(:greeting)
         message = conversation.messages.create!(role: :assistant, content: nil)

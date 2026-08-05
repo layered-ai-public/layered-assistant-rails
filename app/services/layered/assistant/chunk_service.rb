@@ -44,7 +44,12 @@ module Layered
         @input_tokens  = @parser.input_tokens(chunk)  || @input_tokens
         @output_tokens = @parser.output_tokens(chunk) || @output_tokens
         @resolved_model = @parser.model(chunk) || @resolved_model
-        @reasoning << @parser.reasoning(chunk).to_s
+
+        # Reasoning tokens are output tokens, so they set TTFT just as text does.
+        if (reasoning = @parser.reasoning(chunk))
+          @timer.record_first_token!
+          @reasoning << reasoning
+        end
 
         if text
           @timer.record_first_token!
@@ -80,7 +85,6 @@ module Layered
       def fall_back_to_reasoning
         return if @reasoning.empty? || @message.content.present?
 
-        @timer.record_first_token!
         @message.update!(content: @reasoning)
         @broadcast_pending = true
       end
