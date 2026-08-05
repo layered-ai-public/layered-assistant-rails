@@ -100,7 +100,7 @@ module Layered
         return if attrs.empty?
 
         @message.update!(**attrs)
-        @message.conversation.update_token_totals!
+        @message.conversation.update_token_totals! if attrs.key?(:output_tokens)
       end
     end
   end
