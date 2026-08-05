@@ -28,6 +28,13 @@ module Layered
         assert_equal message.model.name, message_model_label(message)
       end
 
+      test "model label is the model name when the resolved model differs only by case" do
+        message = build_message(role: :assistant, content: "Hi")
+        message.model = layered_assistant_models(:sonnet)
+        message.resolved_model = message.model.identifier.upcase
+        assert_equal message.model.name, message_model_label(message)
+      end
+
       test "model label names both models when the resolved model differs" do
         message = build_message(role: :assistant, content: "Hi")
         message.model = layered_assistant_models(:sonnet)

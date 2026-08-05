@@ -9,7 +9,7 @@ module Layered
       def message_model_label(message)
         name = message.model.name
         resolved = message.resolved_model
-        return name if resolved.blank? || resolved == message.model.identifier
+        return name if resolved.blank? || resolved.casecmp?(message.model.identifier)
 
         "#{name} · #{resolved}"
       end
