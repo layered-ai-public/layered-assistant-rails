@@ -8,8 +8,8 @@ credentials = Rails.application.credentials
 # Create the seed user first so we can stamp ownership onto every record.
 user = User.find_or_create_by!(email: "test.user@example.com") do |u|
   u.name = "Test User"
-  u.password = "notasecret123"
-  u.password_confirmation = "notasecret123"
+  u.password = "Notasecret123-"
+  u.password_confirmation = "Notasecret123-"
 end
 
 # Providers

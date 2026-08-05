@@ -3,6 +3,17 @@ module Layered
     module MessagesHelper
       MIN_RESPONSE_MS_FOR_TPS = 100
 
+      # Routers such as OpenRouter's Auto Router pick a model per request, so
+      # the model that answered is not always the one that was asked for. Name
+      # both when they differ.
+      def message_model_label(message)
+        name = message.model.name
+        resolved = message.resolved_model
+        return name if resolved.blank? || resolved.casecmp?(message.model.identifier)
+
+        "#{name} · #{resolved}"
+      end
+
       def message_metadata_title(message)
         total_tokens = message.input_tokens.to_i + message.output_tokens.to_i
         parts = []

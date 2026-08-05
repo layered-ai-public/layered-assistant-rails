@@ -115,6 +115,72 @@ module Layered
         parser = ChunkParser.new("openai")
         assert_nil parser.output_tokens({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
       end
+
+      # Reasoning
+
+      test "openai: reasoning returns text from the reasoning delta" do
+        parser = ChunkParser.new("openai")
+        chunk = { "choices" => [ { "delta" => { "content" => "", "reasoning" => "Hello" } } ] }
+        assert_equal "Hello", parser.reasoning(chunk)
+      end
+
+      test "openai: reasoning returns nil when absent or empty" do
+        parser = ChunkParser.new("openai")
+        assert_nil parser.reasoning({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+        assert_nil parser.reasoning({ "choices" => [ { "delta" => { "reasoning" => "" } } ] })
+      end
+
+      test "anthropic: reasoning returns nil" do
+        parser = ChunkParser.new("anthropic")
+        assert_nil parser.reasoning({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+      end
+
+      # Usage on a finish_reason chunk (OpenRouter)
+
+      test "openai: usage_ready? is true when usage rides the finish_reason chunk" do
+        parser = ChunkParser.new("openai")
+        chunk = {
+          "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ],
+          "usage" => { "prompt_tokens" => 98, "completion_tokens" => 11 }
+        }
+        assert parser.usage_ready?(chunk)
+        assert_equal 98, parser.input_tokens(chunk)
+        assert_equal 11, parser.output_tokens(chunk)
+      end
+
+      test "openai: usage_ready? is false for a mid-stream chunk carrying usage" do
+        parser = ChunkParser.new("openai")
+        chunk = {
+          "choices" => [ { "delta" => { "content" => "Hi" }, "finish_reason" => nil } ],
+          "usage" => { "prompt_tokens" => 10, "completion_tokens" => 1 }
+        }
+        assert_not parser.usage_ready?(chunk)
+      end
+
+      # Resolved model
+
+      test "openai: model returns the model that served the request" do
+        parser = ChunkParser.new("openai")
+        chunk = { "model" => "z-ai/glm-5.2", "choices" => [ { "delta" => { "content" => "Hi" } } ] }
+        assert_equal "z-ai/glm-5.2", parser.model(chunk)
+      end
+
+      test "openai: model returns nil when absent or blank" do
+        parser = ChunkParser.new("openai")
+        assert_nil parser.model({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+        assert_nil parser.model({ "model" => "" })
+      end
+
+      test "anthropic: model returns the model from message_start" do
+        parser = ChunkParser.new("anthropic")
+        chunk = { "type" => "message_start", "message" => { "model" => "claude-opus-5" } }
+        assert_equal "claude-opus-5", parser.model(chunk)
+      end
+
+      test "anthropic: model returns nil for non-message_start chunk" do
+        parser = ChunkParser.new("anthropic")
+        assert_nil parser.model({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+      end
     end
   end
 end

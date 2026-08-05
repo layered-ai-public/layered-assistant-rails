@@ -19,7 +19,7 @@
     <div class="l-ui-message__footer">
       <% if message.model && !message.user? %>
         <% title = message_metadata_title(message) %>
-        <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message.model.name %></span>
+        <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message_model_label(message) %></span>
       <% end %>
       <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
     </div>

@@ -245,6 +245,100 @@ module Layered
         assert_equal 50, message.output_tokens
         assert_not message.tokens_estimated?
       end
+
+      # Reasoning-only responses
+
+      test "uses reasoning as the reply when the model sends no content" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "choices" => [ { "delta" => { "content" => "", "reasoning" => "Hello" } } ] })
+        service.call({ "choices" => [ { "delta" => { "content" => "", "reasoning" => " there" } } ] })
+        service.call({ "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ] })
+
+        assert_equal "Hello there", message.reload.content
+      end
+
+      test "records TTFT from the first reasoning token, not from the finish chunk" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+        service.mark_started!
+
+        service.call({ "choices" => [ { "delta" => { "content" => "", "reasoning" => "Hello" } } ] })
+        sleep 0.05
+        service.call({ "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ] })
+
+        message.reload
+        assert_not_nil message.ttft_ms
+        assert_operator message.response_ms - message.ttft_ms, :>=, 40,
+          "TTFT should be recorded when reasoning arrives, not at the end of the response"
+      end
+
+      test "ignores reasoning when the model also sends content" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "choices" => [ { "delta" => { "content" => "Answer", "reasoning" => "thinking out loud" } } ] })
+        service.call({ "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ] })
+
+        assert_equal "Answer", message.reload.content
+      end
+
+      test "records token usage when usage rides the finish_reason chunk" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+        service.call({
+          "choices" => [ { "delta" => { "content" => "" }, "finish_reason" => "stop" } ],
+          "usage" => { "prompt_tokens" => 98, "completion_tokens" => 11 }
+        })
+
+        message.reload
+        assert_equal 98, message.input_tokens
+        assert_equal 11, message.output_tokens
+        assert_not message.tokens_estimated?
+      end
+
+      # Resolved model
+
+      test "records the model that served an OpenAI-protocol response" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "model" => "z-ai/glm-5.2", "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+        service.call({ "choices" => [], "usage" => { "prompt_tokens" => 10, "completion_tokens" => 5 } })
+
+        assert_equal "z-ai/glm-5.2", message.reload.resolved_model
+      end
+
+      test "records the model that served an Anthropic response" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        service.call({ "type" => "message_start", "message" => { "model" => "claude-opus-5", "usage" => { "input_tokens" => 10 } } })
+        service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+        service.call({ "type" => "message_stop" })
+
+        assert_equal "claude-opus-5", message.reload.resolved_model
+      end
+
+      test "leaves resolved model nil when the response omits it" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = conversation.messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+        service.call({ "type" => "message_stop" })
+
+        assert_nil message.reload.resolved_model
+      end
     end
   end
 end
