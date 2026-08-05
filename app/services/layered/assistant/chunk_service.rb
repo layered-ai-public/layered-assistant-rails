@@ -32,7 +32,7 @@ module Layered
           if @stopped
             attrs = @timer.timing_attrs.merge(resolved_model_attrs)
             unless attrs.empty?
-              @message.update!(attrs)
+              @message.update!(**attrs)
               @message.broadcast_updated
             end
             return

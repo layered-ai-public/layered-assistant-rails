@@ -17,6 +17,8 @@ module Layered
       # Some models stream their whole reply in the reasoning field and leave
       # content empty (DeepSeek via OpenRouter does this). Kept apart from
       # #text so reasoning is only ever shown when no content arrives at all.
+      # Anthropic thinking blocks are not covered here; they always come
+      # alongside content, so there is nothing to fall back to.
       def reasoning(chunk)
         return unless @openai
 
