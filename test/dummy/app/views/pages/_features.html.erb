@@ -1,31 +1,66 @@
 <h2 class="mt-6">Features</h2>
-<div class="l-ui-grid mt-4">
-  <div class="l-ui-surface flex items-center gap-4">
-    <%= image_tag "icon_cloud.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
-    <div>
-      <h3>Multi-provider and model support</h3>
-      <p>Use cloud (Anthropic, OpenAI, Gemini, Mistral, Groq, OpenRouter, Fireworks) or local (Ollama or LM Studio) providers with configurable models.</p>
-    </div>
+<div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-1">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_agent.svg" %>')" aria-hidden="true"></span>
+      <span>Agent skill</span>
+    </h3>
+    <p class="l-ui-card__body">Bundled agent skill teaches AI agents to install, configure, and build with <code>layered-assistant-rails</code>.</p>
   </div>
-  <div class="l-ui-surface flex items-center gap-4">
-    <%= image_tag "icon_bolt.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
-    <div>
-      <h3>Streaming responses</h3>
-      <p>Real-time streaming via Turbo Streams for a responsive chat experience with dynamic token fade-in and chunked markdown formatting.</p>
-    </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-2">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_cloud.svg" %>')" aria-hidden="true"></span>
+      <span>Multi-provider and model support</span>
+    </h3>
+    <p class="l-ui-card__body">Use cloud (Anthropic, OpenAI, Gemini, Mistral, Groq, OpenRouter, Fireworks) or local (Ollama or LM Studio) providers with configurable models.</p>
   </div>
-  <div class="l-ui-surface flex items-center gap-4">
-    <%= image_tag "icon_chat.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
-    <div>
-      <h3>Conversation UI</h3>
-      <p>Full conversation interface with message history, model selection, and a slide-out panel mode.</p>
-    </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-3">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_bolt.svg" %>')" aria-hidden="true"></span>
+      <span>Streaming responses</span>
+    </h3>
+    <p class="l-ui-card__body">Real-time streaming via Turbo Streams with dynamic token fade-in, markdown rendered server-side by Kramdown a block at a time, and a stop button to cancel mid-response.</p>
   </div>
-  <div class="l-ui-surface flex items-center gap-4">
-    <%= image_tag "icon_lock.svg", class: "l-ui-icon l-ui-icon--xl dark:invert", alt: "", aria: { hidden: true } %>
-    <div>
-      <h3>Encrypted secrets</h3>
-      <p>API keys are encrypted at rest using Active Record Encryption.</p>
-    </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-4">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_chat.svg" %>')" aria-hidden="true"></span>
+      <span>Conversation UI and side panel</span>
+    </h3>
+    <p class="l-ui-card__body">Message history, model selection, and conversation switching - either full-screen or in a slide-out panel, wired into your own layout with two helpers.</p>
+  </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-5">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "layered_assistant/icon_personas.svg" %>')" aria-hidden="true"></span>
+      <span>Personas and skills</span>
+    </h3>
+    <p class="l-ui-card__body">Reusable personas and skills compose into an assistant's system prompt, so behaviour and instructions are written once and shared across assistants.</p>
+  </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-1">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_globe.svg" %>')" aria-hidden="true"></span>
+      <span>Public assistants</span>
+    </h3>
+    <p class="l-ui-card__body">Publish an assistant to signed-out visitors. Guests chat full-screen with their conversations tracked in the session, no account required.</p>
+  </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-2">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_shield.svg" %>')" aria-hidden="true"></span>
+      <span>Scoped and authorised</span>
+    </h3>
+    <p class="l-ui-card__body">Every record is stamped with an owner and filtered on read, so users only see their own. Engine routes are blocked by default until you configure an <code>authorize</code> block.</p>
+  </div>
+
+  <div class="l-ui-card l-ui-card--gradient l-ui-tint-3">
+    <h3 class="l-ui-card__title">
+      <span class="l-ui-card__icon" style="--l-ui-icon-src: url('<%= asset_path "icon_lock.svg" %>')" aria-hidden="true"></span>
+      <span>Encrypted secrets and metrics</span>
+    </h3>
+    <p class="l-ui-card__body">API keys are encrypted at rest with Active Record Encryption. Messages record tokens, tok/s, time to first token, and the model that actually served the response.</p>
   </div>
 </div>

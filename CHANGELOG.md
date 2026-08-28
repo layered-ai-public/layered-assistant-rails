@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Changed
 
+- Bump `layered-ui-rails` from `~> 0.22` to `~> 0.25`, picking up the combobox control (`l_ui_combobox` and `as: :combobox` form fields), the Devise account settings screen with the sidebar account menu, view ejection, and the `--l-ui-navigation-width` token. No engine views needed changes; the dummy app now permits `name` for `:account_update` so the new Settings screen can save it
 - Updated `data/models.json` with the latest models for each provider, ordered by recency and popularity
 
 ### Breaking
