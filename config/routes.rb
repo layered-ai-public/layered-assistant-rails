@@ -1,6 +1,6 @@
 Layered::Assistant::Engine.routes.draw do
   root "setup#index"
-  resources :personas, except: [ :show ]
+  layered_resources :personas, namespace: "Layered::Assistant", except: [ :show ]
   layered_resources :skills, namespace: "Layered::Assistant", except: [ :show ]
   resources :assistants, except: [ :show ] do
     resources :conversations, only: [ :index ]
