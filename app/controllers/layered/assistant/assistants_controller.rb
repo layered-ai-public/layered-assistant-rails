@@ -5,6 +5,10 @@ module Layered
     # a field's `collection:` is resolved without a controller - so the
     # options are filled in here, and the ids that come back are resolved
     # through `scoped` before they reach the record.
+    #
+    # `@fields` is set by the gem's own `load_layered_resource`, declared
+    # when `Layered::Resource::Controller` is included by ResourcesController,
+    # so it has always run by the time this subclass's callback does.
     class AssistantsController < ResourcesController
       before_action :scope_choice_fields, only: [ :new, :create, :edit, :update ]
 
