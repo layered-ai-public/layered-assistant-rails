@@ -27,11 +27,25 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/providers"
-        assert_equal "Provider was successfully created.", flash[:notice]
+        assert_equal "Provider created", flash[:notice]
 
         provider = Provider.last
         assert_equal "sk-secret-key", provider.secret
         assert_equal users(:one), provider.owner
+      end
+
+      test "should seed models when the new form asks for them" do
+        post "/layered/assistant/providers", params: { provider: { name: "Anthropic", protocol: "anthropic", url: "https://api.anthropic.com", create_models: "1" } }
+
+        assert_redirected_to "/layered/assistant/providers"
+        assert_predicate Provider.last.models, :any?
+      end
+
+      test "should not seed models when the new form declines them" do
+        post "/layered/assistant/providers", params: { provider: { name: "Anthropic", protocol: "anthropic", url: "https://api.anthropic.com", create_models: "0" } }
+
+        assert_redirected_to "/layered/assistant/providers"
+        assert_empty Provider.last.models
       end
 
       test "should not create provider with invalid params" do
@@ -64,7 +78,7 @@ module Layered
 
         patch "/layered/assistant/providers/#{provider.id}", params: { provider: { name: "Updated Name", protocol: "openai", secret: "sk-updated-secret" } }
         assert_redirected_to "/layered/assistant/providers"
-        assert_equal "Provider was successfully updated.", flash[:notice]
+        assert_equal "Provider updated", flash[:notice]
 
         provider.reload
         assert_equal "Updated Name", provider.name
@@ -88,7 +102,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/providers"
-        assert_equal "Provider was successfully deleted.", flash[:notice]
+        assert_equal "Provider deleted", flash[:notice]
       end
     end
   end
