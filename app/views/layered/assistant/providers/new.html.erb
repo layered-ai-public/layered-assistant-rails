@@ -21,6 +21,15 @@
      hint: "Popular model identifiers are sourced from data/models.json in the layered-assistant-rails repository."
    } %>
 
+<%# The key hint belongs beside the secret field, not up in the picker, so the
+    Stimulus target is rendered as that field's hint - which also wires the
+    input's aria-describedby to it. %>
+<% fields = @fields.map do |field|
+     next field unless field[:attribute] == :secret
+
+     field.merge(hint: tag.span(hidden: true, data: { provider_template_target: "secretHint" }))
+   end %>
+
 <div class="l-ui-spread">
   <div>
     <%= l_ui_breadcrumbs do %>
@@ -45,8 +54,7 @@
       <% end %>
     </select>
     <div class="l-ui-form__hint" hidden data-provider-template-target="description"></div>
-    <div class="l-ui-form__hint" hidden data-provider-template-target="secretHint"></div>
   </div>
 
-  <%= l_ui_form(@record, fields: @fields + [ create_models_field ], url: @form_url) %>
+  <%= l_ui_form(@record, fields: fields + [ create_models_field ], url: @form_url) %>
 </div>

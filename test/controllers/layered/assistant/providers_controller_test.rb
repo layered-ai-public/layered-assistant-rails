@@ -37,6 +37,13 @@ module Layered
         end
       end
 
+      test "the secret hint target sits with the secret field, not the picker" do
+        get "/layered/assistant/providers/new"
+
+        assert_select "#provider_secret_hint [data-provider-template-target=?]", "secretHint"
+        assert_select "#provider_secret[aria-describedby=?]", "provider_secret_hint provider_secret_error"
+      end
+
       test "should create provider with valid params" do
         assert_difference("Provider.count", 1) do
           post "/layered/assistant/providers", params: { provider: { name: "New Provider", protocol: "anthropic", url: "https://api.anthropic.com", secret: "sk-secret-key", enabled: true, position: 1 } }
