@@ -6,7 +6,7 @@ module Layered
     class ProvidersController < ResourcesController
       def create
         super.tap do
-          Models::CreateService.new(@record).call if @record.persisted? && params[:provider][:create_models] == "1"
+          Models::CreateService.new(@record).call if @record.persisted? && params.dig(:provider, :create_models) == "1"
         end
       end
     end
