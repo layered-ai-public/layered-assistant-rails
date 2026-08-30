@@ -7,7 +7,7 @@ Layered::Assistant::Engine.routes.draw do
   end
   layered_resources :providers, namespace: "Layered::Assistant", controller: "providers", except: [ :show ]
   resources :providers, only: [] do
-    resources :models, only: [ :index, :new, :create, :edit, :update, :destroy ]
+    layered_resources :models, namespace: "Layered::Assistant", except: [ :show ]
   end
   resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     patch :stop, on: :member
