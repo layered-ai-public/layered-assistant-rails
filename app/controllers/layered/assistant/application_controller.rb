@@ -37,6 +37,17 @@ module Layered
         Model.available.merge(scoped(Provider))
       end
 
+      # The composer posts the model to answer with, so the id has to be
+      # resolved through `scoped_models` before it reaches a message -
+      # otherwise a request could name another owner's model and have the
+      # response generated through their provider, on their API key. An
+      # out-of-scope id 404s, as it does everywhere else.
+      def scoped_model_id(model_id)
+        return nil if model_id.blank?
+
+        scoped_models.find(model_id).id
+      end
+
       def layered_assistant_authorize!
         block = Layered::Assistant.authorize_block
 

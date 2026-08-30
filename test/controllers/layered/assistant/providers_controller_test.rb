@@ -29,6 +29,14 @@ module Layered
         assert_select "form.l-ui-form"
       end
 
+      test "new form carries every provider template target" do
+        get "/layered/assistant/providers/new"
+
+        %w[name protocol url description secretHint].each do |target|
+          assert_select "[data-provider-template-target=?]", target
+        end
+      end
+
       test "should create provider with valid params" do
         assert_difference("Provider.count", 1) do
           post "/layered/assistant/providers", params: { provider: { name: "New Provider", protocol: "anthropic", url: "https://api.anthropic.com", secret: "sk-secret-key", enabled: true, position: 1 } }

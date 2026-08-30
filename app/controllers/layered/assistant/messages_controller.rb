@@ -15,7 +15,7 @@ module Layered
         result = create_messages_for(
           conversation: @conversation,
           content: message_params[:content],
-          model_id: message_params[:model_id]
+          model_id: scoped_model_id(message_params[:model_id])
         )
         @message = result[:message]
 
