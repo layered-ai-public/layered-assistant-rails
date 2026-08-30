@@ -30,6 +30,13 @@ module Layered
         model_class.owned_by(current_owner)
       end
 
+      # Models carry no owner of their own - they belong to the owner of
+      # their provider - so the set a request may choose from is filtered
+      # through the provider rather than through `scoped`.
+      def scoped_models
+        Model.available.merge(scoped(Provider))
+      end
+
       def layered_assistant_authorize!
         block = Layered::Assistant.authorize_block
 

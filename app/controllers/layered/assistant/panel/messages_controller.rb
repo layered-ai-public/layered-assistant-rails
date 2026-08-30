@@ -20,7 +20,7 @@ module Layered
           end
 
           @assistant_message = result[:assistant_message]
-          @models = Model.available
+          @models = scoped_models
           @selected_model_id = message_params[:model_id]
           @error = result[:error]
 

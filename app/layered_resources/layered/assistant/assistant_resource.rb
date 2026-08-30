@@ -19,15 +19,14 @@ module Layered
 
       default_sort attribute: :name, direction: :asc
 
-      # `persona_id` and `skill_ids` carry no collection here: the options
-      # have to be scoped to the owner, and only the controller can resolve
-      # one. AssistantsController fills them in per request.
+      # `default_model_id`, `persona_id` and `skill_ids` carry no collection
+      # here: the options have to be scoped to the owner, and only the
+      # controller can resolve one. AssistantsController fills them in per
+      # request.
       fields [
         { attribute: :name },
         { attribute: :description, as: :text, rows: 3 },
-        { attribute: :default_model_id, label: "Default model", as: :select,
-          collection: -> { Model.available.map { |m| [ "#{m.provider.name} - #{m.name}", m.id ] } },
-          include_blank: "None" },
+        { attribute: :default_model_id, label: "Default model", as: :select, include_blank: "None" },
         { attribute: :instructions, as: :text, rows: 5 },
         { attribute: :persona_id, label: "Persona", as: :select, include_blank: "None" },
         { attribute: :skill_ids, label: "Skills", as: :combobox, multiple: true, permit: [] },

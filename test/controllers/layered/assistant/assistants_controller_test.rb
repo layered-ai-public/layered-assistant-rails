@@ -106,6 +106,38 @@ module Layered
         assert_not_equal persona, assistant.persona
       end
 
+      test "should reject an out-of-scope default_model_id on create" do
+        model = layered_assistant_models(:sonnet)
+        model.provider.update!(owner: nil)
+
+        assert_no_difference("Assistant.count") do
+          post "/layered/assistant/assistants", params: { assistant: { name: "Sneaky", default_model_id: model.id } }
+        end
+
+        assert_response :not_found
+      end
+
+      test "should reject an out-of-scope default_model_id on update" do
+        assistant = layered_assistant_assistants(:general)
+        model = layered_assistant_models(:gpt)
+        model.provider.update!(owner: nil)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { default_model_id: model.id } }
+        assert_response :not_found
+
+        assert_not_equal model, assistant.reload.default_model
+      end
+
+      test "should not offer another owner's models in the picker" do
+        model = layered_assistant_models(:sonnet)
+        model.provider.update!(owner: nil)
+
+        get "/layered/assistant/assistants/new"
+        assert_response :success
+        assert_select "option[value=?]", model.id.to_s, count: 0
+        assert_select "option[value=?]", layered_assistant_models(:gpt).id.to_s
+      end
+
       test "should assign skills on update" do
         assistant = layered_assistant_assistants(:general)
         skill = layered_assistant_skills(:coding)
