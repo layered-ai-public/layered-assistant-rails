@@ -15,6 +15,14 @@ module Layered
         assert_select "table.l-ui-table"
       end
 
+      test "index links out of the turbo frame to a provider's models" do
+        provider = layered_assistant_providers(:anthropic)
+
+        get "/layered/assistant/providers"
+        assert_select "a[href=?][data-turbo-frame=?]",
+                      "/layered/assistant/providers/#{provider.id}/models", "_top"
+      end
+
       test "should get new" do
         get "/layered/assistant/providers/new"
         assert_response :success

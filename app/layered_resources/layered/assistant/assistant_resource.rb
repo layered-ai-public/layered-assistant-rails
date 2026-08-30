@@ -12,7 +12,14 @@ module Layered
           render: ->(record, _view) { record.persona&.name || "None" } },
         { attribute: :assistant_skills_count, label: "Skills" },
         { attribute: :conversations_count, label: "Conversations",
-          render: ->(record, view) { view.link_to(record.conversations_count, view.layered_assistant.assistant_conversations_path(record)) } }
+          render: ->(record, view) {
+            # Rendered inside the index's turbo frame, so the link has to
+            # break out of it the way the gem's own links do - the
+            # conversations screen has no frame of this name to swap into.
+            view.link_to(record.conversations_count,
+                         view.layered_assistant.assistant_conversations_path(record),
+                         data: { turbo_frame: "_top" })
+          } }
       ]
 
       search_fields [ :name, :description ]

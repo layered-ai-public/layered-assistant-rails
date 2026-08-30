@@ -6,8 +6,7 @@ module Layered
       columns [
         { attribute: :name, primary: true },
         { attribute: :protocol, render: ->(record, view) { view.t("layered_assistant.protocols.#{record.protocol}") } },
-        { attribute: :models_count, label: "Models",
-          render: ->(record, view) { view.link_to(record.models_count, view.layered_assistant.provider_models_path(record)) } },
+        { attribute: :models_count, label: "Models", link: :provider_models },
         { attribute: :enabled,
           render: ->(record, view) {
             view.tag.span(record.enabled? ? "Enabled" : "Disabled",

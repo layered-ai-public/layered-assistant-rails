@@ -9,6 +9,14 @@ module Layered
         assert_select "table.l-ui-table"
       end
 
+      test "index links out of the turbo frame to an assistant's conversations" do
+        assistant = layered_assistant_assistants(:general)
+
+        get "/layered/assistant/assistants"
+        assert_select "a[href=?][data-turbo-frame=?]",
+                      "/layered/assistant/assistants/#{assistant.id}/conversations", "_top"
+      end
+
       test "should get new" do
         get "/layered/assistant/assistants/new"
         assert_response :success
