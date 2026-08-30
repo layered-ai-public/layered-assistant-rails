@@ -1,83 +1,44 @@
 module Layered
   module Assistant
-    class AssistantsController < ApplicationController
-      before_action :set_assistant, only: [ :edit, :update, :destroy ]
-      before_action :set_models, only: [ :new, :create, :edit, :update ]
-      before_action :set_personas, only: [ :new, :create, :edit, :update ]
-      before_action :set_skills, only: [ :new, :create, :edit, :update ]
-
-      def index
-        @page_title = "Assistants"
-        @pagy, @assistants = pagy(scoped(Assistant).includes(:persona).by_name)
-      end
-
-      def new
-        @page_title = "New assistant"
-        @assistant = Assistant.new
-      end
-
-      def create
-        @assistant = Assistant.new(assistant_params.except(:persona_id, :skill_ids))
-        @assistant.owner = current_owner!
-        @assistant.persona = scoped(Persona).find(assistant_params[:persona_id]) if assistant_params[:persona_id].present?
-
-        if @assistant.save
-          assign_skills
-          redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully created."
-        else
-          render :new, status: :unprocessable_entity
-        end
-      end
-
-      def edit
-        @page_title = "Edit assistant"
-      end
-
-      def update
-        if assistant_params.key?(:persona_id)
-          @assistant.persona = assistant_params[:persona_id].present? ? scoped(Persona).find(assistant_params[:persona_id]) : nil
-        end
-
-        if @assistant.update(assistant_params.except(:persona_id, :skill_ids))
-          assign_skills
-          redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully updated."
-        else
-          render :edit, status: :unprocessable_entity
-        end
-      end
-
-      def destroy
-        @assistant.destroy
-        redirect_to layered_assistant.assistants_path, notice: "Assistant was successfully deleted."
-      end
+    # Assistants point at a persona and a set of skills, both of which are
+    # owner-scoped. The resource class cannot scope them itself - a field's
+    # `collection:` is resolved without a controller - so the options are
+    # filled in here, and the ids that come back are resolved through
+    # `scoped` before they reach the record.
+    class AssistantsController < ResourcesController
+      before_action :scope_choice_fields, only: [ :new, :create, :edit, :update ]
 
       private
 
-      def set_assistant
-        @assistant = scoped(Assistant).find(params[:id])
-      end
+      def scope_choice_fields
+        personas = scoped(Persona).by_name.map { |persona| [ persona.name, persona.id ] }
+        skills = scoped(Skill).by_name.map { |skill| [ skill.name, skill.id ] }
 
-      def set_models
-        @models = Model.available
-      end
-
-      def set_personas
-        @personas = scoped(Persona).by_name
-      end
-
-      def set_skills
-        @skills = scoped(Skill).by_name
-      end
-
-      def assign_skills
-        if assistant_params.key?(:skill_ids)
-          skill_ids = Array(assistant_params[:skill_ids]).compact_blank
-          @assistant.skills = scoped(Skill).where(id: skill_ids)
+        @fields = @fields.map do |field|
+          case field[:attribute]
+          when :persona_id then field.merge(collection: personas)
+          when :skill_ids then field.merge(collection: skills)
+          else field
+          end
         end
       end
 
-      def assistant_params
-        params.require(:assistant).permit(:name, :description, :instructions, :default_model_id, :persona_id, :public, skill_ids: [])
+      # An out-of-scope persona 404s rather than being silently dropped,
+      # matching how a record itself is looked up. Skills are filtered
+      # instead: the picker posts a list, and one stale entry should not
+      # fail the whole save.
+      def layered_resource_params
+        attributes = super
+
+        if attributes[:persona_id].present?
+          attributes[:persona_id] = scoped(Persona).find(attributes[:persona_id]).id
+        end
+
+        if attributes.key?(:skill_ids)
+          attributes[:skill_ids] = scoped(Skill).where(id: Array(attributes[:skill_ids]).compact_blank).ids
+        end
+
+        attributes
       end
     end
   end

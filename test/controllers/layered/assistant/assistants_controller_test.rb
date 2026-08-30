@@ -21,7 +21,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully created.", flash[:notice]
+        assert_equal "Assistant created", flash[:notice]
 
         assistant = Assistant.order(:id).last
         assert_equal users(:one), assistant.owner
@@ -68,7 +68,7 @@ module Layered
 
         patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { name: "Updated Name", description: "New description" } }
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully updated.", flash[:notice]
+        assert_equal "Assistant updated", flash[:notice]
 
         assistant.reload
         assert_equal "Updated Name", assistant.name
@@ -106,6 +106,37 @@ module Layered
         assert_not_equal persona, assistant.persona
       end
 
+      test "should assign skills on update" do
+        assistant = layered_assistant_assistants(:general)
+        skill = layered_assistant_skills(:coding)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { skill_ids: [ "", skill.id ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_equal [ skill ], assistant.reload.skills
+      end
+
+      test "should clear skills when the picker posts none" do
+        assistant = layered_assistant_assistants(:general)
+        assert_predicate assistant.skills, :any?
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { skill_ids: [ "" ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_empty assistant.reload.skills
+      end
+
+      test "should drop an out-of-scope skill_id on update" do
+        assistant = layered_assistant_assistants(:general)
+        skill = layered_assistant_skills(:coding)
+        skill.update!(owner: nil)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { skill_ids: [ "", skill.id ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_empty assistant.reload.skills
+      end
+
       test "should destroy assistant" do
         assistant = Assistant.create!(name: "Disposable", owner: users(:one))
 
@@ -114,7 +145,7 @@ module Layered
         end
 
         assert_redirected_to "/layered/assistant/assistants"
-        assert_equal "Assistant was successfully deleted.", flash[:notice]
+        assert_equal "Assistant deleted", flash[:notice]
       end
     end
   end
