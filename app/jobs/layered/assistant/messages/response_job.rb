@@ -32,7 +32,16 @@ module Layered
             message.broadcast_updated
           end
 
-          message.broadcast_response_complete unless message.reload.stopped?
+          return if message.reload.stopped?
+
+          # A response that asked for tools is not finished: the tools run and
+          # a fresh assistant message picks the answer back up, so the composer
+          # stays disabled until that one completes.
+          if message.tool_calls.any?
+            ToolRunnerService.new.call(message: message)
+          else
+            message.broadcast_response_complete
+          end
         end
       end
     end

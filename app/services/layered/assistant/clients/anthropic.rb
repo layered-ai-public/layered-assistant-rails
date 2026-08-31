@@ -2,7 +2,7 @@ module Layered
   module Assistant
     module Clients
       class Anthropic < Base
-        def chat(messages:, model:, stream_proc:)
+        def chat(messages:, model:, stream_proc:, tools: [])
           formatted = MessagesService.new.format(messages, provider: @provider)
 
           parameters = {
@@ -12,6 +12,7 @@ module Layered
             stream: stream_proc
           }
           parameters[:system] = formatted[:system] if formatted[:system].present?
+          parameters[:tools] = tools if tools.present?
 
           ::Anthropic::Client.new(
             access_token: @api_key,

@@ -52,7 +52,16 @@ end
 # their first create. Either give the block a fallback, or have your authorize
 # block send those users somewhere to set one up first.
 
+# Tools
+#
+# Tool classes the assistant may call, listed in a block so that they reload
+# in development. See app/tools in this dummy application for examples.
+Layered::Assistant.tools do
+  [ CurrentTimeTool, UserLookupTool ]
+end
+
 # Optional settings (uncomment to enable):
 Layered::Assistant.log_errors = true                # log API errors to stdout
 Layered::Assistant.api_request_timeout = 210        # total API timeout in seconds, including full streaming response (default: 210)
 # Layered::Assistant.skip_db_encryption = true      # skip encryption on Provider#secret (dev/test only)
+# Layered::Assistant.max_tool_cycles = 10           # rounds of tool calls one prompt may trigger (default: 10)

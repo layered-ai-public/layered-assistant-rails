@@ -71,6 +71,45 @@ module Layered
           chunk.dig("usage", "output_tokens")&.to_i
         end
       end
+
+      # Fragments of the tool calls the model is asking for, or nil when the
+      # chunk carries none. Both protocols stream a call as an opening
+      # fragment naming the tool followed by its arguments as JSON string
+      # fragments; `key` is what ties the fragments of one call together.
+      def tool_calls(chunk)
+        @openai ? openai_tool_calls(chunk) : anthropic_tool_calls(chunk)
+      end
+
+      private
+
+      def openai_tool_calls(chunk)
+        calls = chunk.dig("choices", 0, "delta", "tool_calls")
+        return if calls.blank?
+
+        calls.map do |call|
+          {
+            key: call["index"] || 0,
+            id: call["id"],
+            name: call.dig("function", "name"),
+            arguments: call.dig("function", "arguments")
+          }
+        end
+      end
+
+      def anthropic_tool_calls(chunk)
+        case chunk["type"]
+        when "content_block_start"
+          block = chunk["content_block"]
+          return unless block && block["type"] == "tool_use"
+
+          [ { key: chunk["index"], id: block["id"], name: block["name"] } ]
+        when "content_block_delta"
+          delta = chunk["delta"]
+          return unless delta && delta["type"] == "input_json_delta"
+
+          [ { key: chunk["index"], arguments: delta["partial_json"] } ]
+        end
+      end
     end
   end
 end

@@ -13,6 +13,7 @@ module Layered
         @output_tokens = 0
         @resolved_model = nil
         @reasoning = +""
+        @tool_calls = ToolCallAccumulator.new
         @chunk_count = 0
         @stopped = false
         @last_broadcast_at = 0
@@ -51,6 +52,11 @@ module Layered
           @reasoning << reasoning
         end
 
+        if (fragments = @parser.tool_calls(chunk))
+          @timer.record_first_token!
+          fragments.each { |fragment| @tool_calls.add(**fragment) }
+        end
+
         if text
           @timer.record_first_token!
           @message.update!(content: (@message.content || "") + text)
@@ -58,6 +64,7 @@ module Layered
         end
 
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
+          save_tool_calls
           fall_back_to_reasoning
           save_token_usage
           @message.broadcast_streaming_content if @broadcast_pending
@@ -79,11 +86,17 @@ module Layered
         @message.broadcast_streaming_content
       end
 
+      def save_tool_calls
+        return unless @tool_calls.any?
+
+        @message.update!(tool_calls: @tool_calls.to_a)
+      end
+
       # When a model answers entirely in the reasoning field there is no content
       # to show, which leaves the message stuck on the typing indicator. Adopt
       # the reasoning as the reply rather than rendering an empty bubble.
       def fall_back_to_reasoning
-        return if @reasoning.empty? || @message.content.present?
+        return if @reasoning.empty? || @message.content.present? || @tool_calls.any?
 
         @message.update!(content: @reasoning)
         @broadcast_pending = true

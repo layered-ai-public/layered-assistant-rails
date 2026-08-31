@@ -96,6 +96,81 @@ module Layered
         assert_equal 1, system_messages.size
         assert_equal "You are a helpful assistant.", system_messages.first[:content]
       end
+
+      # Tool calls
+
+      test "an assistant message with tool calls becomes a tool_use block for Anthropic" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :user, content: "What time is it?")
+        conversation.messages.create!(role: :assistant, content: nil, tool_calls: [ tool_call ])
+
+        result = @service.format(conversation.messages)
+        blocks = result[:messages].last[:content]
+
+        assert_equal "assistant", result[:messages].last[:role]
+        assert_equal [ { type: "tool_use", id: "call_1", name: "lookup", input: { "term" => "rails" } } ], blocks
+      end
+
+      test "text alongside tool calls keeps both blocks for Anthropic" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :assistant, content: "Let me look.", tool_calls: [ tool_call ])
+
+        blocks = @service.format(conversation.messages)[:messages].last[:content]
+
+        assert_equal [ "text", "tool_use" ], blocks.map { |block| block[:type] }
+      end
+
+      test "tool results become a following user message for Anthropic" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :assistant, content: nil, tool_calls: [ tool_call ])
+        conversation.messages.create!(role: :tool, content: "Found it", tool_call_id: "call_1", tool_name: "lookup")
+
+        result = @service.format(conversation.messages)
+
+        assert_equal "user", result[:messages].last[:role]
+        assert_equal [ { type: "tool_result", tool_use_id: "call_1", content: "Found it" } ], result[:messages].last[:content]
+      end
+
+      test "consecutive tool results are merged into one user message for Anthropic" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :assistant, content: nil, tool_calls: [ tool_call, tool_call("call_2") ])
+        conversation.messages.create!(role: :tool, content: "First", tool_call_id: "call_1", tool_name: "lookup")
+        conversation.messages.create!(role: :tool, content: "Second", tool_call_id: "call_2", tool_name: "lookup")
+
+        result = @service.format(conversation.messages)
+
+        assert_equal 2, result[:messages].size
+        assert_equal [ "call_1", "call_2" ], result[:messages].last[:content].map { |block| block[:tool_use_id] }
+      end
+
+      test "an assistant message with tool calls carries them for OpenAI" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :assistant, content: nil, tool_calls: [ tool_call ])
+        conversation.messages.create!(role: :tool, content: "Found it", tool_call_id: "call_1", tool_name: "lookup")
+
+        result = @service.format(conversation.messages, provider: layered_assistant_providers(:openai))
+
+        assert_equal [ tool_call ], result[:messages].first[:tool_calls]
+        assert_equal({ role: "tool", tool_call_id: "call_1", content: "Found it" }, result[:messages].last)
+      end
+
+      test "an assistant message that is still streaming is left out" do
+        conversation = layered_assistant_conversations(:empty)
+        conversation.messages.create!(role: :assistant, content: nil)
+
+        assert_empty @service.format(conversation.messages)[:messages]
+        assert_empty @service.format(conversation.messages, provider: layered_assistant_providers(:openai))[:messages]
+      end
+
+      private
+
+      def tool_call(id = "call_1")
+        {
+          "id" => id,
+          "type" => "function",
+          "function" => { "name" => "lookup", "arguments" => '{"term":"rails"}' }
+        }
+      end
     end
   end
 end

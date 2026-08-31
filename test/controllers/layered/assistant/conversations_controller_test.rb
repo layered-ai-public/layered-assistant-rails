@@ -19,6 +19,29 @@ module Layered
         assert_select ".l-ui-message .l-ui-message__author", text: "Assistant"
       end
 
+      test "show renders a tool result and leaves out the message that asked for it" do
+        conversation = layered_assistant_conversations(:greeting)
+        conversation.messages.create!(
+          role: :assistant,
+          content: nil,
+          tool_calls: [ { "id" => "call_1", "type" => "function", "function" => { "name" => "lookup", "arguments" => '{"term":"rails"}' } } ]
+        )
+        conversation.messages.create!(
+          role: :tool,
+          content: '{"found":true}',
+          tool_call_id: "call_1",
+          tool_name: "lookup",
+          tool_arguments: '{"term":"rails"}'
+        )
+
+        get "/layered/assistant/conversations/#{conversation.uid}"
+
+        assert_response :success
+        assert_select "details.l-ui-surface--collapsible-highlighted .l-ui-surface__summary", text: /Tool:\s+lookup/
+        assert_select "details.l-ui-surface--collapsible-highlighted pre code", count: 2
+        assert_select ".l-ui-typing-indicator", count: 0
+      end
+
       test "should get new" do
         get "/layered/assistant/conversations/new"
         assert_response :success

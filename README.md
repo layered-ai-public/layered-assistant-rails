@@ -169,6 +169,88 @@ Both helpers accept keyword arguments that are forwarded as HTML attributes to t
 | `layered_assistant_panel_header` | Empty Turbo Frame (`assistant_panel_header`) populated by the engine's panel views |
 | `layered_assistant_panel_body` | Turbo Frame (`assistant_panel`) that loads the conversation list from the engine's panel routes |
 
+## Tools
+
+An assistant can call into the host application to fetch or change something
+before it answers. Define a tool as a class in `app/tools`:
+
+```ruby
+# app/tools/weather_tool.rb
+class WeatherTool < Layered::Assistant::Tool
+  description "Get the current weather for a city."
+
+  argument :city, :string, required: true, description: "The city to look up."
+  argument :units, :string, description: "celsius or fahrenheit", enum: %w[celsius fahrenheit]
+
+  def call(city:, units: "celsius")
+    forecast = Weather.for(city)
+
+    { city: city, temperature: forecast.temperature(units), summary: forecast.summary }
+  end
+end
+```
+
+Then list the tool classes in your initialiser:
+
+```ruby
+Layered::Assistant.tools do
+  [ WeatherTool ]
+end
+```
+
+The block is called per request rather than read once at boot, so tool classes
+reload in development like any other application class.
+
+### Defining a tool
+
+| Method | Description |
+|---|---|
+| `description` | What the tool does, in the model's words. This is the only thing the model has to go on, so be specific |
+| `argument` | An argument the model may supply: `argument :name, :type, required:, description:, enum:, items:` |
+| `tool_name` | The name the model calls the tool by. Defaults to the class name without its `Tool` suffix, namespaces hyphenated: `Weather::ForecastTool` becomes `weather-forecast` |
+| `requires_owner` | Whether the tool needs an owned conversation. `true` by default - see below |
+
+Argument types are `:string`, `:integer`, `:number`, `:boolean`, `:array` and
+`:object`. An `:array` takes `items:` to name its element type.
+
+`#call` receives the arguments as keywords and may return a string or anything
+that responds to `#to_json`. Inside it, `message`, `conversation` and `owner`
+give the calling context. Raising is safe: the error is reported back to the
+model as the tool's result, so it can correct itself or explain, rather than
+the response failing.
+
+### Tools and public assistants
+
+A conversation with a public assistant has no owner - it belongs to an
+anonymous visitor. Tools are withheld from those conversations by default, so
+that a public assistant cannot reach into your application. A tool that is
+safe to expose opts in:
+
+```ruby
+class CurrentTimeTool < Layered::Assistant::Tool
+  description "Get the current date and time on the server."
+  requires_owner false
+
+  def call
+    { time: Time.current.iso8601 }
+  end
+end
+```
+
+Otherwise, scope a tool's reads and writes to `owner`, the same boundary the
+engine's own controllers use.
+
+### The tool call loop
+
+A response that asks for tools is not the end of the turn. The engine runs the
+tools, records a message per result, then queues a fresh assistant message so
+the model can answer with what came back - which may ask for tools again. The
+composer stays disabled until a response completes without asking for
+anything, and `max_tool_cycles` (default 10) bounds the loop.
+
+Results are shown in the conversation as a collapsible panel naming the tool,
+with its input and output.
+
 ## Configuration
 
 Optional settings can be added to your initialiser (`config/initializers/layered_assistant.rb`):
@@ -184,6 +266,10 @@ Layered::Assistant.api_request_timeout = 210
 # Disable Active Record Encryption on Provider#secret.
 # Only use this in development/test environments without encryption keys configured.
 Layered::Assistant.skip_db_encryption = true
+
+# How many rounds of tool calls one prompt may trigger before the engine gives
+# up and says so (default: 10).
+Layered::Assistant.max_tool_cycles = 10
 ```
 
 Note: `skip_db_encryption` is read at class load time, so it must be set before `Layered::Assistant::Provider` is first loaded. A standard Rails initialiser satisfies this requirement.
