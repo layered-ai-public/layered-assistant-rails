@@ -61,7 +61,7 @@ module Layered
         block = { type: "tool_result", tool_use_id: message.tool_call_id, content: message.content }
         previous = regular_messages.last
 
-        if previous && previous[:role] == "user" && previous[:content].first[:type] == "tool_result"
+        if previous && previous[:role] == "user" && previous.dig(:content, 0, :type) == "tool_result"
           previous[:content] << block
         else
           regular_messages << { role: "user", content: [ block ] }

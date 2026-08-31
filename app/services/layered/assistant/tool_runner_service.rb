@@ -26,6 +26,13 @@ module Layered
         arguments = tool_call.dig("function", "arguments")
         content = execute(message, name, arguments)
 
+        # Both protocols name the call they are asking for. Without an id the
+        # result cannot be paired back to it, and the provider rejects the next
+        # turn - so say so here rather than leaving that trace to explain it.
+        if tool_call["id"].blank?
+          Rails.logger.error("Tool call for '#{name}' arrived with no id on message #{message.id}")
+        end
+
         result = message.conversation.messages.create!(
           role: :tool,
           content: content,
@@ -80,7 +87,7 @@ module Layered
         scope = conversation.messages.where(role: :assistant)
         scope = scope.where(created_at: cutoff..) if cutoff
 
-        scope.count { |message| message.tool_calls.present? }
+        scope.where.not(tool_calls: nil).count
       end
 
       def continue(message)
