@@ -94,10 +94,15 @@ module Layered
       end
 
       def halt(message)
+        # The notice is the engine talking, not the model, so it costs nothing.
+        # Recording that keeps the conversation out of Conversation#responding?,
+        # which would otherwise leave the composer disabled on the next load.
         notice = message.conversation.messages.create!(
           role: :assistant,
           content: "I stopped after #{Layered::Assistant.max_tool_cycles} rounds of tool calls without reaching an answer. Please try rephrasing your request.",
-          model_id: message.model_id
+          model_id: message.model_id,
+          output_tokens: 0,
+          tokens_estimated: true
         )
         notice.broadcast_created
         notice.broadcast_response_complete

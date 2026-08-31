@@ -102,6 +102,15 @@ module Layered
         @broadcast_pending = true
       end
 
+      # A message that only asked for tools has no content to measure, but the
+      # tool calls are output the model generated, so they stand in for it when
+      # the provider reports no usage of its own.
+      def estimated_tool_call_tokens
+        return unless @tool_calls.any?
+
+        TokenEstimator.estimate(@tool_calls.to_a.to_json)
+      end
+
       def resolved_model_attrs
         @resolved_model.present? ? { resolved_model: @resolved_model } : {}
       end
@@ -109,7 +118,7 @@ module Layered
       def save_token_usage
         attrs = @timer.timing_attrs.merge(resolved_model_attrs)
         if @input_tokens == 0 && @output_tokens == 0
-          estimated = TokenEstimator.estimate(@message.content)
+          estimated = TokenEstimator.estimate(@message.content) || estimated_tool_call_tokens
           attrs.merge!(output_tokens: estimated, tokens_estimated: true) if estimated
         else
           attrs.merge!(input_tokens: @input_tokens, output_tokens: @output_tokens)
