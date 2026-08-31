@@ -21,3 +21,8 @@ private_convo:
   name: Private conversation
   assistant: private
   owner: one (User)
+
+anonymous:
+  uid: conv_anonymous_fixture_005
+  name: Anonymous conversation
+  assistant: general

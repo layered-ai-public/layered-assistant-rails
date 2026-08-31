@@ -1,27 +1,31 @@
-<%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} #{message.user? ? "l-ui-message l-ui-message--sent" : "l-ui-message"}" do %>
-  <div class="l-ui-message__bubble">
-    <% unless message.user? %>
-      <div class="l-ui-message__author"><%= message.role.capitalize %></div>
-    <% end %>
-    <div class="<%= dom_id(message) %>_body l-ui-message__body">
-      <div class="<%= dom_id(message) %>_content l-ui-markdown" data-controller="markdown"><%= message.content %></div>
-      <% if message.assistant? && message.content.blank? && !message.stopped? %>
-        <div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">
-          <span class="l-ui-typing-indicator__dot"></span>
-          <span class="l-ui-typing-indicator__dot"></span>
-          <span class="l-ui-typing-indicator__dot"></span>
-        </div>
+<% if message.tool? %>
+  <%= render "layered/assistant/messages/tool_message", message: message %>
+<% elsif !message_tool_request?(message) %>
+  <%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} #{message.user? ? "l-ui-message l-ui-message--sent" : "l-ui-message"}" do %>
+    <div class="l-ui-message__bubble">
+      <% unless message.user? %>
+        <div class="l-ui-message__author"><%= message.role.capitalize %></div>
       <% end %>
-      <% if message.stopped? %>
-        <div class="l-ui-notice l-ui-notice--warning" role="status">The response was stopped</div>
-      <% end %>
+      <div class="<%= dom_id(message) %>_body l-ui-message__body">
+        <div class="<%= dom_id(message) %>_content l-ui-markdown" data-controller="markdown"><%= message.content %></div>
+        <% if message.assistant? && message.content.blank? && !message.stopped? %>
+          <div class="l-ui-typing-indicator" role="status" aria-label="Assistant is typing">
+            <span class="l-ui-typing-indicator__dot"></span>
+            <span class="l-ui-typing-indicator__dot"></span>
+            <span class="l-ui-typing-indicator__dot"></span>
+          </div>
+        <% end %>
+        <% if message.stopped? %>
+          <div class="l-ui-notice l-ui-notice--warning" role="status">The response was stopped</div>
+        <% end %>
+      </div>
+      <div class="l-ui-message__footer">
+        <% if message.model && !message.user? %>
+          <% title = message_metadata_title(message) %>
+          <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message_model_label(message) %></span>
+        <% end %>
+        <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
+      </div>
     </div>
-    <div class="l-ui-message__footer">
-      <% if message.model && !message.user? %>
-        <% title = message_metadata_title(message) %>
-        <span class="l-ui-message__metadata"<%= " title=\"#{title}\"".html_safe if title.present? %>><%= message_model_label(message) %></span>
-      <% end %>
-      <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
-    </div>
-  </div>
+  <% end %>
 <% end %>

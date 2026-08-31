@@ -52,7 +52,34 @@
 # their first create. Either give the block a fallback, or have your authorize
 # block send those users somewhere to set one up first.
 
+# Tools
+#
+# An assistant can call into your application before it answers. Define tools
+# as classes in app/tools and list them here. The block is called per request
+# rather than read once at boot, so tool classes reload in development.
+#
+# class WeatherTool < Layered::Assistant::Tool
+#   description "Get the current weather for a city."
+#
+#   argument :city, :string, required: true, description: "The city to look up."
+#
+#   def call(city:)
+#     { city: city, temperature_c: Weather.for(city).temperature }
+#   end
+# end
+#
+# Layered::Assistant.tools do
+#   [ WeatherTool ]
+# end
+#
+# Inside #call, `message`, `conversation` and `owner` give the calling context.
+# Scope a tool's reads and writes to `owner` to keep it inside the caller's
+# boundary. A conversation with a public assistant has no owner, so tools are
+# withheld from those conversations unless the tool declares
+# `requires_owner false`.
+
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout
 # Layered::Assistant.api_request_timeout = 210      # total API timeout in seconds, including full streaming response (default: 210)
 # Layered::Assistant.skip_db_encryption = true      # skip encryption on Provider#secret (dev/test only)
+# Layered::Assistant.max_tool_cycles = 10           # rounds of tool calls one prompt may trigger (default: 10)

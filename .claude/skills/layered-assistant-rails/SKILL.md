@@ -79,6 +79,7 @@ Ownership is enforced **at the controller layer via `scoped()`**, not via model 
 Layered::Assistant.log_errors = true             # log API errors to stdout
 Layered::Assistant.api_request_timeout = 210     # total streaming API timeout (seconds)
 Layered::Assistant.skip_db_encryption = true     # dev/test only - skip encryption on Provider#secret
+Layered::Assistant.max_tool_cycles = 10          # rounds of tool calls one prompt may trigger
 ```
 
 `Provider#secret` is encrypted with Rails encrypted attributes, so the host app must have `bin/rails db:encryption:init` keys configured (or set `skip_db_encryption = true` for dev/test).
@@ -144,9 +145,42 @@ All under `Layered::Assistant::*`, tables prefixed `layered_assistant_`. Inherit
 | `Assistant` | A configured assistant: model + persona + skills |
 | `AssistantSkill` | Join between assistant and skill |
 | `Conversation` | A chat session with an assistant, owned polymorphically |
-| `Message` | A single message in a conversation; supports streaming |
+| `Message` | A single message in a conversation; supports streaming. A `tool` role message records what a tool returned |
 
 Enums are stored as **strings**, not integers.
+
+## Tools
+
+Tools let an assistant call into the host app before it answers. Define them in `app/tools` as subclasses of `Layered::Assistant::Tool` and list the classes in the initialiser:
+
+```ruby
+# app/tools/weather_tool.rb
+class WeatherTool < Layered::Assistant::Tool
+  description "Get the current weather for a city."
+
+  argument :city, :string, required: true, description: "The city to look up."
+  argument :units, :string, description: "celsius or fahrenheit", enum: %w[celsius fahrenheit]
+
+  def call(city:, units: "celsius")
+    { city: city, temperature: Weather.for(city).temperature(units) }
+  end
+end
+
+# config/initializers/layered_assistant.rb
+Layered::Assistant.tools do
+  [ WeatherTool ]
+end
+```
+
+The block is called per request, not read at boot, so tool classes reload in development.
+
+Class-level DSL: `description`, `argument(name, type, required:, description:, enum:, items:)`, `tool_name` (defaults to the class name minus its `Tool` suffix, namespaces hyphenated), `requires_owner`. Argument types: `:string`, `:integer`, `:number`, `:boolean`, `:array` (with `items:`), `:object`.
+
+Inside `#call`: `message`, `conversation`, `owner`. Return a string or anything responding to `#to_json`. Raising is safe - the error is handed back to the model as the tool's result rather than failing the response.
+
+**Public assistants:** a conversation with a public assistant has no owner. Tools require an owner by default and are withheld from those conversations; declare `requires_owner false` to opt a safe tool in. Otherwise scope a tool's reads and writes to `owner`.
+
+**The loop:** a response that asks for tools is not the end of the turn. `ToolRunnerService` runs the tools, records a `tool` role message per result, then queues a fresh assistant message so the model can answer with what came back. `max_tool_cycles` (default 10) bounds it. Results render as a collapsible `l-ui-surface` panel naming the tool, with input and output.
 
 ## Routes
 

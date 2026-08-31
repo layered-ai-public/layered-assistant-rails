@@ -13,6 +13,7 @@ module Layered
         @output_tokens = 0
         @resolved_model = nil
         @reasoning = +""
+        @tool_calls = ToolCallAccumulator.new
         @chunk_count = 0
         @stopped = false
         @last_broadcast_at = 0
@@ -51,6 +52,11 @@ module Layered
           @reasoning << reasoning
         end
 
+        if (fragments = @parser.tool_calls(chunk))
+          @timer.record_first_token!
+          fragments.each { |fragment| @tool_calls.add(**fragment) }
+        end
+
         if text
           @timer.record_first_token!
           @message.update!(content: (@message.content || "") + text)
@@ -58,6 +64,7 @@ module Layered
         end
 
         if @parser.finished?(chunk) || @parser.usage_ready?(chunk)
+          save_tool_calls
           fall_back_to_reasoning
           save_token_usage
           @message.broadcast_streaming_content if @broadcast_pending
@@ -79,14 +86,29 @@ module Layered
         @message.broadcast_streaming_content
       end
 
+      def save_tool_calls
+        return unless @tool_calls.any?
+
+        @message.update!(tool_calls: @tool_calls.to_a)
+      end
+
       # When a model answers entirely in the reasoning field there is no content
       # to show, which leaves the message stuck on the typing indicator. Adopt
       # the reasoning as the reply rather than rendering an empty bubble.
       def fall_back_to_reasoning
-        return if @reasoning.empty? || @message.content.present?
+        return if @reasoning.empty? || @message.content.present? || @tool_calls.any?
 
         @message.update!(content: @reasoning)
         @broadcast_pending = true
+      end
+
+      # A message that only asked for tools has no content to measure, but the
+      # tool calls are output the model generated, so they stand in for it when
+      # the provider reports no usage of its own.
+      def estimated_tool_call_tokens
+        return unless @tool_calls.any?
+
+        TokenEstimator.estimate(@tool_calls.to_a.to_json)
       end
 
       def resolved_model_attrs
@@ -96,7 +118,7 @@ module Layered
       def save_token_usage
         attrs = @timer.timing_attrs.merge(resolved_model_attrs)
         if @input_tokens == 0 && @output_tokens == 0
-          estimated = TokenEstimator.estimate(@message.content)
+          estimated = TokenEstimator.estimate(@message.content) || estimated_tool_call_tokens
           attrs.merge!(output_tokens: estimated, tokens_estimated: true) if estimated
         else
           attrs.merge!(input_tokens: @input_tokens, output_tokens: @output_tokens)

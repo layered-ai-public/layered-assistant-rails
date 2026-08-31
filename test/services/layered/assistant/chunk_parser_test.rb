@@ -181,6 +181,71 @@ module Layered
         parser = ChunkParser.new("anthropic")
         assert_nil parser.model({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
       end
+
+      # Tool calls
+
+      test "anthropic: tool_calls returns nil for a chunk with none" do
+        parser = ChunkParser.new("anthropic")
+        assert_nil parser.tool_calls({ "type" => "content_block_delta", "delta" => { "text" => "Hi" } })
+        assert_nil parser.tool_calls({ "type" => "message_stop" })
+      end
+
+      test "anthropic: tool_calls names the tool on content_block_start" do
+        parser = ChunkParser.new("anthropic")
+        chunk = {
+          "type" => "content_block_start",
+          "index" => 1,
+          "content_block" => { "type" => "tool_use", "id" => "toolu_1", "name" => "lookup" }
+        }
+
+        assert_equal [ { key: 1, id: "toolu_1", name: "lookup" } ], parser.tool_calls(chunk)
+      end
+
+      test "anthropic: tool_calls ignores a text content_block_start" do
+        parser = ChunkParser.new("anthropic")
+        chunk = { "type" => "content_block_start", "index" => 0, "content_block" => { "type" => "text", "text" => "" } }
+
+        assert_nil parser.tool_calls(chunk)
+      end
+
+      test "anthropic: tool_calls returns argument fragments from input_json_delta" do
+        parser = ChunkParser.new("anthropic")
+        chunk = {
+          "type" => "content_block_delta",
+          "index" => 1,
+          "delta" => { "type" => "input_json_delta", "partial_json" => '{"term":' }
+        }
+
+        assert_equal [ { key: 1, arguments: '{"term":' } ], parser.tool_calls(chunk)
+      end
+
+      test "openai: tool_calls returns nil for a chunk with none" do
+        parser = ChunkParser.new("openai")
+        assert_nil parser.tool_calls({ "choices" => [ { "delta" => { "content" => "Hi" } } ] })
+      end
+
+      test "openai: tool_calls returns the opening fragment" do
+        parser = ChunkParser.new("openai")
+        chunk = {
+          "choices" => [ { "delta" => { "tool_calls" => [
+            { "index" => 0, "id" => "call_1", "function" => { "name" => "lookup", "arguments" => "" } }
+          ] } } ]
+        }
+
+        assert_equal [ { key: 0, id: "call_1", name: "lookup", arguments: "" } ], parser.tool_calls(chunk)
+      end
+
+      test "openai: tool_calls returns each parallel call" do
+        parser = ChunkParser.new("openai")
+        chunk = {
+          "choices" => [ { "delta" => { "tool_calls" => [
+            { "index" => 0, "function" => { "arguments" => '{"a":1}' } },
+            { "index" => 1, "function" => { "arguments" => '{"b":2}' } }
+          ] } } ]
+        }
+
+        assert_equal [ 0, 1 ], parser.tool_calls(chunk).map { |fragment| fragment[:key] }
+      end
     end
   end
 end

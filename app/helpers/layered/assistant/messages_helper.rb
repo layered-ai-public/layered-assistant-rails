@@ -14,6 +14,23 @@ module Layered
         "#{name} · #{resolved}"
       end
 
+      # An assistant message that only asked for tools has nothing of its own to
+      # show - the tool messages that follow it report what happened - so its
+      # bubble is left out entirely.
+      def message_tool_request?(message)
+        message.assistant? && message.content.blank? && message.tool_calls.any?
+      end
+
+      # Tool arguments and results are JSON in all but the simplest cases.
+      # Pretty-print what parses and show the rest as it came.
+      def tool_payload(payload)
+        return "" if payload.blank?
+
+        JSON.pretty_generate(JSON.parse(payload))
+      rescue JSON::ParserError
+        payload
+      end
+
       def message_metadata_title(message)
         total_tokens = message.input_tokens.to_i + message.output_tokens.to_i
         parts = []

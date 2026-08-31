@@ -11,7 +11,8 @@ module Layered
       enum :role, {
         system: "system",
         assistant: "assistant",
-        user: "user"
+        user: "user",
+        tool: "tool"
       }
 
       # Validations
@@ -20,6 +21,12 @@ module Layered
       # Associations
       belongs_to :conversation, counter_cache: true
       belongs_to :model, optional: true, counter_cache: true
+
+      # Tool calls the model asked for, in the shape ToolCallAccumulator stores:
+      # [{ "id" =>, "type" => "function", "function" => { "name" =>, "arguments" => } }]
+      def tool_calls
+        super || []
+      end
 
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }

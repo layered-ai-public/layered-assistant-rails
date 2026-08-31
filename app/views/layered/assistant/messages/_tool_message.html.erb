@@ -1,0 +1,19 @@
+<%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} l-ui-message" do %>
+  <div class="l-ui-message__bubble">
+    <details class="l-ui-surface l-ui-surface--collapsible-highlighted l-ui-surface--sm">
+      <summary class="l-ui-surface__summary">
+        <span><strong>Tool:</strong> <%= message.tool_name %></span>
+        <%= image_tag "layered_ui/icon_chevron_right.svg", alt: "", class: "l-ui-icon l-ui-icon--sm l-ui-surface__chevron", aria: { hidden: true } %>
+      </summary>
+      <div class="l-ui-surface__content l-ui-markdown">
+        <p>Input:</p>
+        <pre><code><%= tool_payload(message.tool_arguments) %></code></pre>
+        <p>Output:</p>
+        <pre><code><%= tool_payload(message.content) %></code></pre>
+      </div>
+    </details>
+    <div class="l-ui-message__footer">
+      <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
+    </div>
+  </div>
+<% end %>

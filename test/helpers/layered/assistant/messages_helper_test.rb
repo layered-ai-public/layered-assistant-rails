@@ -93,6 +93,40 @@ module Layered
         assert_includes result, " · "
         assert_includes result, "200ms TTFT"
       end
+
+      # --- message_tool_request? ---
+
+      test "an assistant message that only asked for tools is a tool request" do
+        message = build_message(role: :assistant, content: nil)
+        message.tool_calls = [ { "id" => "call_1", "function" => { "name" => "lookup" } } ]
+
+        assert message_tool_request?(message)
+      end
+
+      test "an assistant message with text is not a tool request, even alongside tool calls" do
+        message = build_message(role: :assistant, content: "Let me look.")
+        message.tool_calls = [ { "id" => "call_1", "function" => { "name" => "lookup" } } ]
+
+        assert_not message_tool_request?(message)
+      end
+
+      test "a streaming assistant message is not a tool request" do
+        assert_not message_tool_request?(build_message(role: :assistant, content: nil))
+      end
+
+      # --- tool_payload ---
+
+      test "tool payload pretty-prints JSON" do
+        assert_equal "{\n  \"term\": \"rails\"\n}", tool_payload('{"term":"rails"}')
+      end
+
+      test "tool payload passes through what is not JSON" do
+        assert_equal "not json at all", tool_payload("not json at all")
+      end
+
+      test "tool payload is empty for a blank payload" do
+        assert_equal "", tool_payload(nil)
+      end
     end
   end
 end

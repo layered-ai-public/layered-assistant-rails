@@ -339,6 +339,57 @@ module Layered
 
         assert_nil message.reload.resolved_model
       end
+
+      # Tool calls
+
+      test "persists the tool calls an Anthropic response streams" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        service.call({ "type" => "content_block_start", "index" => 0, "content_block" => { "type" => "tool_use", "id" => "toolu_1", "name" => "lookup" } })
+        service.call({ "type" => "content_block_delta", "index" => 0, "delta" => { "type" => "input_json_delta", "partial_json" => '{"term":' } })
+        service.call({ "type" => "content_block_delta", "index" => 0, "delta" => { "type" => "input_json_delta", "partial_json" => '"rails"}' } })
+        service.call({ "type" => "message_stop" })
+
+        assert_equal [ {
+          "id" => "toolu_1",
+          "type" => "function",
+          "function" => { "name" => "lookup", "arguments" => '{"term":"rails"}' }
+        } ], message.reload.tool_calls
+      end
+
+      test "persists the tool calls an OpenAI response streams" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "choices" => [ { "delta" => { "tool_calls" => [ { "index" => 0, "id" => "call_1", "function" => { "name" => "lookup", "arguments" => "" } } ] } } ] })
+        service.call({ "choices" => [ { "delta" => { "tool_calls" => [ { "index" => 0, "function" => { "arguments" => '{"term":"rails"}' } } ] } } ] })
+        service.call({ "choices" => [ { "finish_reason" => "tool_calls" } ] })
+
+        assert_equal "lookup", message.reload.tool_calls.first.dig("function", "name")
+        assert_equal '{"term":"rails"}', message.tool_calls.first.dig("function", "arguments")
+      end
+
+      test "a response with no tool calls leaves the column empty" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @anthropic_provider)
+
+        service.call({ "type" => "content_block_delta", "delta" => { "text" => "Hello" } })
+        service.call({ "type" => "message_stop" })
+
+        assert_empty message.reload.tool_calls
+      end
+
+      test "reasoning is not adopted as content when the response asked for tools" do
+        message = layered_assistant_conversations(:greeting).messages.create!(role: :assistant, content: nil)
+        service = ChunkService.new(message, provider: @openai_provider)
+
+        service.call({ "choices" => [ { "delta" => { "reasoning" => "I should look this up." } } ] })
+        service.call({ "choices" => [ { "delta" => { "tool_calls" => [ { "index" => 0, "id" => "call_1", "function" => { "name" => "lookup", "arguments" => "{}" } } ] } } ] })
+        service.call({ "choices" => [ { "finish_reason" => "tool_calls" } ] })
+
+        assert_nil message.reload.content
+      end
     end
   end
 end
