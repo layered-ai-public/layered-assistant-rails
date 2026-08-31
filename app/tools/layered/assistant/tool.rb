@@ -25,6 +25,10 @@ module Layered
         # The name the model calls the tool by. Defaults to the class name
         # without its Tool suffix, namespaces separated by hyphens:
         # "Weather::ForecastTool" becomes "weather-forecast".
+        #
+        # Alone among the declarations here this is not inherited: two tools
+        # answering to one name would collide in the registry, so a subclass
+        # derives its own from its class name unless it says otherwise.
         def tool_name(value = nil)
           @tool_name = value.to_s if value
           @tool_name || default_tool_name
@@ -32,7 +36,7 @@ module Layered
 
         def description(value = nil)
           @description = value if value
-          @description
+          @description || from_superclass(:description)
         end
 
         # Whether the tool may be offered to a public assistant, matching
@@ -49,14 +53,16 @@ module Layered
         attr_writer :public
 
         def public?
-          @public.nil? ? false : @public
+          return @public unless @public.nil?
+
+          from_superclass(:public?) || false
         end
 
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
           type = type.to_s
           raise ::ArgumentError, "Unsupported argument type: #{type}" unless TYPES.include?(type)
 
-          arguments << {
+          own_arguments << {
             name: name.to_sym,
             type: type,
             required: required,
@@ -66,8 +72,11 @@ module Layered
           }
         end
 
+        # A subclass adds to the arguments it inherits rather than replacing
+        # them. Redeclaring one by name overrides it where it already sits,
+        # so a subclass can narrow a parent's argument without moving it.
         def arguments
-          @arguments ||= []
+          (from_superclass(:arguments).to_a + own_arguments).index_by { |argument| argument[:name] }.values
         end
 
         # The JSON Schema for the arguments, as sent to the provider.
@@ -107,6 +116,22 @@ module Layered
         end
 
         private
+
+        def own_arguments
+          @arguments ||= []
+        end
+
+        # Declarations are held in class instance variables, which subclasses
+        # do not inherit, so each reader asks its parent for what it was not
+        # given itself. Without this a tool subclassed to share logic would
+        # lose its parent's description and arguments and still be callable -
+        # offered to the model with an empty schema.
+        #
+        # Not named `inherited`: that is Ruby's own hook for being subclassed,
+        # and overriding it breaks every subclass of Tool.
+        def from_superclass(reader)
+          superclass.public_send(reader) if superclass.respond_to?(reader)
+        end
 
         def default_tool_name
           name.underscore.sub(/_tool\z/, "").tr("/", "-")

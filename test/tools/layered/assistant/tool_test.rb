@@ -28,6 +28,47 @@ module Layered
         self.public = true
       end
 
+      class BaseLookupTool < Tool
+        description "Look something up."
+        self.public = true
+
+        argument :query, :string, required: true, description: "What to look for."
+        argument :limit, :integer
+      end
+
+      class NarrowedLookupTool < BaseLookupTool
+        argument :limit, :integer, required: true, description: "How many to return."
+        argument :sort, :string
+      end
+
+      test "a subclass inherits the declarations it does not make itself" do
+        assert_equal "Look something up.", NarrowedLookupTool.description
+        assert NarrowedLookupTool.public?
+      end
+
+      test "a subclass takes its own name rather than its parent's" do
+        assert_equal "layered-assistant-tool_test-base_lookup", BaseLookupTool.tool_name
+        assert_equal "layered-assistant-tool_test-narrowed_lookup", NarrowedLookupTool.tool_name
+      end
+
+      test "a subclass adds to the arguments it inherits" do
+        assert_equal [ :query, :limit, :sort ], NarrowedLookupTool.arguments.map { |argument| argument[:name] }
+        assert_equal [ :query, :limit ], BaseLookupTool.arguments.map { |argument| argument[:name] }
+      end
+
+      test "a redeclared argument overrides where it already sits" do
+        limit = NarrowedLookupTool.arguments.find { |argument| argument[:name] == :limit }
+
+        assert_equal "How many to return.", limit[:description]
+        assert_equal [ "query", "limit" ], NarrowedLookupTool.schema[:required]
+      end
+
+      # `inherited` is Ruby's hook for being subclassed. The reader that walks
+      # up to the parent must not be called that, or defining any tool breaks.
+      test "subclassing a tool does not blow up" do
+        assert_nothing_raised { Class.new(BaseLookupTool) }
+      end
+
       test "tool name derives from the class name, hyphenating namespaces" do
         assert_equal "layered-assistant-tool_test-weather-forecast", Weather::ForecastTool.tool_name
       end

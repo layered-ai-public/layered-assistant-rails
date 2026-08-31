@@ -255,6 +255,12 @@ assistant.update!(tool_names: [ "weather", "order-lookup" ])
 Argument types are `:string`, `:integer`, `:number`, `:boolean`, `:array` and
 `:object`. An `:array` takes `items:` to name its element type.
 
+Subclass a tool to share logic and the declarations come with it: the child
+inherits its parent's `description`, `public` flag and arguments, adds any
+arguments of its own, and may redeclare one by name to narrow it. The name is
+the exception - the child derives its own from its class name, since two tools
+answering to one name would collide in the registry.
+
 `#call` receives the arguments as keywords and may return a string or anything
 that responds to `#to_json`. Raising is safe: the error is reported back to the
 model as the tool's result, so it can correct itself or explain, rather than

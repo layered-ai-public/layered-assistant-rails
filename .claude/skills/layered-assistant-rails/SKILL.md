@@ -174,7 +174,7 @@ end
 
 The block is called per request, not read at boot, so tool classes reload in development.
 
-Class-level DSL: `description`, `argument(name, type, required:, description:, enum:, items:)`, `tool_name` (defaults to the class name minus its `Tool` suffix, namespaces hyphenated), `self.public =`. Argument types: `:string`, `:integer`, `:number`, `:boolean`, `:array` (with `items:`), `:object`.
+Class-level DSL: `description`, `argument(name, type, required:, description:, enum:, items:)`, `tool_name` (defaults to the class name minus its `Tool` suffix, namespaces hyphenated), `self.public =`. Argument types: `:string`, `:integer`, `:number`, `:boolean`, `:array` (with `items:`), `:object`. Subclassing a tool inherits `description`, the `public` flag and the parent's arguments (a child may redeclare one by name); `tool_name` is derived per class rather than inherited.
 
 Inside `#call`: `message`, `conversation`, `owner`. Return a string or anything responding to `#to_json`. Raising is safe - the error is handed back to the model as the tool's result rather than failing the response.
 
