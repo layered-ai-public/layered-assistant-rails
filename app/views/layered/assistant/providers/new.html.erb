@@ -1,7 +1,11 @@
 <%#
-  Ejected from layered-resource-rails so the new-provider form can carry the
-  template picker and the model-seeding choice, neither of which is a stored
-  provider attribute. Edit renders the gem's own form.
+  Ejected from layered-resource-rails 0.1.0 so the new-provider form can carry
+  the template picker and the model-seeding choice, neither of which is a
+  stored provider attribute. Edit renders the gem's own form.
+
+  It binds to the gem's controller contract - `@record`, `@fields`, `@model`,
+  `@form_url` and `layered_collection_path` - so check this template against
+  the gem's own `new` view when upgrading past 0.1.
 
   This lives under `layered/assistant/providers` rather than the gem's own
   `layered/providers` prefix: engine view paths are global, so the shorter
