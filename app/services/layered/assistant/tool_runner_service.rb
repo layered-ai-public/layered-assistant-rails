@@ -9,7 +9,11 @@ module Layered
         return if message.tool_calls.blank?
 
         conversation = message.conversation
-        message.tool_calls.each { |tool_call| record_result(message, tool_call) }
+        # The registrations block runs on every registry lookup, by design, so
+        # that tool classes reload in development. Resolve the set this
+        # conversation may use once for the whole batch rather than per call.
+        available = ToolRegistry.for(conversation)
+        message.tool_calls.each { |tool_call| record_result(message, tool_call, available) }
         conversation.update_token_totals!
 
         if cycles_since_last_prompt(conversation) >= Layered::Assistant.max_tool_cycles
@@ -21,10 +25,10 @@ module Layered
 
       private
 
-      def record_result(message, tool_call)
+      def record_result(message, tool_call, available)
         name = tool_call.dig("function", "name")
         arguments = tool_call.dig("function", "arguments")
-        content = execute(message, name, arguments)
+        content = execute(message, name, arguments, available)
 
         # Both protocols name the call they are asking for. Without an id the
         # result cannot be paired back to it, and the provider rejects the next
@@ -49,10 +53,9 @@ module Layered
       # Every failure is reported to the model as the tool's result rather than
       # raised: a bad argument or a missing record is something it can recover
       # from on the next turn.
-      def execute(message, name, arguments)
-        tool = ToolRegistry.find(name)
-        return error("There is no tool called '#{name}'.") unless tool
-        return error("The tool '#{name}' is not available in this conversation.") unless tool.available_for?(message.conversation)
+      def execute(message, name, arguments, available)
+        tool = available.find { |candidate| candidate.tool_name == name }
+        return error(refusal(name)) unless tool
 
         result = tool.new(message: message).call(**tool.cast_arguments(parse(arguments)))
         format_result(result)
@@ -61,6 +64,18 @@ module Layered
       rescue => e
         Rails.logger.error("Tool '#{name}' failed: #{e.class}: #{e.message}")
         error("The tool raised an error: #{e.message}")
+      end
+
+      # Only reached when a call cannot be run, so the second registry lookup
+      # costs nothing on the path that matters. A tool the host never
+      # registered and one this assistant was not given are different
+      # mistakes, and the model can act on the difference.
+      def refusal(name)
+        if ToolRegistry.find(name)
+          "The tool '#{name}' is not available in this conversation."
+        else
+          "There is no tool called '#{name}'."
+        end
       end
 
       def parse(arguments)

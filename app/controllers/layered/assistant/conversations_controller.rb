@@ -10,10 +10,10 @@ module Layered
         if params[:assistant_id]
           @assistant = scoped(Assistant).find(params[:assistant_id])
           @page_title = "Conversations - #{@assistant.name}"
-          @pagy, @conversations = pagy(@assistant.conversations.merge(scoped(Conversation)).includes(:owner).by_created_at)
+          @pagy, @conversations = pagy(@assistant.conversations.merge(scoped(Conversation)).includes(:owner, :user).by_created_at)
         else
           @page_title = "Conversations"
-          @pagy, @conversations = pagy(scoped(Conversation).includes(:assistant, :owner).by_created_at)
+          @pagy, @conversations = pagy(scoped(Conversation).includes(:assistant, :owner, :user).by_created_at)
         end
       end
 
@@ -32,6 +32,7 @@ module Layered
       def create
         @conversation = Conversation.new(conversation_params)
         @conversation.owner = current_owner!
+        @conversation.user = current_conversation_user
         @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
         @conversation.name = Conversation.default_name if @conversation.name.blank?
         if @conversation.save

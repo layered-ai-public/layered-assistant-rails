@@ -1,8 +1,8 @@
-# A tool with no arguments, available to public assistants as well as
-# signed-in ones because it reaches nothing owned by anybody.
+# A tool with no arguments, marked public because it reaches nothing owned by
+# anybody - so it is safe to offer to an anonymous visitor.
 class CurrentTimeTool < Layered::Assistant::Tool
   description "Get the current date and time on the server."
-  requires_owner false
+  self.public = true
 
   argument :time_zone, :string, description: "An IANA time zone name, e.g. 'Europe/London'. Defaults to UTC."
 

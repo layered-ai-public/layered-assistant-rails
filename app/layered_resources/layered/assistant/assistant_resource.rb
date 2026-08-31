@@ -11,6 +11,7 @@ module Layered
         { attribute: :persona_id, label: "Persona", sortable: false,
           render: ->(record, _view) { record.persona&.name || "None" } },
         { attribute: :assistant_skills_count, label: "Skills" },
+        { attribute: :assistant_tools_count, label: "Tools" },
         { attribute: :conversations_count, label: "Conversations",
           render: ->(record, view) {
             # Rendered inside the index's turbo frame, so the link has to
@@ -26,10 +27,10 @@ module Layered
 
       default_sort attribute: :name, direction: :asc
 
-      # `default_model_id`, `persona_id` and `skill_ids` carry no collection
-      # here: the options have to be scoped to the owner, and only the
-      # controller can resolve one. AssistantsController fills them in per
-      # request.
+      # `default_model_id`, `persona_id`, `skill_ids` and `tool_names` carry
+      # no collection here: the options have to be scoped to the owner, or
+      # read from the registry, and only the controller can resolve either.
+      # AssistantsController fills them in per request.
       fields [
         { attribute: :name },
         { attribute: :description, as: :text, rows: 3 },
@@ -37,6 +38,7 @@ module Layered
         { attribute: :instructions, as: :text, rows: 5 },
         { attribute: :persona_id, label: "Persona", as: :select, include_blank: "None" },
         { attribute: :skill_ids, label: "Skills", as: :combobox, multiple: true, permit: [] },
+        { attribute: :tool_names, label: "Tools", as: :combobox, multiple: true, permit: [] },
         { attribute: :public, as: :checkbox }
       ]
 

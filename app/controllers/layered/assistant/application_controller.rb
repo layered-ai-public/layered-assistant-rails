@@ -19,6 +19,13 @@ module Layered
         block ? instance_exec(&block) : l_ui_current_user
       end
 
+      # The person a new conversation records as the one talking. Unlike the
+      # owner this is never redirected by a block: it is always whoever is
+      # signed in, and nil for an anonymous visitor on a public assistant.
+      def current_conversation_user
+        l_ui_current_user
+      end
+
       # Owner stamping on create goes through this bang variant: persisting
       # a record with a nil owner would leave it invisible to every scoped
       # read, so a missing owner fails loudly instead.

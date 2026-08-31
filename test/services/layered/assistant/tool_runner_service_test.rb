@@ -31,6 +31,10 @@ module Layered
 
         @conversation = layered_assistant_conversations(:empty)
         @conversation.messages.create!(role: :user, content: "Echo rails")
+
+        # The runner checks the assistant was given the tool before running
+        # it, so the fixture assistant behind these conversations gets both.
+        layered_assistant_assistants(:general).update!(tool_names: [ "echo", "broken" ])
       end
 
       teardown do
@@ -115,6 +119,29 @@ module Layered
         ToolRunnerService.new.call(message: message)
 
         assert_match "not available", JSON.parse(@conversation.messages.where(role: :tool).sole.content)["error"]
+      end
+
+      test "a tool the assistant was not given is refused" do
+        layered_assistant_assistants(:general).update!(tool_names: [ "broken" ])
+        message = assistant_message_with([ tool_call("call_1", "echo", '{"word":"rails"}') ])
+
+        ToolRunnerService.new.call(message: message)
+
+        assert_match "not available", JSON.parse(@conversation.messages.where(role: :tool).sole.content)["error"]
+      end
+
+      test "the registrations block is evaluated once however many tools are called" do
+        calls = 0
+        Layered::Assistant.tools { calls += 1; [ EchoTool, BrokenTool ] }
+        message = assistant_message_with([
+          tool_call("call_1", "echo", '{"word":"one"}'),
+          tool_call("call_2", "echo", '{"word":"two"}')
+        ])
+        calls = 0
+
+        ToolRunnerService.new.call(message: message)
+
+        assert_equal 1, calls
       end
 
       test "the loop stops once max_tool_cycles is reached" do

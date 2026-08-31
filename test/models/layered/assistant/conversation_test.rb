@@ -7,6 +7,24 @@ module Layered
         assert_equal "New conversation", Conversation.default_name
       end
 
+      test "user is optional" do
+        conversation = layered_assistant_conversations(:greeting)
+
+        assert_nothing_raised { conversation.update!(user: nil) }
+        assert_nil conversation.reload.user
+      end
+
+      # Ownership answers which records a request may see; the user answers
+      # who did the talking. An owner block scoping to an organisation makes
+      # the two differ, and only the second can name the person.
+      test "user is held separately from owner" do
+        conversation = layered_assistant_conversations(:greeting)
+        conversation.update!(owner: users(:other), user: users(:one))
+
+        assert_equal users(:other), conversation.reload.owner
+        assert_equal users(:one), conversation.user
+      end
+
       test "owned_by returns nothing for a nil user even when unowned records exist" do
         layered_assistant_conversations(:greeting).update!(owner: nil)
 

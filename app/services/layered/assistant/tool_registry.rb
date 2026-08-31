@@ -11,10 +11,18 @@ module Layered
         Array(block.call).map { |tool| tool.is_a?(String) ? tool.constantize : tool }
       end
 
-      # The subset a conversation may use. A tool that requires an owner is
-      # withheld from public conversations, which have none.
+      # The subset a conversation may use: the tools its assistant has been
+      # given, minus any the conversation cannot reach. A tool that requires
+      # an owner is withheld from public conversations, which have none.
+      #
+      # An assistant with no tools selected calls nothing. Names that no
+      # longer match a registered class simply drop out, so a tool removed
+      # from the application does not break the assistants that listed it.
       def self.for(conversation)
-        all.select { |tool| tool.available_for?(conversation) }
+        names = conversation&.assistant&.tool_names
+        return [] if names.blank?
+
+        all.select { |tool| names.include?(tool.tool_name) && tool.available_for?(conversation) }
       end
 
       def self.find(name)

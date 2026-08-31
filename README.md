@@ -142,6 +142,24 @@ If you configure an owner block, it must return a record for every request your 
 
 Ownership is enforced at the controller layer, not by model validations. Out-of-scope IDs return 404.
 
+### The conversation user
+
+Ownership answers "which records may this request see". It does not answer
+"who is doing the talking" - and once an owner block scopes records to an
+organisation, the owner cannot: every member of that organisation shares it.
+
+So a conversation separately records the signed-in user who started it:
+
+```ruby
+conversation.owner # => #<Organisation id: 3>   the boundary records are scoped to
+conversation.user  # => #<User id: 91>          the person who asked
+```
+
+The two are the same record until you configure an owner block. `user` is
+always whoever was signed in and is never redirected by a block, and it is nil
+for an anonymous visitor on a public assistant. Tools read both - see
+[Tools](#tools).
+
 ## Panel helpers
 
 The engine provides two convenience helpers for wiring the layered-ui panel to the assistant. Use them inside `content_for` blocks in your application layout:
@@ -201,6 +219,30 @@ end
 The block is called per request rather than read once at boot, so tool classes
 reload in development like any other application class.
 
+### Giving tools to an assistant
+
+Registering a tool makes it available to pick, not available to call. Each
+assistant is given its own set on its edit screen, and an assistant with no
+tools calls nothing - so adding a tool to the application does not hand it to
+every assistant at once. Two assistants can share a registered tool and still
+be given different sets:
+
+| Assistant | Tools |
+|---|---|
+| Sales assistant | `weather` |
+| Support assistant | `weather`, `order-lookup` |
+
+The set is held by tool name rather than a foreign key, because tools are
+classes rather than records. A name whose class is no longer registered is
+ignored, so removing a tool from the initialiser does not break the assistants
+that listed it.
+
+Outside the UI, assign the set with `tool_names`:
+
+```ruby
+assistant.update!(tool_names: [ "weather", "order-lookup" ])
+```
+
 ### Defining a tool
 
 | Method | Description |
@@ -208,28 +250,53 @@ reload in development like any other application class.
 | `description` | What the tool does, in the model's words. This is the only thing the model has to go on, so be specific |
 | `argument` | An argument the model may supply: `argument :name, :type, required:, description:, enum:, items:` |
 | `tool_name` | The name the model calls the tool by. Defaults to the class name without its `Tool` suffix, namespaces hyphenated: `Weather::ForecastTool` becomes `weather-forecast` |
-| `requires_owner` | Whether the tool needs an owned conversation. `true` by default - see below |
+| `self.public =` | Whether the tool may be offered to a public assistant. `false` by default - see below |
 
 Argument types are `:string`, `:integer`, `:number`, `:boolean`, `:array` and
 `:object`. An `:array` takes `items:` to name its element type.
 
+Subclass a tool to share logic and the declarations come with it: the child
+inherits its parent's `description`, `public` flag and arguments, adds any
+arguments of its own, and may redeclare one by name to narrow it. The name is
+the exception - the child derives its own from its class name, since two tools
+answering to one name would collide in the registry.
+
 `#call` receives the arguments as keywords and may return a string or anything
-that responds to `#to_json`. Inside it, `message`, `conversation` and `owner`
-give the calling context. Raising is safe: the error is reported back to the
+that responds to `#to_json`. Raising is safe: the error is reported back to the
 model as the tool's result, so it can correct itself or explain, rather than
 the response failing.
+
+Inside `#call`, four methods give the calling context:
+
+| Method | Description |
+|---|---|
+| `owner` | The record the conversation is scoped to. Scope the tool's reads and writes to this - it is the caller's boundary |
+| `user` | The person doing the talking. The same record as `owner` until an owner block scopes ownership elsewhere, at which point `owner` is (say) the organisation and `user` is the member of it who asked |
+| `conversation` | The conversation the call came from |
+| `message` | The assistant message that asked for the call |
+
+Registering a tool does not scope it. `owner` is handed to you, but nothing
+enforces that you use it - a tool that queries across every tenant will do
+exactly that. Scoping is the tool's own job:
+
+```ruby
+def call(reference:)
+  owner.orders.find_by(reference: reference)
+end
+```
 
 ### Tools and public assistants
 
 A conversation with a public assistant has no owner - it belongs to an
-anonymous visitor. Tools are withheld from those conversations by default, so
-that a public assistant cannot reach into your application. A tool that is
-safe to expose opts in:
+anonymous visitor, so there is no boundary to scope a tool's reads to. Tools
+are private by default and withheld from those conversations even when the
+assistant has been given them. A tool that is safe to expose opts in, using
+the same word an assistant does:
 
 ```ruby
 class CurrentTimeTool < Layered::Assistant::Tool
   description "Get the current date and time on the server."
-  requires_owner false
+  self.public = true
 
   def call
     { time: Time.current.iso8601 }
@@ -237,8 +304,11 @@ class CurrentTimeTool < Layered::Assistant::Tool
 end
 ```
 
-Otherwise, scope a tool's reads and writes to `owner`, the same boundary the
-engine's own controllers use.
+This is written as an attribute rather than a `public true` DSL because
+`public` is Ruby's own method-visibility keyword. A class method of that name
+would shadow it, and a tool whose body used a bare `public` to reopen
+visibility would silently mark itself callable by anonymous visitors - too
+sharp an edge for a flag that governs exposure.
 
 ### The tool call loop
 

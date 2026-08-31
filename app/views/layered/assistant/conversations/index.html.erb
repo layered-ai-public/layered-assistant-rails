@@ -40,8 +40,10 @@
             <%= number_with_delimiter(conversation.token_estimate.to_i) %>
           </td>
           <td class="l-ui-table__cell">
-            <%# nil owner = public conversation (guest user) %>
-            <%= conversation.owner.try(:name) || "Guest" %>
+            <%# The person who did the talking, which is the owner itself
+                until an owner block scopes ownership elsewhere. Neither is
+                set for an anonymous visitor on a public assistant. %>
+            <%= conversation.user.try(:name) || conversation.owner.try(:name) || "Guest" %>
           </td>
           <td class="l-ui-table__cell">
             <%= conversation.created_at.to_fs(:short) %>

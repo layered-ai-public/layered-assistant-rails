@@ -8,6 +8,12 @@ module Layered
 
       # Associations
       belongs_to :assistant, counter_cache: true
+      # The person doing the talking, as distinct from `owner`, the record
+      # this conversation is scoped to. They are the same when ownership is
+      # left at its default, but an owner block scoping to an organisation
+      # makes them differ - and a tool that needs to know who asked wants
+      # this one, not the organisation it was asked from.
+      belongs_to :user, polymorphic: true, optional: true
       belongs_to :subject, polymorphic: true, optional: true
       has_many :messages, dependent: :destroy
 

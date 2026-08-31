@@ -25,6 +25,7 @@ module Layered
         def create
           @conversation = Conversation.new(conversation_params)
           @conversation.owner = current_owner!
+          @conversation.user = current_conversation_user
           @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
           @conversation.name = Conversation.default_name if @conversation.name.blank?
 

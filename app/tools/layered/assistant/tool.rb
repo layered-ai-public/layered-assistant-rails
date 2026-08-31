@@ -6,7 +6,6 @@ module Layered
     #
     #   class WeatherTool < Layered::Assistant::Tool
     #     description "Get the current weather for a city."
-    #
     #     argument :city, :string, required: true, description: "The city to look up."
     #
     #     def call(city:)
@@ -26,6 +25,10 @@ module Layered
         # The name the model calls the tool by. Defaults to the class name
         # without its Tool suffix, namespaces separated by hyphens:
         # "Weather::ForecastTool" becomes "weather-forecast".
+        #
+        # Alone among the declarations here this is not inherited: two tools
+        # answering to one name would collide in the registry, so a subclass
+        # derives its own from its class name unless it says otherwise.
         def tool_name(value = nil)
           @tool_name = value.to_s if value
           @tool_name || default_tool_name
@@ -33,22 +36,33 @@ module Layered
 
         def description(value = nil)
           @description = value if value
-          @description
+          @description || from_superclass(:description)
         end
 
-        # Tools are offered only to conversations that have an owner, so that a
-        # public assistant talking to an anonymous visitor cannot reach into the
-        # host application by default. Opt in with `requires_owner false`.
-        def requires_owner(value = nil)
-          @requires_owner = value unless value.nil?
-          @requires_owner.nil? ? true : @requires_owner
+        # Whether the tool may be offered to a public assistant, matching
+        # `public` on Assistant. Tools are private by default: a public
+        # assistant is talking to an anonymous visitor, and its conversations
+        # have no owner to scope a tool's reads to. Opt in with
+        # `self.public = true`.
+        #
+        # Written as an attribute rather than a `public true` DSL on purpose.
+        # `public` is Ruby's own method-visibility keyword, so a class method
+        # of that name would shadow it - and a tool whose body used a bare
+        # `public` to reopen visibility would silently mark itself callable by
+        # anonymous visitors. Too sharp an edge for a security flag.
+        attr_writer :public
+
+        def public?
+          return @public unless @public.nil?
+
+          from_superclass(:public?) || false
         end
 
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
           type = type.to_s
           raise ::ArgumentError, "Unsupported argument type: #{type}" unless TYPES.include?(type)
 
-          arguments << {
+          own_arguments << {
             name: name.to_sym,
             type: type,
             required: required,
@@ -58,8 +72,11 @@ module Layered
           }
         end
 
+        # A subclass adds to the arguments it inherits rather than replacing
+        # them. Redeclaring one by name overrides it where it already sits,
+        # so a subclass can narrow a parent's argument without moving it.
         def arguments
-          @arguments ||= []
+          (from_superclass(:arguments).to_a + own_arguments).index_by { |argument| argument[:name] }.values
         end
 
         # The JSON Schema for the arguments, as sent to the provider.
@@ -81,7 +98,7 @@ module Layered
         end
 
         def available_for?(conversation)
-          !requires_owner || conversation&.owner.present?
+          public? || conversation&.owner.present?
         end
 
         # Checks what the model supplied against the schema and returns it as
@@ -99,6 +116,22 @@ module Layered
         end
 
         private
+
+        def own_arguments
+          @arguments ||= []
+        end
+
+        # Declarations are held in class instance variables, which subclasses
+        # do not inherit, so each reader asks its parent for what it was not
+        # given itself. Without this a tool subclassed to share logic would
+        # lose its parent's description and arguments and still be callable -
+        # offered to the model with an empty schema.
+        #
+        # Not named `inherited`: that is Ruby's own hook for being subclassed,
+        # and overriding it breaks every subclass of Tool.
+        def from_superclass(reader)
+          superclass.public_send(reader) if superclass.respond_to?(reader)
+        end
 
         def default_tool_name
           name.underscore.sub(/_tool\z/, "").tr("/", "-")
@@ -120,6 +153,17 @@ module Layered
       # with a public assistant.
       def owner
         conversation&.owner
+      end
+
+      # The person doing the talking. The same as `owner` until an owner
+      # block scopes records to something else, such as an organisation, at
+      # which point `owner` is the organisation and this is the member of it
+      # who asked. Nil for an anonymous visitor on a public assistant.
+      #
+      # Scope reads and writes to `owner`; use this to answer questions about
+      # the person, or to narrow further within the owner's boundary.
+      def user
+        conversation&.user
       end
 
       def call(**)

@@ -177,6 +177,52 @@ module Layered
         assert_empty assistant.reload.skills
       end
 
+      test "should assign tools on update" do
+        assistant = layered_assistant_assistants(:general)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { tool_names: [ "", "current_time" ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_equal [ "current_time" ], assistant.reload.tool_names
+      end
+
+      test "should clear tools when the picker posts none" do
+        assistant = layered_assistant_assistants(:coding)
+        assert_predicate assistant.tool_names, :any?
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { tool_names: [ "" ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_empty assistant.reload.tool_names
+      end
+
+      test "should drop an unregistered tool_name on update" do
+        assistant = layered_assistant_assistants(:general)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { tool_names: [ "current_time", "not-a-tool" ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_equal [ "current_time" ], assistant.reload.tool_names
+      end
+
+      test "should assign several tools at once" do
+        assistant = layered_assistant_assistants(:general)
+
+        patch "/layered/assistant/assistants/#{assistant.id}", params: { assistant: { tool_names: [ "", "current_time", "user_lookup" ] } }
+        assert_redirected_to "/layered/assistant/assistants"
+
+        assert_equal [ "current_time", "user_lookup" ], assistant.reload.tool_names.sort
+      end
+
+      test "the tool picker offers the registered tools and takes more than one" do
+        get "/layered/assistant/assistants/#{layered_assistant_assistants(:general).id}/edit"
+        assert_response :success
+
+        assert_select "li[role=option][data-value=?]", "current_time"
+        assert_select "li[role=option][data-value=?]", "user_lookup"
+        assert_select "ul[role=listbox][aria-multiselectable=true]"
+      end
+
       test "should destroy assistant" do
         assistant = Assistant.create!(name: "Disposable", owner: users(:one))
 
