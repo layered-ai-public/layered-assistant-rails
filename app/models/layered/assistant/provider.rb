@@ -4,6 +4,11 @@ module Layered
       include Ownable
 
       # Virtual attributes
+      # `create_models` backs the model-seeding choice on the new provider
+      # form: ProviderResource.build_record defaults it to "1" and the field
+      # reads it back to preselect that option. ProvidersController#create
+      # reads the posted value straight from params, so this accessor looks
+      # unused from the controller side - it is not.
       attr_accessor :create_models
 
       # Positioning

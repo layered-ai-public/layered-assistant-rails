@@ -8,10 +8,12 @@ module Layered
         before_action :set_conversation
 
         def create
+          model_id = scoped_model_id(message_params[:model_id])
+
           result = create_messages_for(
             conversation: @conversation,
             content: message_params[:content],
-            model_id: message_params[:model_id]
+            model_id: model_id
           )
           @message = result[:message]
 
@@ -20,8 +22,8 @@ module Layered
           end
 
           @assistant_message = result[:assistant_message]
-          @models = Model.available
-          @selected_model_id = message_params[:model_id]
+          @models = scoped_models
+          @selected_model_id = model_id
           @error = result[:error]
 
           respond_to do |format|

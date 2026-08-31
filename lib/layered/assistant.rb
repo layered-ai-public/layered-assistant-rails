@@ -1,4 +1,5 @@
 require "anthropic"
+require "layered-resource-rails"
 require "layered-ui-rails"
 require "openai"
 require "pagy"

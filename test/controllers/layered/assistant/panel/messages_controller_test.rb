@@ -27,6 +27,18 @@ module Layered
           assert_equal @model.id, assistant_message.model_id
         end
 
+        test "should not create a message through another owner's model" do
+          @model.provider.update!(owner: nil)
+
+          assert_no_difference("Message.count") do
+            post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
+              params: { message: { content: "Hello from panel", model_id: @model.id } },
+              as: :turbo_stream
+          end
+
+          assert_response :not_found
+        end
+
         test "should respond with turbo_stream" do
           post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
             params: { message: { content: "Test", model_id: @model.id } },

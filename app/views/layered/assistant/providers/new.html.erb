@@ -1,6 +1,64 @@
-<%= l_ui_title_bar(
-  title: "New provider",
-  breadcrumbs: [["Providers", layered_assistant.providers_path]]
-) %>
+<%#
+  Ejected from layered-resource-rails 0.1.0 so the new-provider form can carry
+  the template picker and the model-seeding choice, neither of which is a
+  stored provider attribute. Edit renders the gem's own form.
 
-<%= render "form", provider: @provider, url: layered_assistant.providers_path %>
+  It binds to the gem's controller contract - `@record`, `@fields`, `@model`,
+  `@form_url` and `layered_collection_path` - so check this template against
+  the gem's own `new` view when upgrading past 0.1.
+
+  This lives under `layered/assistant/providers` rather than the gem's own
+  `layered/providers` prefix: engine view paths are global, so the shorter
+  path would also answer a host app's own `layered_resources :providers`.
+  The controller's own prefix chain still finds it here.
+%>
+<% create_models_field = {
+     attribute: :create_models,
+     as: :select,
+     label: "Models",
+     required: false,
+     include_blank: false,
+     collection: [
+       [ "If available, automatically create popular models for this provider", "1" ],
+       [ "Add your own models manually", "0" ]
+     ],
+     hint: "Popular model identifiers are sourced from data/models.json in the layered-assistant-rails repository."
+   } %>
+
+<%# The key hint belongs beside the secret field, not up in the picker, so the
+    Stimulus target is rendered as that field's hint - which also wires the
+    input's aria-describedby to it. %>
+<% fields = @fields.map do |field|
+     next field unless field[:attribute] == :secret
+
+     field.merge(hint: tag.span(hidden: true, data: { provider_template_target: "secretHint" }))
+   end %>
+
+<div class="l-ui-spread">
+  <div>
+    <%= l_ui_breadcrumbs do %>
+      <%= l_ui_breadcrumb_item @model.model_name.human.pluralize, layered_collection_path %>
+    <% end %>
+
+    <h1 class="l-ui-heading">New <%= @model.model_name.human.downcase %></h1>
+  </div>
+</div>
+
+<div class="l-ui-mt-2" data-controller="provider-template" data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>">
+  <div class="l-ui-form__group">
+    <label class="l-ui-label" for="provider_template">Template</label>
+    <select id="provider_template" class="l-ui-select" data-action="provider-template#apply">
+      <option value="">Manual</option>
+      <% Layered::Assistant::Provider::TEMPLATES.each do |group, templates| %>
+        <optgroup label="<%= group %>">
+          <% templates.each do |template| %>
+            <option value="<%= template[:key] %>"><%= template[:name] %></option>
+          <% end %>
+        </optgroup>
+      <% end %>
+    </select>
+    <div class="l-ui-form__hint" hidden data-provider-template-target="description"></div>
+  </div>
+
+  <%= l_ui_form(@record, fields: fields + [ create_models_field ], url: @form_url) %>
+</div>
