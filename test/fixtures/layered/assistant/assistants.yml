@@ -10,6 +10,9 @@ general:
 
 coding:
   uid: ast_coding_fixture_002
+  # Fixtures do not maintain counter caches, so the one in assistant_tools.yml
+  # is declared here to keep the pair consistent.
+  assistant_tools_count: 1
   name: Coding assistant
   description: An assistant specialising in programming help.
   instructions: You are an expert programmer. Help the user write clean, well-tested code.

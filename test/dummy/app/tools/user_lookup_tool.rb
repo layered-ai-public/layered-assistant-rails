@@ -8,7 +8,10 @@ class UserLookupTool < Layered::Assistant::Tool
   argument :email, :string, required: true, description: "The email address to look up."
 
   def call(email:)
-    match = User.where(id: owner).find_by(email: email)
+    # `owner` is a record, not an id, so the boundary is spelled out: this
+    # app's owner is the caller themselves, which means the only user a
+    # lookup may return is their own. A nil owner narrows to nothing.
+    match = User.where(id: owner&.id).find_by(email: email)
     return { found: false, email: email } unless match
 
     { found: true, email: match.email, name: match.name, signed_up_at: match.created_at.iso8601 }

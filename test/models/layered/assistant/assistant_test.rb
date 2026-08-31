@@ -105,6 +105,30 @@ module Layered
         assert_equal 0, assistant.reload.assistant_tools_count
       end
 
+      # A name dropped and re-added before the save used to keep the
+      # destruction mark it was given on the way out, so it was deleted
+      # anyway and took the counter cache to -1.
+      test "tool_names= re-assigned before saving keeps the name" do
+        assistant = layered_assistant_assistants(:coding)
+        assert_equal [ "current_time" ], assistant.tool_names
+
+        assistant.tool_names = []
+        assistant.tool_names = [ "current_time" ]
+        assistant.save!
+
+        assert_equal [ "current_time" ], assistant.reload.tool_names
+        assert_equal 1, assistant.assistant_tools_count
+      end
+
+      test "tool_names= keeps the row backing a name that survives" do
+        assistant = layered_assistant_assistants(:coding)
+        kept = assistant.assistant_tools.sole
+
+        assistant.update!(tool_names: [ "current_time", "user_lookup" ])
+
+        assert_includes assistant.reload.assistant_tools.ids, kept.id
+      end
+
       test "destroying an assistant destroys its tools" do
         assistant = layered_assistant_assistants(:coding)
         tool_ids = assistant.assistant_tools.ids

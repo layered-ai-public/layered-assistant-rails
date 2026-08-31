@@ -68,14 +68,6 @@ module Layered
         assert_equal [ OpenTool ], ToolRegistry.for(layered_assistant_conversations(:greeting))
       end
 
-      test "available? asks whether the conversation may call the tool" do
-        @assistant.update!(tool_names: [ OpenTool.tool_name ])
-        conversation = layered_assistant_conversations(:greeting)
-
-        assert ToolRegistry.available?(OpenTool, conversation)
-        assert_not ToolRegistry.available?(OwnedTool, conversation)
-      end
-
       test "find looks a tool up by the name the model calls it" do
         assert_equal OpenTool, ToolRegistry.find(OpenTool.tool_name)
         assert_nil ToolRegistry.find("no-such-tool")

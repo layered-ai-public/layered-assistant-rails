@@ -25,13 +25,6 @@ module Layered
         all.select { |tool| names.include?(tool.tool_name) && tool.available_for?(conversation) }
       end
 
-      # Whether a conversation may call the named tool. The runner asks
-      # before executing, so a model that invents a call to a tool its
-      # assistant was not given gets an error back rather than a result.
-      def self.available?(tool, conversation)
-        self.for(conversation).include?(tool)
-      end
-
       def self.find(name)
         all.find { |tool| tool.tool_name == name }
       end

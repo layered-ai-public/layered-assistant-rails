@@ -11,7 +11,7 @@ module Layered
       belongs_to :persona, optional: true, counter_cache: :assistants_count
       has_many :assistant_skills, dependent: :destroy
       has_many :skills, through: :assistant_skills
-      has_many :assistant_tools, dependent: :destroy, autosave: true
+      has_many :assistant_tools, -> { order(:id) }, dependent: :destroy
       has_many :conversations, dependent: :destroy
 
       # Validations
@@ -27,19 +27,19 @@ module Layered
       # An assistant with none calls nothing: the set is opt-in, so adding a
       # tool to the application does not hand it to every assistant at once.
       def tool_names
-        assistant_tools.reject(&:marked_for_destruction?).map(&:tool_name)
+        assistant_tools.map(&:tool_name)
       end
 
+      # Replaces the set, keeping the rows for names that survive so their
+      # ids and timestamps do. Assigning the collection rather than marking
+      # the leavers for destruction: a mark cannot be lifted, so a name
+      # dropped and re-added before the save would keep its mark and be
+      # deleted anyway, taking the counter cache below zero with it.
       def tool_names=(names)
         names = Array(names).map(&:to_s).compact_blank.uniq
+        existing = assistant_tools.index_by(&:tool_name)
 
-        assistant_tools.each do |assistant_tool|
-          assistant_tool.mark_for_destruction unless names.include?(assistant_tool.tool_name)
-        end
-
-        (names - assistant_tools.map(&:tool_name)).each do |name|
-          assistant_tools.build(tool_name: name)
-        end
+        self.assistant_tools = names.map { |name| existing[name] || AssistantTool.new(tool_name: name) }
       end
     end
   end

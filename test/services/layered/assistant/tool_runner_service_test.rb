@@ -130,6 +130,20 @@ module Layered
         assert_match "not available", JSON.parse(@conversation.messages.where(role: :tool).sole.content)["error"]
       end
 
+      test "the registrations block is evaluated once however many tools are called" do
+        calls = 0
+        Layered::Assistant.tools { calls += 1; [ EchoTool, BrokenTool ] }
+        message = assistant_message_with([
+          tool_call("call_1", "echo", '{"word":"one"}'),
+          tool_call("call_2", "echo", '{"word":"two"}')
+        ])
+        calls = 0
+
+        ToolRunnerService.new.call(message: message)
+
+        assert_equal 1, calls
+      end
+
       test "the loop stops once max_tool_cycles is reached" do
         Layered::Assistant.max_tool_cycles = 2
         2.times { |i| assistant_message_with([ tool_call("spent_#{i}", "echo", '{"word":"x"}') ]) }
