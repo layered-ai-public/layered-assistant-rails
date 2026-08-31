@@ -270,6 +270,43 @@ else
   Rails.logger.warn "No Sonnet model found - skipping skilled assistants"
 end
 
+# Tooled assistants
+#
+# Tools are given per assistant, so two assistants can register the same tool
+# in the initializer and still reach different things. The concierge gets both
+# tools; the clock gets only the one that needs no owner, which is what lets it
+# be public.
+if sonnet
+  tooled_assistants = [
+    {
+      name: "Account concierge",
+      description: "Looks up registered users and tells the time.",
+      instructions: "You help staff answer questions about registered users. Use the user lookup tool rather than guessing, and say plainly when someone is not registered.",
+      tool_names: [ "user_lookup", "current_time" ],
+      public: false
+    },
+    {
+      name: "Clock",
+      description: "Answers questions about the current date and time.",
+      instructions: "You answer questions about the time. Always use the tool rather than guessing, and give the time zone alongside the time.",
+      tool_names: [ "current_time" ],
+      public: true
+    }
+  ]
+
+  tooled_assistants.each do |attrs|
+    assistant = Layered::Assistant::Assistant.find_or_create_by!(name: attrs[:name]) do |a|
+      a.description = attrs[:description]
+      a.instructions = attrs[:instructions]
+      a.default_model = sonnet
+      a.public = attrs[:public]
+    end
+    assistant.update!(default_model: sonnet, public: attrs[:public], tool_names: attrs[:tool_names])
+  end
+else
+  Rails.logger.warn "No Sonnet model found - skipping tooled assistants"
+end
+
 # Stamp ownership onto every engine record. Records without an owner are
 # invisible to the owner-scoped controllers, so this must stay the last step
 # in the file - anything seeded below it would be left unowned.

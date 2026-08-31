@@ -6,7 +6,6 @@ module Layered
     #
     #   class WeatherTool < Layered::Assistant::Tool
     #     description "Get the current weather for a city."
-    #
     #     argument :city, :string, required: true, description: "The city to look up."
     #
     #     def call(city:)
@@ -36,12 +35,21 @@ module Layered
           @description
         end
 
-        # Tools are offered only to conversations that have an owner, so that a
-        # public assistant talking to an anonymous visitor cannot reach into the
-        # host application by default. Opt in with `requires_owner false`.
-        def requires_owner(value = nil)
-          @requires_owner = value unless value.nil?
-          @requires_owner.nil? ? true : @requires_owner
+        # Whether the tool may be offered to a public assistant, matching
+        # `public` on Assistant. Tools are private by default: a public
+        # assistant is talking to an anonymous visitor, and its conversations
+        # have no owner to scope a tool's reads to. Opt in with
+        # `self.public = true`.
+        #
+        # Written as an attribute rather than a `public true` DSL on purpose.
+        # `public` is Ruby's own method-visibility keyword, so a class method
+        # of that name would shadow it - and a tool whose body used a bare
+        # `public` to reopen visibility would silently mark itself callable by
+        # anonymous visitors. Too sharp an edge for a security flag.
+        attr_writer :public
+
+        def public?
+          @public.nil? ? false : @public
         end
 
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
@@ -81,7 +89,7 @@ module Layered
         end
 
         def available_for?(conversation)
-          !requires_owner || conversation&.owner.present?
+          public? || conversation&.owner.present?
         end
 
         # Checks what the model supplied against the schema and returns it as
@@ -120,6 +128,17 @@ module Layered
       # with a public assistant.
       def owner
         conversation&.owner
+      end
+
+      # The person doing the talking. The same as `owner` until an owner
+      # block scopes records to something else, such as an organisation, at
+      # which point `owner` is the organisation and this is the member of it
+      # who asked. Nil for an anonymous visitor on a public assistant.
+      #
+      # Scope reads and writes to `owner`; use this to answer questions about
+      # the person, or to narrow further within the owner's boundary.
+      def user
+        conversation&.user
       end
 
       def call(**)

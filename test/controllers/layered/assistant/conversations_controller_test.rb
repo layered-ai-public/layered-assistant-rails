@@ -58,6 +58,7 @@ module Layered
         conversation = Conversation.order(:id).last
         assert_equal assistant, conversation.assistant
         assert_equal users(:one), conversation.owner
+        assert_equal users(:one), conversation.user
         assert_redirected_to "/layered/assistant/conversations/#{conversation.uid}"
       end
 

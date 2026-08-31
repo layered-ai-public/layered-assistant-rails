@@ -31,6 +31,10 @@ module Layered
 
         @conversation = layered_assistant_conversations(:empty)
         @conversation.messages.create!(role: :user, content: "Echo rails")
+
+        # The runner checks the assistant was given the tool before running
+        # it, so the fixture assistant behind these conversations gets both.
+        layered_assistant_assistants(:general).update!(tool_names: [ "echo", "broken" ])
       end
 
       teardown do
@@ -110,6 +114,15 @@ module Layered
 
       test "a tool requiring an owner is refused in a conversation without one" do
         @conversation = layered_assistant_conversations(:anonymous)
+        message = assistant_message_with([ tool_call("call_1", "echo", '{"word":"rails"}') ])
+
+        ToolRunnerService.new.call(message: message)
+
+        assert_match "not available", JSON.parse(@conversation.messages.where(role: :tool).sole.content)["error"]
+      end
+
+      test "a tool the assistant was not given is refused" do
+        layered_assistant_assistants(:general).update!(tool_names: [ "broken" ])
         message = assistant_message_with([ tool_call("call_1", "echo", '{"word":"rails"}') ])
 
         ToolRunnerService.new.call(message: message)

@@ -51,6 +51,11 @@
 # not created an organisation yet, and that user will hit MissingOwnerError on
 # their first create. Either give the block a fallback, or have your authorize
 # block send those users somewhere to set one up first.
+#
+# Separately from ownership, a conversation records the signed-in user who
+# started it in `Conversation#user`. Ownership answers "which records may this
+# request see"; the user answers "who is doing the talking". They are the same
+# record until an owner block sends ownership elsewhere.
 
 # Tools
 #
@@ -72,11 +77,17 @@
 #   [ WeatherTool ]
 # end
 #
-# Inside #call, `message`, `conversation` and `owner` give the calling context.
-# Scope a tool's reads and writes to `owner` to keep it inside the caller's
-# boundary. A conversation with a public assistant has no owner, so tools are
-# withheld from those conversations unless the tool declares
-# `requires_owner false`.
+# Inside #call, `message`, `conversation`, `owner` and `user` give the calling
+# context. Scope a tool's reads and writes to `owner` to keep it inside the
+# caller's boundary; `user` is the person doing the talking, which is the same
+# record until an owner block scopes ownership to something else. A
+# conversation with a public assistant has no owner, so tools are withheld
+# from those conversations unless the tool declares `self.public = true`.
+#
+# Registering a tool here makes it available to pick, not available to call.
+# Each assistant is given its own set on its edit screen, and an assistant
+# with none calls nothing - so adding a tool to the application does not hand
+# it to every assistant at once.
 
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout

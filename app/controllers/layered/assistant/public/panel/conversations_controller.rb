@@ -17,7 +17,7 @@ module Layered
           end
 
           def create
-            @conversation = @assistant.conversations.new(name: Conversation.default_name)
+            @conversation = @assistant.conversations.new(name: Conversation.default_name, user: current_conversation_user)
 
             if @conversation.save
               add_conversation_to_session(@conversation)

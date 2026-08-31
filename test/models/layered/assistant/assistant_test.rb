@@ -69,6 +69,52 @@ module Layered
         assert_equal false, assistant.public
       end
 
+      test "tool_names lists the tools the assistant has been given" do
+        assert_equal [ "current_time" ], layered_assistant_assistants(:coding).tool_names
+      end
+
+      test "tool_names is empty for an assistant given none" do
+        assert_empty layered_assistant_assistants(:general).tool_names
+      end
+
+      test "tool_names= adds and removes to match what it is given" do
+        assistant = layered_assistant_assistants(:coding)
+
+        assistant.update!(tool_names: [ "current_time", "user_lookup" ])
+        assert_equal [ "current_time", "user_lookup" ], assistant.reload.tool_names
+
+        assistant.update!(tool_names: [ "user_lookup" ])
+        assert_equal [ "user_lookup" ], assistant.reload.tool_names
+      end
+
+      test "tool_names= ignores blanks and duplicates" do
+        assistant = layered_assistant_assistants(:general)
+
+        assistant.update!(tool_names: [ "", "current_time", "current_time" ])
+
+        assert_equal [ "current_time" ], assistant.reload.tool_names
+      end
+
+      test "tool_names= keeps the counter cache in step" do
+        assistant = layered_assistant_assistants(:general)
+
+        assistant.update!(tool_names: [ "current_time", "user_lookup" ])
+        assert_equal 2, assistant.reload.assistant_tools_count
+
+        assistant.update!(tool_names: [])
+        assert_equal 0, assistant.reload.assistant_tools_count
+      end
+
+      test "destroying an assistant destroys its tools" do
+        assistant = layered_assistant_assistants(:coding)
+        tool_ids = assistant.assistant_tools.ids
+        assert tool_ids.any?
+
+        assistant.destroy
+
+        assert_empty AssistantTool.where(id: tool_ids)
+      end
+
       test "publicly_available scope returns only public assistants" do
         public_assistants = Assistant.publicly_available
         assert public_assistants.all?(&:public)

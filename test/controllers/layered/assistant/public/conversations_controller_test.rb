@@ -16,8 +16,21 @@ module Layered
 
           conversation = Conversation.order(:id).last
           assert_nil conversation.owner
+          assert_nil conversation.user
           assert_equal @assistant, conversation.assistant
           assert_response :redirect
+        end
+
+        # A public assistant takes no owner, but there is still a person to
+        # name when the visitor happens to be signed in.
+        test "create records a signed-in visitor as the user but takes no owner" do
+          sign_in users(:one)
+
+          post "/layered/assistant/public/conversations", params: { assistant_id: @assistant.id }
+
+          conversation = Conversation.order(:id).last
+          assert_nil conversation.owner
+          assert_equal users(:one), conversation.user
         end
 
         test "should not create conversation for private assistant" do

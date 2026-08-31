@@ -52,7 +52,7 @@ module Layered
       def execute(message, name, arguments)
         tool = ToolRegistry.find(name)
         return error("There is no tool called '#{name}'.") unless tool
-        return error("The tool '#{name}' is not available in this conversation.") unless tool.available_for?(message.conversation)
+        return error("The tool '#{name}' is not available in this conversation.") unless ToolRegistry.available?(tool, message.conversation)
 
         result = tool.new(message: message).call(**tool.cast_arguments(parse(arguments)))
         format_result(result)

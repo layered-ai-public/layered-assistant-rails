@@ -51,13 +51,27 @@ end
 # not created an organisation yet, and that user will hit MissingOwnerError on
 # their first create. Either give the block a fallback, or have your authorize
 # block send those users somewhere to set one up first.
+#
+# Separately from ownership, a conversation records the signed-in user who
+# started it in `Conversation#user`. Ownership answers "which records may this
+# request see"; the user answers "who is doing the talking". They are the same
+# record until an owner block sends ownership elsewhere.
 
 # Tools
 #
 # Tool classes the assistant may call, listed in a block so that they reload
 # in development. See app/tools in this dummy application for examples.
+#
+# Registering a tool here makes it available to pick, not available to call.
+# Each assistant is given its own set on its edit screen, and an assistant
+# with none calls nothing - so adding a tool to the application does not hand
+# it to every assistant at once.
+#
+# Inside #call, `message`, `conversation`, `owner` and `user` give the calling
+# context. Tools are withheld from public assistants unless they declare
+# `self.public = true`, as CurrentTimeTool does.
 Layered::Assistant.tools do
-  [ CurrentTimeTool, UserLookupTool ]
+  [ CurrentTimeTool, UserLookupTool, WhoamiTool ]
 end
 
 # Optional settings (uncomment to enable):

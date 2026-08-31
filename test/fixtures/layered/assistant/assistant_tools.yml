@@ -1,0 +1,3 @@
+coding_current_time:
+  assistant: coding
+  tool_name: current_time

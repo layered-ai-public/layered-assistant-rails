@@ -33,6 +33,9 @@ module Layered
           Layered::Assistant.tools { [ EchoTool ] }
 
           @conversation = layered_assistant_conversations(:empty)
+          # Tools are given per assistant, so registering the tool is not
+          # enough on its own - the fixture assistant has to be given it too.
+          @conversation.assistant.update!(tool_names: [ EchoTool.tool_name ])
           @conversation.messages.create!(role: :user, content: "Echo rails")
           @message = @conversation.messages.create!(role: :assistant, content: nil, model: layered_assistant_models(:sonnet))
         end
