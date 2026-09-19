@@ -1,6 +1,12 @@
+<% pending = message.consent_pending? %>
+<%# An approved call holds nothing until the tool has run, which for a slow %>
+<%# one is a while. Saying so beats an empty Output block. %>
+<% running = message.under_consent? && message.content.blank? %>
 <%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} l-ui-message" do %>
   <div class="l-ui-message__bubble">
-    <details class="l-ui-surface l-ui-surface--collapsible-highlighted l-ui-surface--sm">
+    <%# A call waiting to be approved is opened: nobody should be asked to %>
+    <%# approve arguments they have to go looking for. %>
+    <%= tag.details class: "l-ui-surface l-ui-surface--collapsible-highlighted l-ui-surface--sm", open: pending do %>
       <summary class="l-ui-surface__summary">
         <span><strong>Tool:</strong> <%= message.tool_name %></span>
         <%= image_tag "layered_ui/icon_chevron_right.svg", alt: "", class: "l-ui-icon l-ui-icon--sm l-ui-surface__chevron", aria: { hidden: true } %>
@@ -8,10 +14,39 @@
       <div class="l-ui-surface__content l-ui-markdown">
         <p>Input:</p>
         <pre><code><%= tool_payload(message.tool_arguments) %></code></pre>
-        <p>Output:</p>
-        <pre><code><%= tool_payload(message.content) %></code></pre>
+        <% if message.content.present? %>
+          <p>Output:</p>
+          <pre><code><%= tool_payload(message.content) %></code></pre>
+        <% end %>
       </div>
-    </details>
+    <% end %>
+    <% if pending %>
+      <%# The notice and the decision are one thing, so they sit in one child %>
+      <%# of the bubble: its gap would otherwise stack with the notice's own %>
+      <%# bottom margin. A plain row, not l-ui-form__actions - that is a page %>
+      <%# form's footer, right-aligned and set well clear of the fields above. %>
+      <div>
+        <div class="l-ui-notice l-ui-notice--warning" role="status">This tool needs your approval before it runs.</div>
+        <div class="l-ui-tag-row">
+          <%= button_to "Approve",
+                layered_assistant.conversation_tool_call_path(message.conversation, message),
+                method: :patch,
+                params: { decision: "approve" },
+                class: "l-ui-button l-ui-button--primary l-ui-button--small",
+                aria: { label: "Approve the call to #{message.tool_name}" } %>
+          <%= button_to "Decline",
+                layered_assistant.conversation_tool_call_path(message.conversation, message),
+                method: :patch,
+                params: { decision: "decline" },
+                class: "l-ui-button l-ui-button--outline-danger l-ui-button--small",
+                aria: { label: "Decline the call to #{message.tool_name}" } %>
+        </div>
+      </div>
+    <% elsif running %>
+      <div class="l-ui-notice" role="status">This tool call is running.</div>
+    <% elsif message.consent_declined? %>
+      <div class="l-ui-notice l-ui-notice--warning" role="status">This tool call was declined.</div>
+    <% end %>
     <div class="l-ui-message__footer">
       <span class="l-ui-message__timestamp"><%= message.created_at.to_fs(:short) %></span>
     </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_31_184139) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_19_210651) do
   create_table "layered_assistant_assistant_skills", force: :cascade do |t|
     t.integer "assistant_id", null: false
     t.datetime "created_at", null: false
@@ -90,6 +90,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_31_184139) do
     t.string "tool_call_id"
     t.json "tool_calls"
     t.string "tool_name"
+    t.string "tool_status"
     t.integer "ttft_ms"
     t.string "uid", null: false
     t.datetime "updated_at", null: false

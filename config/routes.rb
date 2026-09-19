@@ -13,6 +13,12 @@ Layered::Assistant::Engine.routes.draw do
   resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
     patch :stop, on: :member
     resources :messages, only: [ :index, :create, :destroy ]
+    # Approving a tool call is the same act wherever it is rendered, and the
+    # partial carrying the buttons is broadcast rather than requested, so it
+    # cannot know which namespace it landed in. One route serves them all.
+    # Public conversations are not among them: a tool that asks for consent
+    # is withheld from a conversation with nobody to ask.
+    resources :tool_calls, only: [ :update ]
   end
 
   namespace :panel do

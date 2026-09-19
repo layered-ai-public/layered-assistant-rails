@@ -58,6 +58,50 @@ module Layered
           from_superclass(:public?) || false
         end
 
+        # Who may call the tool, as a block returning truthy to allow it:
+        #
+        #   permit { |conversation| conversation.user&.admin? }
+        #
+        # This narrows what an assistant has been given rather than replacing
+        # it: a tool still has to be selected on the assistant before anyone
+        # can call it. An unpermitted tool is left out of the definitions sent
+        # to the provider, and refused if the model asks for it anyway from an
+        # earlier turn's history.
+        #
+        # Inherited like the other declarations, so a tool subclassed to share
+        # logic keeps its parent's policy unless it declares its own.
+        def permit(&block)
+          @permit = block if block
+          @permit || from_superclass(:permit)
+        end
+
+        # Whether a call has to be approved by the person talking before it
+        # runs. Reads are usually fine unattended; anything that writes, spends
+        # or sends is worth asking about first.
+        #
+        #   consent :always
+        #
+        # A tool that asks for consent is withheld from a conversation with no
+        # user or no owner: an anonymous visitor gives nobody to ask, and a
+        # public assistant's conversation has no owner to answer as, so a
+        # waiting call there could never be approved. Inherited like the other
+        # declarations.
+        CONSENT = %i[never always].freeze
+
+        def consent(value = nil)
+          if value
+            raise ::ArgumentError, "Unsupported consent: #{value}" unless CONSENT.include?(value.to_sym)
+
+            @consent = value.to_sym
+          end
+
+          @consent || from_superclass(:consent) || :never
+        end
+
+        def consent_required?
+          consent == :always
+        end
+
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
           type = type.to_s
           raise ::ArgumentError, "Unsupported argument type: #{type}" unless TYPES.include?(type)
@@ -97,8 +141,17 @@ module Layered
           }
         end
 
+        # Whether a conversation may be offered the tool at all. Cheapest
+        # gate first: a private tool needs an owner to scope its reads to, a
+        # tool that asks for consent needs somebody to ask and an owner to
+        # answer as, the host's authorize_tool block may narrow every tool at
+        # once, and the tool's own permit block has the last word.
         def available_for?(conversation)
-          public? || conversation&.owner.present?
+          return false unless public? || conversation&.owner.present?
+          return false if consent_required? && !consentable?(conversation)
+          return false unless host_permits?(conversation)
+
+          permits?(conversation)
         end
 
         # Checks what the model supplied against the schema and returns it as
@@ -135,6 +188,40 @@ module Layered
 
         def default_tool_name
           name.underscore.sub(/_tool\z/, "").tr("/", "-")
+        end
+
+        # A waiting call is approved through the owner-scoped route, so a
+        # conversation with no owner - a public assistant's - has no way to
+        # answer one, whoever is signed in. Both are required: somebody to
+        # ask, and an owner to reach the decision with.
+        def consentable?(conversation)
+          conversation&.user.present? && conversation&.owner.present?
+        end
+
+        def permits?(conversation)
+          block = permit
+          return true unless block
+
+          allowed?("The permit block for '#{tool_name}'") do
+            block.arity.zero? ? block.call : block.call(conversation)
+          end
+        end
+
+        def host_permits?(conversation)
+          block = Layered::Assistant.authorize_tool_block
+          return true unless block
+
+          allowed?("The authorize_tool block") { block.call(self, conversation) }
+        end
+
+        # A policy that raises denies the tool rather than failing the whole
+        # response: a broken block should not hand the tool over, and should
+        # not take the conversation down with it either.
+        def allowed?(subject)
+          !!yield
+        rescue => e
+          Rails.logger.error("#{subject} raised #{e.class}: #{e.message} - denying the tool")
+          false
         end
       end
 

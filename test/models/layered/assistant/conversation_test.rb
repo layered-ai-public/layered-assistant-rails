@@ -108,6 +108,42 @@ module Layered
         assert_not conversation.responding?
       end
 
+      test "responding? returns true while a tool call waits to be approved" do
+        conversation = layered_assistant_conversations(:greeting)
+        pending_tool_call(conversation)
+
+        assert conversation.awaiting_consent?
+        assert conversation.responding?
+      end
+
+      # Stopping is an answer: the outstanding calls are declined and the
+      # response is not picked back up.
+      test "stop_response! declines the tool calls waiting to be approved" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = pending_tool_call(conversation)
+
+        assert conversation.stop_response!
+
+        message.reload
+        assert message.consent_declined?
+        assert_match "stopped", JSON.parse(message.content)["error"]
+        assert_not conversation.awaiting_consent?
+      end
+
+      # Approving and then stopping is still stopping: the call is answered on
+      # the tool's behalf before it gets the chance to run.
+      test "stop_response! abandons an approved call that has yet to run" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = pending_tool_call(conversation)
+        message.update!(tool_status: :approved)
+
+        assert conversation.stop_response!
+
+        assert_match "stopped", JSON.parse(message.reload.content)["error"]
+        assert_not conversation.unresolved_tool_call?
+        assert conversation.stopped?
+      end
+
       test "stop_response! marks latest assistant message as stopped" do
         conversation = layered_assistant_conversations(:greeting)
         assistant_message = conversation.messages.create!(role: :assistant, content: "Partial", model: layered_assistant_models(:sonnet))
@@ -225,6 +261,19 @@ module Layered
         assert_equal 10, conversation.input_tokens
         assert_equal 0, conversation.output_tokens
         assert_equal 10, conversation.token_estimate
+      end
+
+      private
+
+      def pending_tool_call(conversation)
+        conversation.messages.create!(
+          role: :tool,
+          content: nil,
+          tool_call_id: "call_1",
+          tool_name: "guarded",
+          tool_arguments: "{}",
+          tool_status: :pending
+        )
       end
     end
   end

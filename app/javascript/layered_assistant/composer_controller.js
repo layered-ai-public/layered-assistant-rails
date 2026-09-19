@@ -7,11 +7,15 @@ export default class extends Controller {
   static targets = ["form", "input", "sendButton", "stopButton"]
   static values = {
     responding: { type: Boolean, default: false },
+    waiting: { type: Boolean, default: false },
     stopUrl: { type: String, default: "" }
   }
 
   connect() {
-    this._onChunkReceived = () => this._resetRespondingTimeout()
+    this._onChunkReceived = () => {
+      this.waitingValue = false
+      this._resetRespondingTimeout()
+    }
     document.addEventListener("assistant:chunk-received", this._onChunkReceived)
     this._applyRespondingState()
     this.updateButtonDisabled()
@@ -24,6 +28,16 @@ export default class extends Controller {
 
   respondingValueChanged() {
     this._applyRespondingState()
+  }
+
+  // A tool call waiting to be approved sends nothing until it is answered,
+  // so the safety timeout is stood down rather than giving up on it.
+  waitingValueChanged() {
+    if (this.waitingValue) {
+      clearTimeout(this._respondingTimeout)
+    } else {
+      this._resetRespondingTimeout()
+    }
   }
 
   // Enter submits, Shift+Enter is a no-op (default newline),
@@ -81,9 +95,10 @@ export default class extends Controller {
   }
 
   // Toggle visibility of the Send and Stop buttons. While responding a
-  // 60-second safety timeout resets the composer in case the server
+  // 30-second safety timeout resets the composer in case the server
   // never signals completion. The timeout is reset each time a chunk
-  // is received so long-running responses are not interrupted.
+  // is received so long-running responses are not interrupted, and is
+  // not armed at all while a tool call waits to be approved.
   _applyRespondingState() {
     clearTimeout(this._respondingTimeout)
 
@@ -104,7 +119,7 @@ export default class extends Controller {
   }
 
   _resetRespondingTimeout() {
-    if (!this.respondingValue) return
+    if (!this.respondingValue || this.waitingValue) return
     clearTimeout(this._respondingTimeout)
     this._respondingTimeout = setTimeout(() => {
       this.respondingValue = false

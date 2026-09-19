@@ -88,6 +88,34 @@
 # Each assistant is given its own set on its edit screen, and an assistant
 # with none calls nothing - so adding a tool to the application does not hand
 # it to every assistant at once.
+#
+# Who may call a tool is separate from which assistants have it. A `permit`
+# block narrows a tool to the conversations that satisfy it:
+#
+# class RefundTool < Layered::Assistant::Tool
+#   permit { |conversation| conversation.user&.admin? }
+# end
+#
+# An unpermitted tool is left out of the definitions sent to the provider, so
+# the model is never told about it, and is refused if it asks from an earlier
+# turn's history anyway. To apply one rule across every tool, configure an
+# authorize_tool block - it is given the tool class and the conversation, and
+# returning falsey withholds the tool:
+#
+# Layered::Assistant.authorize_tool do |tool, conversation|
+#   conversation.user&.permitted_tools&.include?(tool.tool_name)
+# end
+#
+# Separately from who may call a tool, a tool that writes, spends or sends
+# can put each call to the person talking before it runs:
+#
+# class RefundTool < Layered::Assistant::Tool
+#   consent :always
+# end
+#
+# The call waits in the conversation with its arguments shown, the composer
+# stays disabled, and the response picks up once it has been approved or
+# declined.
 
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout

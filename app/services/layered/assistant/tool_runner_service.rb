@@ -4,7 +4,29 @@ module Layered
     # result, then queues a fresh assistant message so the model can answer
     # with what the tools returned. That message may ask for tools again,
     # which is the loop max_tool_cycles bounds.
+    #
+    # A tool that declares `consent :always` is not run here. Its message is
+    # recorded with nothing in it, the response stops where it is, and the
+    # person talking approves or declines it - at which point #resolve
+    # finishes the call and picks the response back up.
     class ToolRunnerService
+      DECLINED = "The person you are talking to declined this tool call.".freeze
+      STOPPED = "The response was stopped before this tool ran.".freeze
+
+      # Results are reported to the model as JSON, a refusal included, so
+      # that being turned down reads like any other unhappy answer.
+      def self.error(reason)
+        { error: reason }.to_json
+      end
+
+      # Writes down a call that was never answered because the response was
+      # stopped. Nothing is resumed: stopping means stopping. Returns false if
+      # the call is beyond stopping - already answered, or claimed by the job
+      # that is running its tool, whose own result is the true one.
+      def self.abandon(message)
+        message.resolve_tool_call!(status: :declined, content: error(STOPPED), from: %w[pending approved])
+      end
+
       def call(message:)
         return if message.tool_calls.blank?
 
@@ -16,11 +38,43 @@ module Layered
         message.tool_calls.each { |tool_call| record_result(message, tool_call, available) }
         conversation.update_token_totals!
 
-        if cycles_since_last_prompt(conversation) >= Layered::Assistant.max_tool_cycles
-          halt(message)
-        else
-          continue(message)
+        message.broadcast_response_waiting if conversation.awaiting_consent?
+
+        resume(message)
+      end
+
+      # Carries out a call once it has been approved, or writes down the
+      # refusal, and resumes the response. The refusal is reported to the
+      # model as the tool's result rather than ending the conversation: it
+      # can say something useful about being turned down.
+      def resolve(message:)
+        # An answered call is one this job has already run, or one the response
+        # was stopped over. The tool does not run twice - but resuming may be
+        # what failed last time, so that is still attempted below.
+        if message.content.blank?
+          # Held from before the claim, because claiming moves the call to
+          # running. Running is the tool being carried out, not an outcome, so
+          # the answer is written back under the decision that allowed it.
+          decided = message.tool_status
+
+          content = if message.consent_declined?
+            error(DECLINED)
+          elsif message.claim_tool_call!
+            execute(message, message.tool_name, message.tool_arguments, ToolRegistry.for(message.conversation))
+          else
+            # The claim went elsewhere: the response was stopped before the
+            # tool ran, or this job was delivered twice. Either way the tool
+            # does not run here, and whoever holds the claim finishes the job.
+            return
+          end
+
+          return unless message.resolve_tool_call!(status: decided, content: content)
+
+          message.broadcast_updated
+          message.conversation.update_token_totals!
         end
+
+        resume(message)
       end
 
       private
@@ -28,7 +82,7 @@ module Layered
       def record_result(message, tool_call, available)
         name = tool_call.dig("function", "name")
         arguments = tool_call.dig("function", "arguments")
-        content = execute(message, name, arguments, available)
+        tool = available.find { |candidate| candidate.tool_name == name }
 
         # Both protocols name the call they are asking for. Without an id the
         # result cannot be paired back to it, and the provider rejects the next
@@ -37,6 +91,14 @@ module Layered
           Rails.logger.error("Tool call for '#{name}' arrived with no id on message #{message.id}")
         end
 
+        if tool&.consent_required?
+          record(message, tool_call, name, arguments, content: nil, status: :pending)
+        else
+          record(message, tool_call, name, arguments, content: execute(message, name, arguments, available))
+        end
+      end
+
+      def record(message, tool_call, name, arguments, content:, status: nil)
         result = message.conversation.messages.create!(
           role: :tool,
           content: content,
@@ -44,6 +106,7 @@ module Layered
           tool_call_id: tool_call["id"],
           tool_name: name,
           tool_arguments: arguments,
+          tool_status: status,
           input_tokens: TokenEstimator.estimate(content),
           tokens_estimated: true
         )
@@ -92,7 +155,7 @@ module Layered
       end
 
       def error(reason)
-        { error: reason }.to_json
+        self.class.error(reason)
       end
 
       # One cycle is an assistant message that asked for tools. Counted from
@@ -103,6 +166,72 @@ module Layered
         scope = scope.where(created_at: cutoff..) if cutoff
 
         scope.where.not(tool_calls: nil).count
+      end
+
+      # Picks the response back up once every call in the batch has an answer.
+      # Taken under a lock, and refusing to queue a second follow-up, because
+      # two calls approved at once would otherwise both find themselves last.
+      def resume(message)
+        conversation = message.conversation
+
+        conversation.with_lock do
+          if conversation.stopped?
+            # A tool claimed before the Stop still finishes, and the response
+            # is not picked back up. But a tab that loaded while it was
+            # running is waiting on it, so say the response is over once
+            # nothing is left running - otherwise its composer never comes
+            # back.
+            message.broadcast_response_complete unless conversation.unresolved_tool_call?
+            return
+          end
+
+          # Every call in the batch has to hold a result before the model is
+          # shown any of them: approving two at once means the first to finish
+          # would otherwise send a turn with the second still empty.
+          return if conversation.unresolved_tool_call?
+          return if awaiting_results?(conversation)
+          return if followed_up?(conversation, message)
+
+          if cycles_since_last_prompt(conversation) >= Layered::Assistant.max_tool_cycles
+            halt(message)
+          else
+            continue(message)
+          end
+        end
+      end
+
+      # Results are written down one call at a time, so a batch is briefly
+      # part-recorded. A call put to the person talking is answerable the
+      # moment its own row exists, and approving it while a slower call in the
+      # same batch is still running would otherwise find nothing unresolved -
+      # there being no row yet to be unresolved - and send a turn missing that
+      # result. So the batch is measured against what the model asked for
+      # rather than against what has been written down so far.
+      def awaiting_results?(conversation)
+        asked = conversation.messages
+          .where(role: :assistant).where.not(tool_calls: nil)
+          .order(created_at: :desc, id: :desc).first
+        return false unless asked
+
+        ids = asked.tool_calls.filter_map { |tool_call| tool_call["id"].presence }
+        return false if ids.empty?
+
+        conversation.messages.where(role: :tool, tool_call_id: ids).count < ids.size
+      end
+
+      # Whether the conversation has already moved past this batch, which is
+      # what makes resuming safe to attempt twice. Any assistant message from
+      # this point on is that move, finished or not: a follow-up that has since
+      # completed still means the batch was resumed, and a job delivered late
+      # must not queue a second response for it. The message passed in is
+      # excluded because on the unattended path it is itself an assistant
+      # message - the one that asked for the tools.
+      def followed_up?(conversation, message)
+        conversation.messages
+          .where(role: :assistant)
+          .where(created_at: message.created_at..)
+          .where.not(id: message.id)
+          .exists?
       end
 
       def continue(message)

@@ -251,13 +251,15 @@ assistant.update!(tool_names: [ "weather", "order-lookup" ])
 | `argument` | An argument the model may supply: `argument :name, :type, required:, description:, enum:, items:` |
 | `tool_name` | The name the model calls the tool by. Defaults to the class name without its `Tool` suffix, namespaces hyphenated: `Weather::ForecastTool` becomes `weather-forecast` |
 | `self.public =` | Whether the tool may be offered to a public assistant. `false` by default - see below |
+| `permit` | A block deciding which conversations may call the tool - see [Who may call a tool](#who-may-call-a-tool) |
+| `consent` | `:always` to put each call to the person talking before it runs. `:never` by default - see [Asking before a tool runs](#asking-before-a-tool-runs) |
 
 Argument types are `:string`, `:integer`, `:number`, `:boolean`, `:array` and
 `:object`. An `:array` takes `items:` to name its element type.
 
 Subclass a tool to share logic and the declarations come with it: the child
-inherits its parent's `description`, `public` flag and arguments, adds any
-arguments of its own, and may redeclare one by name to narrow it. The name is
+inherits its parent's `description`, `public` flag, `permit` block, `consent`
+setting and arguments, adds any arguments of its own, and may redeclare one by name to narrow it. The name is
 the exception - the child derives its own from its class name, since two tools
 answering to one name would collide in the registry.
 
@@ -284,6 +286,79 @@ def call(reference:)
   owner.orders.find_by(reference: reference)
 end
 ```
+
+### Who may call a tool
+
+Which assistants have a tool is a configuration decision; who may call it is a
+runtime one. A `permit` block narrows a tool to the conversations that satisfy
+it:
+
+```ruby
+class RefundTool < Layered::Assistant::Tool
+  description "Refund an order."
+
+  permit { |conversation| conversation.user&.admin? }
+end
+```
+
+An unpermitted tool is left out of the definitions sent to the provider, so
+the model is never told it exists, and is refused if it asks for it anyway
+from an earlier turn's history. The block is inherited like the other
+declarations, so a tool subclassed to share logic keeps its parent's policy
+unless it declares its own.
+
+To apply one rule across every tool, configure an `authorize_tool` block in
+your initialiser. It is given the tool class and the conversation, and
+returning falsey withholds the tool:
+
+```ruby
+Layered::Assistant.authorize_tool do |tool, conversation|
+  conversation.user&.permitted_tools&.include?(tool.tool_name)
+end
+```
+
+Unlike `authorize`, which guards the engine's routes, this is left open when
+unconfigured: tool calls already sit behind that block and behind the set of
+tools each assistant has been given. A block that raises denies the tool and
+logs, rather than handing it over or failing the response.
+
+### Asking before a tool runs
+
+Reads are usually fine unattended. Anything that writes, spends or sends is
+worth putting to the person talking first:
+
+```ruby
+class RefundTool < Layered::Assistant::Tool
+  description "Refund an order."
+  consent :always
+
+  argument :reference, :string, required: true
+
+  def call(reference:)
+    owner.orders.find_by!(reference: reference).refund!
+  end
+end
+```
+
+The call is recorded in the conversation with its arguments shown and nothing
+in it, and the response stops there - the composer stays disabled, and the
+call waits as long as it needs to, surviving a reload. Approving runs the tool
+and the response picks up where it left off. Declining reports the refusal to
+the model as the tool's result, so it can say something useful about being
+turned down rather than the conversation dead-ending. Stopping the response
+declines whatever is outstanding, including a call that has been approved but
+has yet to run - so a tool that writes, spends or sends does not slip through
+after the Stop. A call whose tool is already running is left to finish, its
+result recorded, and the response is still not picked back up.
+
+Calls in the same batch that need no consent still run while one waits: each
+call stands on its own.
+
+A tool that asks for consent needs both a user and an owner, so it is never
+offered to a public assistant - even one an anonymous visitor happens to be
+signed in for. There is nobody to ask an anonymous visitor, and a decision is
+recorded through the owner-scoped route a conversation with no owner cannot
+reach. The tool is withheld rather than offered and then stuck waiting.
 
 ### Tools and public assistants
 
@@ -319,7 +394,8 @@ composer stays disabled until a response completes without asking for
 anything, and `max_tool_cycles` (default 10) bounds the loop.
 
 Results are shown in the conversation as a collapsible panel naming the tool,
-with its input and output.
+with its input and output. A call waiting to be approved holds the loop where
+it is until it has been answered.
 
 ## Configuration
 

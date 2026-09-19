@@ -15,8 +15,21 @@ module Layered
         tool: "tool"
       }
 
+      # Where a tool call that asked for consent has got to. Null for a call
+      # that ran unattended, which is most of them.
+      enum :tool_status, {
+        pending: "pending",
+        approved: "approved",
+        running: "running",
+        declined: "declined"
+      }, prefix: :consent
+
       # Validations
-      validates :content, presence: true, unless: :assistant?
+      # A tool call under consent is written in two steps - the decision is
+      # recorded, then the call runs and its answer is written - so it holds
+      # no content in between. Every other tool message has its answer from
+      # the moment it exists.
+      validates :content, presence: true, unless: -> { assistant? || under_consent? }
 
       # Associations
       belongs_to :conversation, counter_cache: true
@@ -31,6 +44,51 @@ module Layered
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
 
+      # Whether this message is a tool call that was put to the person
+      # talking, whatever they said to it.
+      def under_consent?
+        tool_status.present?
+      end
+
+      # Writes the outcome of a call that was waiting to be approved. Until
+      # this runs the message is the question; afterwards it is the answer,
+      # and reads like any other tool message.
+      #
+      # Conditional on the call still being unanswered, because stopping the
+      # response answers a waiting call on its behalf: whichever gets there
+      # first wins, and the loser is told so rather than overwriting it.
+      # `from` narrows that to particular states, so a caller can decline to
+      # overtake a call whose tool is already running.
+      def resolve_tool_call!(status:, content:, from: nil)
+        scope = self.class.where(id: id, content: nil)
+        scope = scope.where(tool_status: from) if from
+
+        written = scope.update_all(
+          tool_status: status,
+          content: content,
+          input_tokens: TokenEstimator.estimate(content),
+          tokens_estimated: true,
+          updated_at: Time.current
+        )
+        return false if written.zero?
+
+        reload
+        true
+      end
+
+      # Claims an approved call, so that the tool runs once and only once. The
+      # claim is the same row stopping the response competes for: a tool under
+      # consent writes, spends or sends, so it must not run after a Stop, and
+      # must not run twice because a job was delivered twice.
+      def claim_tool_call!
+        claimed = self.class.where(id: id, tool_status: "approved", content: nil)
+          .update_all(tool_status: "running", updated_at: Time.current)
+        return false if claimed.zero?
+
+        reload
+        true
+      end
+
       # Broadcasting
       def broadcast_created
         broadcast_append_to conversation,
@@ -44,6 +102,15 @@ module Layered
           targets: ".#{dom_id(self)}",
           partial: "layered/assistant/messages/message",
           locals: { message: self }
+      end
+
+      # Tells the composer the response is not lost, only waiting: it holds
+      # its ground rather than giving up on a response that is doing exactly
+      # what it should - nothing, until the call is answered.
+      def broadcast_response_waiting
+        broadcast_action_to conversation,
+          action: :wait_composer,
+          targets: ".#{dom_id(conversation)}_composer"
       end
 
       def broadcast_response_complete

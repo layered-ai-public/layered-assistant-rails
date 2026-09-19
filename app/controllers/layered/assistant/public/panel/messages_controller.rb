@@ -15,12 +15,12 @@ module Layered
               model_id: @conversation.assistant.default_model_id
             )
             @message = result[:message]
+            @error = result[:error]
+            @responding = result[:responding]
 
-            unless @message.persisted?
+            unless @message.persisted? || @error
               return head :unprocessable_entity
             end
-
-            @error = result[:error]
 
             respond_to do |format|
               format.turbo_stream
