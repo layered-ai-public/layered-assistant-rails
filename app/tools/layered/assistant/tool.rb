@@ -82,8 +82,10 @@ module Layered
         #   consent :always
         #
         # A tool that asks for consent is withheld from a conversation with no
-        # user, an anonymous visitor having nobody to ask. Inherited like the
-        # other declarations.
+        # user or no owner: an anonymous visitor gives nobody to ask, and a
+        # public assistant's conversation has no owner to answer as, so a
+        # waiting call there could never be approved. Inherited like the other
+        # declarations.
         CONSENT = %i[never always].freeze
 
         def consent(value = nil)
@@ -141,12 +143,12 @@ module Layered
 
         # Whether a conversation may be offered the tool at all. Cheapest
         # gate first: a private tool needs an owner to scope its reads to, a
-        # tool that asks for consent needs somebody to ask, the host's
-        # authorize_tool block may narrow every tool at once, and the tool's
-        # own permit block has the last word.
+        # tool that asks for consent needs somebody to ask and an owner to
+        # answer as, the host's authorize_tool block may narrow every tool at
+        # once, and the tool's own permit block has the last word.
         def available_for?(conversation)
           return false unless public? || conversation&.owner.present?
-          return false if consent_required? && conversation&.user.blank?
+          return false if consent_required? && !consentable?(conversation)
           return false unless host_permits?(conversation)
 
           permits?(conversation)
@@ -186,6 +188,14 @@ module Layered
 
         def default_tool_name
           name.underscore.sub(/_tool\z/, "").tr("/", "-")
+        end
+
+        # A waiting call is approved through the owner-scoped route, so a
+        # conversation with no owner - a public assistant's - has no way to
+        # answer one, whoever is signed in. Both are required: somebody to
+        # ask, and an owner to reach the decision with.
+        def consentable?(conversation)
+          conversation&.user.present? && conversation&.owner.present?
         end
 
         def permits?(conversation)

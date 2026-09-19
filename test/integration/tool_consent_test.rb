@@ -46,6 +46,18 @@ module Layered
         assert_select ".l-ui-notice--warning", text: /declined/i
       end
 
+      # The composer is disabled while a call waits, so a message arriving
+      # anyway is a stale tab. Answering it would send the model a call with
+      # no result yet, which the provider rejects.
+      test "a message posted while a call waits is refused" do
+        assert_no_difference -> { @conversation.messages.count } do
+          post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
+            params: { message: { content: "Are you there?" } }
+        end
+
+        assert_response :unprocessable_entity
+      end
+
       # Broadcasts render the partial with no request to build URLs from.
       test "a waiting call broadcasts without a request" do
         assert_nothing_raised { @message.broadcast_updated }

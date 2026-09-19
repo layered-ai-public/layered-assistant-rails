@@ -49,6 +49,12 @@ module Layered
       class InheritedConsentTool < GuardedTool
       end
 
+      class PublicGuardedTool < Tool
+        description "Asks first, and offered to public assistants."
+        self.public = true
+        consent :always
+      end
+
       class SignedInOnlyTool < Tool
         description "Only for someone signed in."
         self.public = true
@@ -237,6 +243,17 @@ module Layered
 
         conversation.update!(user: users(:one))
         assert GuardedTool.available_for?(conversation)
+      end
+
+      # A waiting call is approved through the owner-scoped route, so one
+      # raised in a public assistant's conversation could never be answered -
+      # whoever happens to be signed in while talking to it.
+      test "a tool that asks for consent is withheld from a conversation with no owner" do
+        conversation = layered_assistant_conversations(:anonymous)
+        conversation.update!(user: users(:one))
+
+        assert PublicGuardedTool.public?
+        assert_not PublicGuardedTool.available_for?(conversation)
       end
 
       test "call must be implemented" do

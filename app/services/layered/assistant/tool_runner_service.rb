@@ -51,10 +51,13 @@ module Layered
         end
 
         message.resolve_tool_call!(status: message.tool_status, content: content)
+        # Resumed before the broadcast and the totals, so that a retry after
+        # either of them fails finds the response already picked back up
+        # rather than stopping short of it.
+        resume(message)
+
         message.broadcast_updated
         message.conversation.update_token_totals!
-
-        resume(message)
       end
 
       private

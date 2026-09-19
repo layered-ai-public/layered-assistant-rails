@@ -351,10 +351,11 @@ declines whatever is outstanding.
 Calls in the same batch that need no consent still run while one waits: each
 call stands on its own.
 
-A tool that asks for consent is withheld from a conversation with no user, in
-the same way a private tool is withheld from one with no owner. There is
-nobody to ask an anonymous visitor, so the tool is not offered rather than
-offered and then stuck waiting.
+A tool that asks for consent needs both a user and an owner, so it is never
+offered to a public assistant - even one an anonymous visitor happens to be
+signed in for. There is nobody to ask an anonymous visitor, and a decision is
+recorded through the owner-scoped route a conversation with no owner cannot
+reach. The tool is withheld rather than offered and then stuck waiting.
 
 ### Tools and public assistants
 

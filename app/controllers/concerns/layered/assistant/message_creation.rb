@@ -4,6 +4,12 @@ module Layered
       private
 
       def create_messages_for(conversation:, content:, model_id:)
+        # A tool call waiting to be approved holds the conversation. The
+        # composer is disabled while it waits, so anything arriving here is a
+        # stale tab - and answering it would send the model a call with no
+        # result yet, which the provider rejects.
+        return { message: conversation.messages.new(role: :user, content: content) } if conversation.awaiting_consent?
+
         message = conversation.messages.create(
           role: :user,
           content: content,
