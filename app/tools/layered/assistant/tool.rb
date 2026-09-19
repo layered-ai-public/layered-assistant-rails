@@ -75,6 +75,31 @@ module Layered
           @permit || from_superclass(:permit)
         end
 
+        # Whether a call has to be approved by the person talking before it
+        # runs. Reads are usually fine unattended; anything that writes, spends
+        # or sends is worth asking about first.
+        #
+        #   consent :always
+        #
+        # A tool that asks for consent is withheld from a conversation with no
+        # user, an anonymous visitor having nobody to ask. Inherited like the
+        # other declarations.
+        CONSENT = %i[never always].freeze
+
+        def consent(value = nil)
+          if value
+            raise ::ArgumentError, "Unsupported consent: #{value}" unless CONSENT.include?(value.to_sym)
+
+            @consent = value.to_sym
+          end
+
+          @consent || from_superclass(:consent) || :never
+        end
+
+        def consent_required?
+          consent == :always
+        end
+
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
           type = type.to_s
           raise ::ArgumentError, "Unsupported argument type: #{type}" unless TYPES.include?(type)
@@ -114,12 +139,14 @@ module Layered
           }
         end
 
-        # Whether a conversation may be offered the tool at all. Three gates,
-        # cheapest first: a private tool needs an owner to scope its reads to,
-        # the host's authorize_tool block may narrow every tool at once, and
-        # the tool's own permit block has the last word.
+        # Whether a conversation may be offered the tool at all. Cheapest
+        # gate first: a private tool needs an owner to scope its reads to, a
+        # tool that asks for consent needs somebody to ask, the host's
+        # authorize_tool block may narrow every tool at once, and the tool's
+        # own permit block has the last word.
         def available_for?(conversation)
           return false unless public? || conversation&.owner.present?
+          return false if consent_required? && conversation&.user.blank?
           return false unless host_permits?(conversation)
 
           permits?(conversation)

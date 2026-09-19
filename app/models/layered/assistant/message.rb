@@ -15,8 +15,20 @@ module Layered
         tool: "tool"
       }
 
+      # Where a tool call that asked for consent has got to. Null for a call
+      # that ran unattended, which is most of them.
+      enum :tool_status, {
+        pending: "pending",
+        approved: "approved",
+        declined: "declined"
+      }, prefix: :consent
+
       # Validations
-      validates :content, presence: true, unless: :assistant?
+      # A tool call under consent is written in two steps - the decision is
+      # recorded, then the call runs and its answer is written - so it holds
+      # no content in between. Every other tool message has its answer from
+      # the moment it exists.
+      validates :content, presence: true, unless: -> { assistant? || under_consent? }
 
       # Associations
       belongs_to :conversation, counter_cache: true
@@ -30,6 +42,24 @@ module Layered
 
       # Scopes
       scope :by_created_at, -> { order(created_at: :asc, id: :asc) }
+
+      # Whether this message is a tool call that was put to the person
+      # talking, whatever they said to it.
+      def under_consent?
+        tool_status.present?
+      end
+
+      # Writes the outcome of a call that was waiting to be approved. Until
+      # this runs the message is the question; afterwards it is the answer,
+      # and reads like any other tool message.
+      def resolve_tool_call!(status:, content:)
+        update!(
+          tool_status: status,
+          content: content,
+          input_tokens: TokenEstimator.estimate(content),
+          tokens_estimated: true
+        )
+      end
 
       # Broadcasting
       def broadcast_created

@@ -25,16 +25,28 @@ module Layered
         end
       end
 
+      class GuardedTool < Tool
+        tool_name "guarded"
+        description "Asks first."
+        consent :always
+
+        argument :word, :string, required: true
+
+        def call(word:)
+          { guarded: word }
+        end
+      end
+
       setup do
         @original_tools = Layered::Assistant.tools_block
-        Layered::Assistant.tools { [ EchoTool, BrokenTool ] }
+        Layered::Assistant.tools { [ EchoTool, BrokenTool, GuardedTool ] }
 
         @conversation = layered_assistant_conversations(:empty)
         @conversation.messages.create!(role: :user, content: "Echo rails")
 
         # The runner checks the assistant was given the tool before running
         # it, so the fixture assistant behind these conversations gets both.
-        layered_assistant_assistants(:general).update!(tool_names: [ "echo", "broken" ])
+        layered_assistant_assistants(:general).update!(tool_names: [ "echo", "broken", "guarded" ])
       end
 
       teardown do
@@ -158,6 +170,98 @@ module Layered
         Layered::Assistant.max_tool_cycles = 10
       end
 
+      test "a tool that asks for consent is recorded unanswered and not run" do
+        message = assistant_message_with([ tool_call("call_1", "guarded", '{"word":"rails"}') ])
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.call(message: message)
+        end
+
+        result = @conversation.messages.where(role: :tool).sole
+        assert result.consent_pending?
+        assert_nil result.content
+        assert_equal '{"word":"rails"}', result.tool_arguments
+        assert @conversation.awaiting_consent?
+        assert @conversation.responding?
+      end
+
+      # Each call stands on its own: waiting on one is no reason to hold up
+      # the reads the model asked for alongside it.
+      test "calls needing no consent still run alongside one that does" do
+        message = assistant_message_with([
+          tool_call("call_1", "echo", '{"word":"rails"}'),
+          tool_call("call_2", "guarded", '{"word":"rails"}')
+        ])
+
+        ToolRunnerService.new.call(message: message)
+
+        echoed, guarded = @conversation.messages.where(role: :tool).order(:created_at).to_a
+        assert_equal({ "echoed" => "rails" }, JSON.parse(echoed.content))
+        assert guarded.consent_pending?
+      end
+
+      test "approving runs the tool and picks the response back up" do
+        pending = pending_call
+        pending.update!(tool_status: :approved)
+
+        assert_enqueued_with(job: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending)
+        end
+
+        assert_equal({ "guarded" => "rails" }, JSON.parse(pending.reload.content))
+        assert pending.consent_approved?
+        assert_not @conversation.awaiting_consent?
+      end
+
+      # The model is told it was turned down rather than left hanging: it can
+      # say something useful about that.
+      test "declining reports the refusal and picks the response back up" do
+        pending = pending_call
+        pending.update!(tool_status: :declined)
+
+        assert_enqueued_with(job: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending)
+        end
+
+        assert_match "declined", JSON.parse(pending.reload.content)["error"]
+        assert pending.consent_declined?
+      end
+
+      test "the response waits until every call in the batch has an answer" do
+        message = assistant_message_with([
+          tool_call("call_1", "guarded", '{"word":"one"}'),
+          tool_call("call_2", "guarded", '{"word":"two"}')
+        ])
+        ToolRunnerService.new.call(message: message)
+        first, second = @conversation.messages.where(role: :tool).order(:created_at).to_a
+
+        first.update!(tool_status: :approved)
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: first)
+        end
+
+        second.update!(tool_status: :approved)
+        assert_enqueued_with(job: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: second)
+        end
+      end
+
+      # Two approvals landing together must not each decide they were last.
+      test "only one follow-up is queued however the last calls resolve" do
+        message = assistant_message_with([
+          tool_call("call_1", "guarded", '{"word":"one"}'),
+          tool_call("call_2", "guarded", '{"word":"two"}')
+        ])
+        ToolRunnerService.new.call(message: message)
+        first, second = @conversation.messages.where(role: :tool).order(:created_at).to_a
+        [ first, second ].each { |call| call.update!(tool_status: :approved, content: "done") }
+
+        assert_enqueued_jobs 1, only: Messages::ResponseJob do
+          ToolRunnerService.new.resolve(message: first)
+          ToolRunnerService.new.resolve(message: second)
+        end
+      end
+
       test "a message with no tool calls does nothing" do
         message = @conversation.messages.create!(role: :assistant, content: "All done", model: layered_assistant_models(:sonnet))
 
@@ -169,6 +273,12 @@ module Layered
       end
 
       private
+
+      def pending_call
+        message = assistant_message_with([ tool_call("call_1", "guarded", '{"word":"rails"}') ])
+        ToolRunnerService.new.call(message: message)
+        @conversation.messages.where(role: :tool).sole
+      end
 
       def assistant_message_with(tool_calls)
         @conversation.messages.create!(

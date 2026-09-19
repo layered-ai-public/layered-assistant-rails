@@ -42,12 +42,31 @@ module Layered
         "New conversation"
       end
 
+      # The composer stays disabled while either is true: the assistant is
+      # still writing, or a tool call is waiting to be approved.
       def responding?
+        generating? || awaiting_consent?
+      end
+
+      def generating?
         messages.where(role: :assistant, stopped: false, output_tokens: nil).exists?
+      end
+
+      def awaiting_consent?
+        pending_tool_calls.exists?
+      end
+
+      def pending_tool_calls
+        messages.where(role: :tool, tool_status: :pending)
       end
 
       def stop_response!
         with_lock do
+          # Stopping while a tool call waits for an answer is an answer: the
+          # calls are declined and the response is not picked back up, which
+          # would only ask the model to try again.
+          return decline_pending_tool_calls! if awaiting_consent?
+
           message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
           return false unless message
 
@@ -82,6 +101,20 @@ module Layered
       end
 
       private
+
+      def decline_pending_tool_calls!
+        last = nil
+
+        pending_tool_calls.each do |message|
+          ToolRunnerService.abandon(message)
+          message.broadcast_updated
+          last = message
+        end
+
+        update_token_totals!
+        last&.broadcast_response_complete
+        true
+      end
 
       def create_system_message
         prompt = SystemPromptService.new.call(assistant: assistant)

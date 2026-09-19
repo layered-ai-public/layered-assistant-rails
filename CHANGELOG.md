@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Tools can say who may call them. A `permit` block on a tool narrows it to the conversations that satisfy it (`permit { |conversation| conversation.user&.admin? }`), and an `authorize_tool` block in the initialiser applies one rule across every tool, given the tool class and the conversation. An unpermitted tool is left out of the definitions sent to the provider and refused if the model asks for it anyway from an earlier turn's history. Both are inherited like the other declarations, and a block that raises denies the tool and logs rather than handing it over or failing the response. `authorize_tool` is left open when unconfigured, unlike `authorize`: tool calls already sit behind that block and behind the set of tools each assistant has been given, so nothing changes for an existing installation
+- A tool that writes, spends or sends can put each call to the person talking before it runs, with `consent :always`. The call is recorded in the conversation with its arguments shown and nothing in it, the response stops there with the composer disabled, and it waits as long as it needs to, surviving a reload. Approving runs the tool and the response picks up where it left off; declining reports the refusal to the model as the tool's result, so it can say something useful about being turned down rather than the conversation dead-ending. Stopping the response declines whatever is outstanding. Calls in the same batch that need no consent still run while one waits. A tool that asks for consent is withheld from a conversation with no user, in the same way a private tool is withheld from one with no owner - there is nobody to ask an anonymous visitor. Adds a `tool_status` column to `layered_assistant_messages`, null for every call that ran unattended
+
 ## [0.7.0] - 2026-09-10
 
 ### Added

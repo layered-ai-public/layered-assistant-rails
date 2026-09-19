@@ -80,8 +80,12 @@ end
 # Layered::Assistant.authorize_tool do |tool, conversation|
 #   conversation.user.present?
 # end
+#
+# A tool that writes something can ask before it runs, with `consent :always`,
+# as RenameUserTool does. The call waits in the conversation with its
+# arguments shown until it is approved or declined.
 Layered::Assistant.tools do
-  [ CurrentTimeTool, UserLookupTool, WhoamiTool ]
+  [ CurrentTimeTool, RenameUserTool, UserLookupTool, WhoamiTool ]
 end
 
 # Optional settings (uncomment to enable):

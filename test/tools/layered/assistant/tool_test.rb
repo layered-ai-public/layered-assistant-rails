@@ -41,6 +41,14 @@ module Layered
         argument :sort, :string
       end
 
+      class GuardedTool < Tool
+        description "Asks first."
+        consent :always
+      end
+
+      class InheritedConsentTool < GuardedTool
+      end
+
       class SignedInOnlyTool < Tool
         description "Only for someone signed in."
         self.public = true
@@ -207,6 +215,28 @@ module Layered
         Layered::Assistant.authorize_tool { raise "the policy exploded" }
 
         assert_not GreetTool.available_for?(layered_assistant_conversations(:greeting))
+      end
+
+      test "tools run unattended unless they ask for consent" do
+        assert_not GreetTool.consent_required?
+        assert GuardedTool.consent_required?
+        assert InheritedConsentTool.consent_required?
+      end
+
+      test "consent rejects a value it does not know" do
+        assert_raises(::ArgumentError) { Class.new(Tool) { consent :sometimes } }
+      end
+
+      # There is nobody to ask an anonymous visitor, so the tool is not
+      # offered rather than offered and then stuck waiting.
+      test "a tool that asks for consent is withheld from a conversation with no user" do
+        conversation = layered_assistant_conversations(:greeting)
+        conversation.update!(user: nil)
+
+        assert_not GuardedTool.available_for?(conversation)
+
+        conversation.update!(user: users(:one))
+        assert GuardedTool.available_for?(conversation)
       end
 
       test "call must be implemented" do

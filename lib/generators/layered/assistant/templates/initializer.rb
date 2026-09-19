@@ -105,6 +105,17 @@
 # Layered::Assistant.authorize_tool do |tool, conversation|
 #   conversation.user&.permitted_tools&.include?(tool.tool_name)
 # end
+#
+# Separately from who may call a tool, a tool that writes, spends or sends
+# can put each call to the person talking before it runs:
+#
+# class RefundTool < Layered::Assistant::Tool
+#   consent :always
+# end
+#
+# The call waits in the conversation with its arguments shown, the composer
+# stays disabled, and the response picks up once it has been approved or
+# declined.
 
 # Optional settings (uncomment to enable):
 # Layered::Assistant.log_errors = true              # log API errors to stdout
