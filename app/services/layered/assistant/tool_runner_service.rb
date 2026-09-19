@@ -20,7 +20,9 @@ module Layered
       end
 
       # Writes down a call that was never answered because the response was
-      # stopped. Nothing is resumed: stopping means stopping.
+      # stopped. Nothing is resumed: stopping means stopping. Returns false if
+      # the call had already been answered, which a retry or a tool that
+      # finished first can do.
       def self.abandon(message)
         message.resolve_tool_call!(status: :declined, content: error(STOPPED))
       end
@@ -36,6 +38,8 @@ module Layered
         message.tool_calls.each { |tool_call| record_result(message, tool_call, available) }
         conversation.update_token_totals!
 
+        message.broadcast_response_waiting if conversation.awaiting_consent?
+
         resume(message)
       end
 
@@ -44,20 +48,26 @@ module Layered
       # model as the tool's result rather than ending the conversation: it
       # can say something useful about being turned down.
       def resolve(message:)
-        content = if message.consent_approved?
-          execute(message, message.tool_name, message.tool_arguments, ToolRegistry.for(message.conversation))
-        else
-          error(DECLINED)
+        # An answered call is one this job has already run, or one the response
+        # was stopped over. The tool does not run twice - but resuming may be
+        # what failed last time, so that is still attempted below.
+        if message.content.blank?
+          content = if message.consent_approved?
+            execute(message, message.tool_name, message.tool_arguments, ToolRegistry.for(message.conversation))
+          else
+            error(DECLINED)
+          end
+
+          # Stopping the response answers a waiting call on its behalf. If that
+          # happened while the tool was running, the answer is already written
+          # and there is nothing here to pick back up.
+          return unless message.resolve_tool_call!(status: message.tool_status, content: content)
+
+          message.broadcast_updated
+          message.conversation.update_token_totals!
         end
 
-        message.resolve_tool_call!(status: message.tool_status, content: content)
-        # Resumed before the broadcast and the totals, so that a retry after
-        # either of them fails finds the response already picked back up
-        # rather than stopping short of it.
         resume(message)
-
-        message.broadcast_updated
-        message.conversation.update_token_totals!
       end
 
       private
@@ -158,6 +168,7 @@ module Layered
         conversation = message.conversation
 
         conversation.with_lock do
+          return if conversation.stopped?
           return if conversation.awaiting_consent?
           return if followed_up?(conversation, message)
 
@@ -170,8 +181,10 @@ module Layered
       end
 
       # Whether an assistant message is already waiting on an answer to this
-      # batch. Anything older is the message that asked for the tools, or an
-      # earlier turn.
+      # batch, which is what makes resuming safe to attempt twice. The message
+      # passed in is excluded because on the unattended path it is itself an
+      # assistant message - the one that asked for the tools - and it can share
+      # a timestamp with the follow-up.
       def followed_up?(conversation, message)
         conversation.messages
           .where(role: :assistant, stopped: false, output_tokens: nil)

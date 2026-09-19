@@ -18,7 +18,16 @@ const pendingRender = new WeakMap()
 
 Turbo.StreamActions.enable_composer = function () {
   this.targetElements.forEach((form) => {
+    form.setAttribute("data-composer-waiting-value", "false")
     form.setAttribute("data-composer-responding-value", "false")
+  })
+}
+
+// A tool call is waiting to be approved: the composer stays disabled, and
+// holds there for as long as it takes rather than timing out.
+Turbo.StreamActions.wait_composer = function () {
+  this.targetElements.forEach((form) => {
+    form.setAttribute("data-composer-waiting-value", "true")
   })
 }
 

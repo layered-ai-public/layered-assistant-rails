@@ -52,13 +52,22 @@ module Layered
       # Writes the outcome of a call that was waiting to be approved. Until
       # this runs the message is the question; afterwards it is the answer,
       # and reads like any other tool message.
+      #
+      # Conditional on the call still being unanswered, because stopping the
+      # response answers a waiting call on its behalf: whichever gets there
+      # first wins, and the loser is told so rather than overwriting it.
       def resolve_tool_call!(status:, content:)
-        update!(
+        written = self.class.where(id: id, content: nil).update_all(
           tool_status: status,
           content: content,
           input_tokens: TokenEstimator.estimate(content),
-          tokens_estimated: true
+          tokens_estimated: true,
+          updated_at: Time.current
         )
+        return false if written.zero?
+
+        reload
+        true
       end
 
       # Broadcasting
@@ -74,6 +83,15 @@ module Layered
           targets: ".#{dom_id(self)}",
           partial: "layered/assistant/messages/message",
           locals: { message: self }
+      end
+
+      # Tells the composer the response is not lost, only waiting: it holds
+      # its ground rather than giving up on a response that is doing exactly
+      # what it should - nothing, until the call is answered.
+      def broadcast_response_waiting
+        broadcast_action_to conversation,
+          action: :wait_composer,
+          targets: ".#{dom_id(conversation)}_composer"
       end
 
       def broadcast_response_complete

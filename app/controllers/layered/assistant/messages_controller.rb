@@ -20,15 +20,16 @@ module Layered
           model_id: model_id
         )
         @message = result[:message]
+        @error = result[:error]
+        @responding = result[:responding]
 
-        unless @message.persisted?
+        unless @message.persisted? || @error
           return head :unprocessable_entity
         end
 
         @assistant_message = result[:assistant_message]
         @models = scoped_models
         @selected_model_id = model_id
-        @error = result[:error]
 
         respond_to do |format|
           format.turbo_stream

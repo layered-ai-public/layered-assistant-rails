@@ -1,14 +1,23 @@
 module Layered
   module Assistant
     module MessageCreation
+      WAITING_ON_TOOL_CALL = "A tool call is waiting on you. Answer it before sending another message.".freeze
+
       private
 
       def create_messages_for(conversation:, content:, model_id:)
-        # A tool call waiting to be approved holds the conversation. The
-        # composer is disabled while it waits, so anything arriving here is a
-        # stale tab - and answering it would send the model a call with no
-        # result yet, which the provider rejects.
-        return { message: conversation.messages.new(role: :user, content: content) } if conversation.awaiting_consent?
+        # A tool call that has yet to reach an answer holds the conversation.
+        # The composer is disabled while it waits, so anything arriving here is
+        # a stale tab - and answering it would send the model a call with no
+        # result yet, which the provider rejects. Said rather than dropped, or
+        # the message would vanish with nothing to explain it.
+        if conversation.unresolved_tool_call?
+          return {
+            message: conversation.messages.new(role: :user, content: content),
+            error: WAITING_ON_TOOL_CALL,
+            responding: true
+          }
+        end
 
         message = conversation.messages.create(
           role: :user,
@@ -43,7 +52,8 @@ module Layered
         {
           message: message,
           assistant_message: assistant_message,
-          error: error
+          error: error,
+          responding: error.nil?
         }
       end
     end

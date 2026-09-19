@@ -9,8 +9,10 @@ module Layered
 
         def perform(message_id)
           message = Message.find(message_id)
-          # Nothing to do for a call still waiting, or one already answered.
-          return if message.consent_pending? || message.content.present?
+          # Nothing to do for a call still waiting on a decision. A call that
+          # is already answered is not run again, but is still passed on: a
+          # retry may be here because resuming the response is what failed.
+          return if message.consent_pending?
 
           ToolRunnerService.new.resolve(message: message)
         end

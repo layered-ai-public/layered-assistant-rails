@@ -213,6 +213,38 @@ module Layered
         assert_not @conversation.awaiting_consent?
       end
 
+      # Stopping answers the call on the tool's behalf. The tool itself writes
+      # nothing - which matters, because a call under consent is one that
+      # writes, spends or sends.
+      test "stopping before an approved call runs leaves the tool unrun" do
+        pending = pending_call
+        pending.update!(tool_status: :approved)
+        @conversation.stop_response!
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending)
+        end
+
+        assert_match "stopped", JSON.parse(pending.reload.content)["error"]
+      end
+
+      # Answering the call and picking the response back up are two writes, so
+      # a retry can arrive with the first done and the second not.
+      test "a retry after resuming failed picks the response back up" do
+        pending = pending_call
+        pending.update!(tool_status: :approved)
+        ToolRunnerService.new.resolve(message: pending)
+        answer = pending.reload.content
+
+        @conversation.messages.where(role: :assistant, content: nil, output_tokens: nil).destroy_all
+
+        assert_enqueued_with(job: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending)
+        end
+
+        assert_equal answer, pending.reload.content
+      end
+
       # The model is told it was turned down rather than left hanging: it can
       # say something useful about that.
       test "declining reports the refusal and picks the response back up" do

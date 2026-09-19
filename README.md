@@ -346,7 +346,9 @@ call waits as long as it needs to, surviving a reload. Approving runs the tool
 and the response picks up where it left off. Declining reports the refusal to
 the model as the tool's result, so it can say something useful about being
 turned down rather than the conversation dead-ending. Stopping the response
-declines whatever is outstanding.
+declines whatever is outstanding, including a call that has been approved but
+has yet to run - so a tool that writes, spends or sends does not slip through
+after the Stop.
 
 Calls in the same batch that need no consent still run while one waits: each
 call stands on its own.

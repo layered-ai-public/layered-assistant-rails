@@ -130,6 +130,20 @@ module Layered
         assert_not conversation.awaiting_consent?
       end
 
+      # Approving and then stopping is still stopping: the call is answered on
+      # the tool's behalf before it gets the chance to run.
+      test "stop_response! abandons an approved call that has yet to run" do
+        conversation = layered_assistant_conversations(:greeting)
+        message = pending_tool_call(conversation)
+        message.update!(tool_status: :approved)
+
+        assert conversation.stop_response!
+
+        assert_match "stopped", JSON.parse(message.reload.content)["error"]
+        assert_not conversation.unresolved_tool_call?
+        assert conversation.stopped?
+      end
+
       test "stop_response! marks latest assistant message as stopped" do
         conversation = layered_assistant_conversations(:greeting)
         assistant_message = conversation.messages.create!(role: :assistant, content: "Partial", model: layered_assistant_models(:sonnet))

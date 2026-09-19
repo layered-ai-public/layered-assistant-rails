@@ -49,13 +49,30 @@ module Layered
       # The composer is disabled while a call waits, so a message arriving
       # anyway is a stale tab. Answering it would send the model a call with
       # no result yet, which the provider rejects.
-      test "a message posted while a call waits is refused" do
+      test "a message posted while a call waits is refused, and said so" do
         assert_no_difference -> { @conversation.messages.count } do
           post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
-            params: { message: { content: "Are you there?" } }
+            params: { message: { content: "Are you there?" } },
+            as: :turbo_stream
         end
 
-        assert_response :unprocessable_entity
+        assert_response :success
+        assert_match "waiting on you", response.body
+        assert_match 'data-composer-responding-value="true"', response.body
+      end
+
+      # An approved call is still unanswered while the tool runs, and sending
+      # then would leave the same gap in what the model is shown.
+      test "a message posted while an approved call runs is refused" do
+        @message.update!(tool_status: :approved)
+
+        assert_no_difference -> { @conversation.messages.count } do
+          post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
+            params: { message: { content: "Are you there?" } },
+            as: :turbo_stream
+        end
+
+        assert_match "waiting on you", response.body
       end
 
       # Broadcasts render the partial with no request to build URLs from.

@@ -43,13 +43,19 @@ module Layered
       end
 
       # The composer stays disabled while either is true: the assistant is
-      # still writing, or a tool call is waiting to be approved.
+      # still writing, or a tool call has yet to reach an answer.
       def responding?
-        generating? || awaiting_consent?
+        generating? || unresolved_tool_call?
       end
 
       def generating?
         messages.where(role: :assistant, stopped: false, output_tokens: nil).exists?
+      end
+
+      # Whether the response was stopped where it stands. The latest assistant
+      # message carries the mark, so a fresh turn clears it.
+      def stopped?
+        last_assistant_message&.stopped? || false
       end
 
       def awaiting_consent?
@@ -60,12 +66,23 @@ module Layered
         messages.where(role: :tool, tool_status: :pending)
       end
 
+      # A call that was put to the person talking and has yet to reach an
+      # answer - either waiting on them, or running now they have approved it.
+      # Nothing may be sent to the model until every one of them is answered.
+      def unresolved_tool_calls
+        messages.where(role: :tool, tool_status: %w[pending approved], content: nil)
+      end
+
+      def unresolved_tool_call?
+        unresolved_tool_calls.exists?
+      end
+
       def stop_response!
         with_lock do
-          # Stopping while a tool call waits for an answer is an answer: the
-          # calls are declined and the response is not picked back up, which
-          # would only ask the model to try again.
-          return decline_pending_tool_calls! if awaiting_consent?
+          # Stopping while a tool call is unanswered is an answer: the calls
+          # are abandoned and the response is not picked back up, which would
+          # only ask the model to try again.
+          return abandon_unresolved_tool_calls! if unresolved_tool_call?
 
           message = messages.where(role: :assistant, stopped: false).order(created_at: :desc).first
           return false unless message
@@ -102,18 +119,29 @@ module Layered
 
       private
 
-      def decline_pending_tool_calls!
+      def abandon_unresolved_tool_calls!
         last = nil
 
-        pending_tool_calls.each do |message|
-          ToolRunnerService.abandon(message)
+        unresolved_tool_calls.each do |message|
+          next unless ToolRunnerService.abandon(message)
+
           message.broadcast_updated
           last = message
         end
 
+        # The message that asked for the tools is already complete, with its
+        # real token counts, so it is marked stopped without being estimated
+        # over. That mark is what keeps an approved call still running, or a
+        # job retried later, from picking the response back up.
+        last_assistant_message&.update!(stopped: true)
+
         update_token_totals!
         last&.broadcast_response_complete
         true
+      end
+
+      def last_assistant_message
+        messages.where(role: :assistant).order(created_at: :desc, id: :desc).first
       end
 
       def create_system_message
