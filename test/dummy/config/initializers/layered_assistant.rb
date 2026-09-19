@@ -70,6 +70,16 @@ end
 # Inside #call, `message`, `conversation`, `owner` and `user` give the calling
 # context. Tools are withheld from public assistants unless they declare
 # `self.public = true`, as CurrentTimeTool does.
+#
+# Who may call a tool is separate from which assistants have it: a `permit`
+# block narrows a tool to the conversations that satisfy it, as
+# UserLookupTool does. An authorize_tool block applies one rule to every
+# tool at once - it is given the tool class and the conversation, and
+# returning falsey withholds the tool.
+#
+# Layered::Assistant.authorize_tool do |tool, conversation|
+#   conversation.user.present?
+# end
 Layered::Assistant.tools do
   [ CurrentTimeTool, UserLookupTool, WhoamiTool ]
 end

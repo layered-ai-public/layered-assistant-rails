@@ -58,6 +58,23 @@ module Layered
           from_superclass(:public?) || false
         end
 
+        # Who may call the tool, as a block returning truthy to allow it:
+        #
+        #   permit { |conversation| conversation.user&.admin? }
+        #
+        # This narrows what an assistant has been given rather than replacing
+        # it: a tool still has to be selected on the assistant before anyone
+        # can call it. An unpermitted tool is left out of the definitions sent
+        # to the provider, and refused if the model asks for it anyway from an
+        # earlier turn's history.
+        #
+        # Inherited like the other declarations, so a tool subclassed to share
+        # logic keeps its parent's policy unless it declares its own.
+        def permit(&block)
+          @permit = block if block
+          @permit || from_superclass(:permit)
+        end
+
         def argument(name, type = :string, required: false, description: nil, enum: nil, items: nil)
           type = type.to_s
           raise ::ArgumentError, "Unsupported argument type: #{type}" unless TYPES.include?(type)
@@ -97,8 +114,15 @@ module Layered
           }
         end
 
+        # Whether a conversation may be offered the tool at all. Three gates,
+        # cheapest first: a private tool needs an owner to scope its reads to,
+        # the host's authorize_tool block may narrow every tool at once, and
+        # the tool's own permit block has the last word.
         def available_for?(conversation)
-          public? || conversation&.owner.present?
+          return false unless public? || conversation&.owner.present?
+          return false unless host_permits?(conversation)
+
+          permits?(conversation)
         end
 
         # Checks what the model supplied against the schema and returns it as
@@ -135,6 +159,32 @@ module Layered
 
         def default_tool_name
           name.underscore.sub(/_tool\z/, "").tr("/", "-")
+        end
+
+        def permits?(conversation)
+          block = permit
+          return true unless block
+
+          allowed?("The permit block for '#{tool_name}'") do
+            block.arity.zero? ? block.call : block.call(conversation)
+          end
+        end
+
+        def host_permits?(conversation)
+          block = Layered::Assistant.authorize_tool_block
+          return true unless block
+
+          allowed?("The authorize_tool block") { block.call(self, conversation) }
+        end
+
+        # A policy that raises denies the tool rather than failing the whole
+        # response: a broken block should not hand the tool over, and should
+        # not take the conversation down with it either.
+        def allowed?(subject)
+          !!yield
+        rescue => e
+          Rails.logger.error("#{subject} raised #{e.class}: #{e.message} - denying the tool")
+          false
         end
       end
 

@@ -12,6 +12,11 @@ module Layered
         self.public = true
       end
 
+      class PermittedTool < Tool
+        description "Only for someone signed in."
+        permit { |conversation| conversation.user.present? }
+      end
+
       setup do
         @original_tools = Layered::Assistant.tools_block
         Layered::Assistant.tools { [ OwnedTool, OpenTool ] }
@@ -24,6 +29,7 @@ module Layered
 
       teardown do
         Layered::Assistant.tools(&@original_tools)
+        Layered::Assistant.authorize_tool(&nil)
       end
 
       test "all returns the configured tools" do
@@ -64,6 +70,24 @@ module Layered
 
       test "for ignores a name with no registered tool class" do
         @assistant.update!(tool_names: [ OpenTool.tool_name, "since-deleted" ])
+
+        assert_equal [ OpenTool ], ToolRegistry.for(layered_assistant_conversations(:greeting))
+      end
+
+      test "for withholds a tool whose permit block refuses the conversation" do
+        Layered::Assistant.tools { [ OwnedTool, PermittedTool ] }
+        @assistant.update!(tool_names: [ OwnedTool.tool_name, PermittedTool.tool_name ])
+        conversation = layered_assistant_conversations(:greeting)
+        conversation.update!(user: nil)
+
+        assert_equal [ OwnedTool ], ToolRegistry.for(conversation)
+
+        conversation.update!(user: users(:one))
+        assert_equal [ OwnedTool, PermittedTool ], ToolRegistry.for(conversation)
+      end
+
+      test "for withholds every tool the authorize_tool block refuses" do
+        Layered::Assistant.authorize_tool { |tool, _conversation| tool == OpenTool }
 
         assert_equal [ OpenTool ], ToolRegistry.for(layered_assistant_conversations(:greeting))
       end

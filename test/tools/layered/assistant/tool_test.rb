@@ -41,6 +41,30 @@ module Layered
         argument :sort, :string
       end
 
+      class SignedInOnlyTool < Tool
+        description "Only for someone signed in."
+        self.public = true
+
+        permit { |conversation| conversation&.user.present? }
+      end
+
+      class InheritedPolicyTool < SignedInOnlyTool
+      end
+
+      class RelaxedPolicyTool < SignedInOnlyTool
+        permit { true }
+      end
+
+      class BrokenPolicyTool < Tool
+        self.public = true
+
+        permit { raise "the policy exploded" }
+      end
+
+      teardown do
+        Layered::Assistant.authorize_tool(&nil)
+      end
+
       test "a subclass inherits the declarations it does not make itself" do
         assert_equal "Look something up.", NarrowedLookupTool.description
         assert NarrowedLookupTool.public?
@@ -130,6 +154,59 @@ module Layered
         end
 
         assert_not tool.public?
+      end
+
+      test "permit decides who the tool is offered to" do
+        signed_in = layered_assistant_conversations(:greeting)
+        signed_in.update!(user: users(:one))
+
+        assert SignedInOnlyTool.available_for?(signed_in)
+        assert_not SignedInOnlyTool.available_for?(layered_assistant_conversations(:anonymous))
+      end
+
+      test "a subclass inherits its parent's permit block" do
+        assert_not InheritedPolicyTool.available_for?(layered_assistant_conversations(:anonymous))
+      end
+
+      test "a subclass may declare its own permit block" do
+        assert RelaxedPolicyTool.available_for?(layered_assistant_conversations(:anonymous))
+      end
+
+      # The owner gate comes first, so a permissive policy cannot hand an
+      # anonymous visitor a tool that reads somebody's records.
+      test "permit does not override the owner a private tool needs" do
+        tool = Class.new(Tool) { permit { true } }
+
+        assert_not tool.available_for?(layered_assistant_conversations(:anonymous))
+      end
+
+      test "a permit block that raises denies the tool" do
+        assert_not BrokenPolicyTool.available_for?(layered_assistant_conversations(:greeting))
+      end
+
+      test "the authorize_tool block withholds a tool from every conversation" do
+        Layered::Assistant.authorize_tool { |_tool, _conversation| false }
+
+        assert_not PublicTool.available_for?(layered_assistant_conversations(:anonymous))
+        assert_not GreetTool.available_for?(layered_assistant_conversations(:greeting))
+      end
+
+      test "the authorize_tool block is given the tool and the conversation" do
+        conversation = layered_assistant_conversations(:greeting)
+        seen = []
+        Layered::Assistant.authorize_tool do |tool, asked_in|
+          seen << [ tool, asked_in ]
+          true
+        end
+
+        assert GreetTool.available_for?(conversation)
+        assert_equal [ [ GreetTool, conversation ] ], seen
+      end
+
+      test "an authorize_tool block that raises denies the tool" do
+        Layered::Assistant.authorize_tool { raise "the policy exploded" }
+
+        assert_not GreetTool.available_for?(layered_assistant_conversations(:greeting))
       end
 
       test "call must be implemented" do
