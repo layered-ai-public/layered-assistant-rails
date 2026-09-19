@@ -350,6 +350,58 @@ module Layered
         assert_empty @conversation.messages.where(role: :tool)
       end
 
+      # A batch is written down one call at a time, so a call under consent
+      # becomes answerable while a later call in the same batch is still
+      # running. The turn has to wait for the result that is not written yet.
+      test "the response waits for a call in the batch that has yet to be recorded" do
+        message = assistant_message_with([
+          tool_call("call_1", "guarded", '{"word":"one"}'),
+          tool_call("call_2", "echo", '{"word":"two"}')
+        ])
+        message.update!(output_tokens: 12)
+        conversation = @conversation
+        test = self
+
+        runner = ToolRunnerService.new
+        # Another worker approves the guarded call while the echo it was
+        # batched with is still in flight, before its result row exists.
+        runner.define_singleton_method(:execute) do |*args|
+          guarded = conversation.messages.where(role: :tool).sole
+          guarded.update!(tool_status: :approved)
+          test.assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+            ToolRunnerService.new.resolve(message: guarded)
+          end
+          super(*args)
+        end
+
+        runner.call(message: message)
+      end
+
+      # A tool claimed before the Stop still finishes and nothing is resumed,
+      # but a tab that loaded while it was running is waiting on it.
+      test "finishing a stopped call releases the composers waiting on it" do
+        pending = pending_call
+        @conversation.messages.where(role: :assistant).update_all(output_tokens: 12)
+        pending.update!(tool_status: :approved)
+        conversation = @conversation
+        completions = 0
+        pending.define_singleton_method(:broadcast_response_complete) { completions += 1 }
+
+        runner = ToolRunnerService.new
+        runner.define_singleton_method(:execute) do |*args|
+          conversation.stop_response!
+          super(*args)
+        end
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          runner.resolve(message: pending)
+        end
+
+        assert conversation.stopped?
+        assert_not conversation.unresolved_tool_call?
+        assert_equal 1, completions
+      end
+
       private
 
       def pending_call

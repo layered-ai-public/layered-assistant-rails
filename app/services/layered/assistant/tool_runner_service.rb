@@ -52,6 +52,9 @@ module Layered
         # was stopped over. The tool does not run twice - but resuming may be
         # what failed last time, so that is still attempted below.
         if message.content.blank?
+          # Held from before the claim, because claiming moves the call to
+          # running. Running is the tool being carried out, not an outcome, so
+          # the answer is written back under the decision that allowed it.
           decided = message.tool_status
 
           content = if message.consent_declined?
@@ -172,11 +175,21 @@ module Layered
         conversation = message.conversation
 
         conversation.with_lock do
-          return if conversation.stopped?
+          if conversation.stopped?
+            # A tool claimed before the Stop still finishes, and the response
+            # is not picked back up. But a tab that loaded while it was
+            # running is waiting on it, so say the response is over once
+            # nothing is left running - otherwise its composer never comes
+            # back.
+            message.broadcast_response_complete unless conversation.unresolved_tool_call?
+            return
+          end
+
           # Every call in the batch has to hold a result before the model is
           # shown any of them: approving two at once means the first to finish
           # would otherwise send a turn with the second still empty.
           return if conversation.unresolved_tool_call?
+          return if awaiting_results?(conversation)
           return if followed_up?(conversation, message)
 
           if cycles_since_last_prompt(conversation) >= Layered::Assistant.max_tool_cycles
@@ -185,6 +198,25 @@ module Layered
             continue(message)
           end
         end
+      end
+
+      # Results are written down one call at a time, so a batch is briefly
+      # part-recorded. A call put to the person talking is answerable the
+      # moment its own row exists, and approving it while a slower call in the
+      # same batch is still running would otherwise find nothing unresolved -
+      # there being no row yet to be unresolved - and send a turn missing that
+      # result. So the batch is measured against what the model asked for
+      # rather than against what has been written down so far.
+      def awaiting_results?(conversation)
+        asked = conversation.messages
+          .where(role: :assistant).where.not(tool_calls: nil)
+          .order(created_at: :desc, id: :desc).first
+        return false unless asked
+
+        ids = asked.tool_calls.filter_map { |tool_call| tool_call["id"].presence }
+        return false if ids.empty?
+
+        conversation.messages.where(role: :tool, tool_call_id: ids).count < ids.size
       end
 
       # Whether the conversation has already moved past this batch, which is
