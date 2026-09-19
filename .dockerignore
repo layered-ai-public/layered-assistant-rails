@@ -7,3 +7,10 @@ log/
 test/dummy/log/
 test/dummy/storage/*.sqlite3
 node_modules/
+
+# Never bake credential keys into the image - RAILS_MASTER_KEY is passed in at
+# deploy time. A key file copied in is root-owned and unreadable by the rails
+# user, which makes Rails raise EACCES on boot rather than fall back to the env.
+test/dummy/config/master.key
+test/dummy/config/credentials/*.key
+.env.deploy

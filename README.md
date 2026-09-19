@@ -434,15 +434,16 @@ Then visit `http://localhost:3000`.
 
 ### Deploying the dummy app
 
-The dummy app can be deployed with [Kamal](https://kamal-deploy.org). Set the required environment variables and deploy from `test/dummy`:
+The dummy app can be deployed with [Kamal](https://kamal-deploy.org). Copy `.env.deploy.example` to `.env.deploy` and fill in the target, then deploy with `bin/deploy`:
 
 ```bash
-cd test/dummy
-export KAMAL_DEPLOY_IP=<server-ip>
-export KAMAL_DEPLOY_DOMAIN=<domain>
-export KAMAL_SSH_KEY=<path-to-ssh-key>
-kamal deploy
+cp .env.deploy.example .env.deploy
+bin/deploy           # kamal deploy
+bin/deploy setup     # first run on a new server
+bin/deploy logs      # any other kamal subcommand passes straight through
 ```
+
+`.env.deploy` is gitignored, so the server address stays out of the repo. The script reads it, checks the three `KAMAL_*` variables are set, and runs Kamal from `test/dummy`, where `config/deploy.yml` lives.
 
 ## Testing
 
