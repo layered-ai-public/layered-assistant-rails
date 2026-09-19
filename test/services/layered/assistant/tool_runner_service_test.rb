@@ -245,6 +245,52 @@ module Layered
         assert_equal answer, pending.reload.content
       end
 
+      # Approving both at once means two jobs racing. The turn the model is
+      # shown has to carry every result or none: a tool message with nothing
+      # in it is rejected by the provider.
+      test "the response waits for the whole batch when two calls are approved at once" do
+        message = assistant_message_with([
+          tool_call("call_1", "guarded", '{"word":"one"}'),
+          tool_call("call_2", "guarded", '{"word":"two"}')
+        ])
+        ToolRunnerService.new.call(message: message)
+        first, second = @conversation.messages.where(role: :tool).order(:created_at).to_a
+        [ first, second ].each { |call| call.update!(tool_status: :approved) }
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: first)
+        end
+
+        assert_enqueued_with(job: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: second)
+        end
+      end
+
+      # The claim is what stopping competes for, so a job arriving twice - or
+      # arriving after a Stop took the claim - does not run the tool again.
+      test "a call already claimed is not run a second time" do
+        pending = pending_call
+        pending.update!(tool_status: :running)
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending)
+        end
+
+        assert_nil pending.reload.content
+      end
+
+      # A follow-up that has since answered still means the batch was resumed.
+      test "a late duplicate does not queue a second response" do
+        pending = pending_call
+        pending.update!(tool_status: :approved)
+        ToolRunnerService.new.resolve(message: pending)
+        @conversation.messages.where(role: :assistant, output_tokens: nil).update_all(output_tokens: 12)
+
+        assert_no_enqueued_jobs(only: Messages::ResponseJob) do
+          ToolRunnerService.new.resolve(message: pending.reload)
+        end
+      end
+
       # The model is told it was turned down rather than left hanging: it can
       # say something useful about that.
       test "declining reports the refusal and picks the response back up" do

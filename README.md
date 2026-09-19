@@ -348,7 +348,8 @@ the model as the tool's result, so it can say something useful about being
 turned down rather than the conversation dead-ending. Stopping the response
 declines whatever is outstanding, including a call that has been approved but
 has yet to run - so a tool that writes, spends or sends does not slip through
-after the Stop.
+after the Stop. A call whose tool is already running is left to finish, its
+result recorded, and the response is still not picked back up.
 
 Calls in the same batch that need no consent still run while one waits: each
 call stands on its own.

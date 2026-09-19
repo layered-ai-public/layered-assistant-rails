@@ -88,6 +88,22 @@ module Layered
         assert_select "p", text: "Output:", count: 0
       end
 
+      # The decision is recorded before the job writes what came of it, and in
+      # between the call still holds nothing the model can be shown.
+      test "a declined call is unresolved until its refusal is written" do
+        @message.update!(tool_status: :declined)
+
+        assert @conversation.unresolved_tool_call?
+
+        assert_no_difference -> { @conversation.messages.count } do
+          post "/layered/assistant/panel/conversations/#{@conversation.uid}/messages",
+            params: { message: { content: "Are you there?" } },
+            as: :turbo_stream
+        end
+
+        assert_match "waiting on you", response.body
+      end
+
       # Broadcasts render the partial with no request to build URLs from.
       test "a waiting call broadcasts without a request" do
         assert_nothing_raised { @message.broadcast_updated }

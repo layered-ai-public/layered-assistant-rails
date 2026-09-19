@@ -67,10 +67,12 @@ module Layered
       end
 
       # A call that was put to the person talking and has yet to reach an
-      # answer - either waiting on them, or running now they have approved it.
-      # Nothing may be sent to the model until every one of them is answered.
+      # answer. The decision is recorded before the result is written, so a
+      # call that has been answered is still unresolved until the job says
+      # what came of it - a refusal included. Nothing may be sent to the model
+      # until every one of them holds a result.
       def unresolved_tool_calls
-        messages.where(role: :tool, tool_status: %w[pending approved], content: nil)
+        messages.where(role: :tool, content: nil).where.not(tool_status: nil)
       end
 
       def unresolved_tool_call?
