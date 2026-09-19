@@ -1,4 +1,7 @@
 <% pending = message.consent_pending? %>
+<%# An approved call holds nothing until the tool has run, which for a slow %>
+<%# one is a while. Saying so beats an empty Output block. %>
+<% running = message.consent_approved? && message.content.blank? %>
 <%= tag.div id: dom_id(message), data: { created_at: (message.created_at.to_f * 1000).to_i }, class: "#{dom_id(message)} l-ui-message" do %>
   <div class="l-ui-message__bubble">
     <%# A call waiting to be approved is opened: nobody should be asked to %>
@@ -11,7 +14,7 @@
       <div class="l-ui-surface__content l-ui-markdown">
         <p>Input:</p>
         <pre><code><%= tool_payload(message.tool_arguments) %></code></pre>
-        <% unless pending %>
+        <% if message.content.present? %>
           <p>Output:</p>
           <pre><code><%= tool_payload(message.content) %></code></pre>
         <% end %>
@@ -39,6 +42,8 @@
                 aria: { label: "Decline the call to #{message.tool_name}" } %>
         </div>
       </div>
+    <% elsif running %>
+      <div class="l-ui-notice" role="status">This tool call is running.</div>
     <% elsif message.consent_declined? %>
       <div class="l-ui-notice l-ui-notice--warning" role="status">This tool call was declined.</div>
     <% end %>

@@ -75,6 +75,19 @@ module Layered
         assert_match "waiting on you", response.body
       end
 
+      # The buttons go the moment the call is approved, but the tool has yet
+      # to run - an empty Output block would read as a tool that returned
+      # nothing rather than one still working.
+      test "an approved call says it is running rather than showing no output" do
+        @message.update!(tool_status: :approved)
+
+        get "/layered/assistant/panel/conversations/#{@conversation.uid}"
+
+        assert_select "form[action*=?]", "tool_calls", count: 0
+        assert_select ".l-ui-notice", text: /running/i
+        assert_select "p", text: "Output:", count: 0
+      end
+
       # Broadcasts render the partial with no request to build URLs from.
       test "a waiting call broadcasts without a request" do
         assert_nothing_raised { @message.broadcast_updated }
