@@ -16,7 +16,7 @@ Layered::Assistant::Engine.routes.draw do
     end
   end
   resources :conversations, only: [] do
-    resources :messages, only: [ :index, :create, :destroy ]
+    layered_resources :messages, namespace: "Layered::Assistant", controller: "messages", only: [ :index, :create, :destroy ]
     # Approving a tool call is the same act wherever it is rendered, and the
     # partial carrying the buttons is broadcast rather than requested, so it
     # cannot know which namespace it landed in. One route serves them all.

@@ -1,15 +1,14 @@
 module Layered
   module Assistant
-    class MessagesController < ApplicationController
+    # Messages are a layered resource for listing and deleting them; only
+    # `create` - the composer posting a message - is this engine's own.
+    class MessagesController < ResourcesController
       include MessageCreation
 
-      before_action :set_conversation
-      before_action :set_message, only: [ :destroy ]
-
-      def index
-        @page_title = "Messages"
-        @pagy, @messages = pagy(@conversation.messages.includes(:model).by_created_at)
-      end
+      # Messages have no fields, which the gem reads as having no form, but
+      # `create` is the composer's rather than the gem's.
+      skip_before_action :require_layered_fields, only: [ :create ]
+      before_action :set_conversation, only: [ :create, :destroy ]
 
       def create
         model_id = scoped_model_id(message_params[:model_id])
@@ -37,19 +36,14 @@ module Layered
       end
 
       def destroy
-        @message.destroy
+        super
         @conversation.update_token_totals!
-        redirect_to layered_assistant.conversation_messages_path(@conversation), notice: "Message was successfully deleted."
       end
 
       private
 
       def set_conversation
         @conversation = scoped(Conversation).find_by!(uid: params[:conversation_id])
-      end
-
-      def set_message
-        @message = @conversation.messages.find(params[:id])
       end
 
       def message_params

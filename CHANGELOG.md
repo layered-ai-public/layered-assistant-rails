@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- A conversation's messages list is now a layered resource, so it gets the layered-resource-rails index - search, sortable columns and a row actions menu - like conversations do. Its breadcrumb now includes the conversation itself, and deleting a message uses the gem's flash wording ("Message deleted")
+
 ## [0.9.0] - 2026-10-04
 
 ### Added
