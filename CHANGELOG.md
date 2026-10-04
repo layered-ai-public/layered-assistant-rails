@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+### Added
+
+- Together AI provider template (OpenAI-compatible, `https://api.together.ai/v1`), with a matching model catalogue entry, dummy app seed block, and `TOGETHER_API_KEY` in `.env.example`
+
 ### Changed
 
 - Model catalogue refreshed with each provider's current models: Claude Opus 5.5, Sonnet 5.5 and Fable 5.1; GPT-6 Astra, GPT-6.1 Sol and GPT-6 Luna; Gemini 3.8 and 3.7 Flash; and newer Qwen, DeepSeek, GLM, Grok and Kimi releases on OpenRouter, Groq and Fireworks. Retired or restricted models are removed, including the Gemini 2.5 family and Groq's Compound systems, and OpenRouter's `qwen/qwen3.8-max`, which no longer resolves, is replaced by `qwen/qwen3.8-max-0902`
+- Cloud provider templates list the frontier labs first (Anthropic, OpenAI, Gemini, Mistral), followed by the inference providers in order of popularity (OpenRouter, Together AI, Groq, Fireworks)
 
 ## [0.8.0] - 2026-09-19
 

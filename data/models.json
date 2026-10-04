@@ -49,6 +49,18 @@
     { "name": "MiniMax M3", "identifier": "accounts/fireworks/models/minimax-m3" },
     { "name": "GPT-OSS 120B", "identifier": "accounts/fireworks/models/gpt-oss-120b" }
   ],
+  "Together AI": [
+    { "name": "Qwen3.8 2.4T A95B", "identifier": "Qwen/Qwen3.8-2.4T-A95B" },
+    { "name": "DeepSeek V4.1 Flash", "identifier": "deepseek-ai/DeepSeek-V4.1-Flash" },
+    { "name": "Kimi K3", "identifier": "moonshotai/Kimi-K3" },
+    { "name": "GLM 5.3", "identifier": "zai-org/GLM-5.3" },
+    { "name": "GLM 5.3 Flash", "identifier": "zai-org/GLM-5.3-Flash" },
+    { "name": "Qwen3.7 Max", "identifier": "Qwen/Qwen3.7-Max" },
+    { "name": "MiniMax M3", "identifier": "MiniMaxAI/MiniMax-M3" },
+    { "name": "DeepSeek V4 Pro 0813", "identifier": "deepseek-ai/DeepSeek-V4-Pro-0813" },
+    { "name": "GPT-OSS 120B", "identifier": "openai/gpt-oss-120b" },
+    { "name": "Llama 3.3 70B Instruct Turbo", "identifier": "meta-llama/Llama-3.3-70B-Instruct-Turbo" }
+  ],
   "Mistral": [
     { "name": "Mistral Medium 3.5", "identifier": "mistral-medium-2604" },
     { "name": "Mistral Small 4", "identifier": "mistral-small-2603" },

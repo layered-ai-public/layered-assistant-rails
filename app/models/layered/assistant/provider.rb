@@ -38,8 +38,9 @@ module Layered
           { key: "openai", name: "OpenAI", description: "GPT family of models. Requires an API key.", protocol: "openai", url: "https://api.openai.com/v1", keys_url: "https://platform.openai.com/api-keys" },
           { key: "gemini", name: "Gemini", description: "Google Gemini family of models. Requires an API key.", protocol: "openai", url: "https://generativelanguage.googleapis.com/v1beta/openai/", keys_url: "https://aistudio.google.com/api-keys" },
           { key: "mistral", name: "Mistral", description: "Mistral's own frontier models. Requires an API key.", protocol: "openai", url: "https://api.mistral.ai/v1", keys_url: "https://admin.mistral.ai/organization/api-keys" },
-          { key: "groq", name: "Groq", description: "Low-latency inference for popular open-weight models. Requires an API key.", protocol: "openai", url: "https://api.groq.com/openai/v1", keys_url: "https://console.groq.com/keys" },
           { key: "openrouter", name: "OpenRouter", description: "Access hundreds of models through a single API. Requires an API key.", protocol: "openai", url: "https://openrouter.ai/api/v1/", keys_url: "https://openrouter.ai/settings/keys" },
+          { key: "together", name: "Together AI", description: "Serverless inference for open-weight models. Requires an API key.", protocol: "openai", url: "https://api.together.ai/v1", keys_url: "https://api.together.ai/settings/projects/~current/api-keys" },
+          { key: "groq", name: "Groq", description: "Low-latency inference for popular open-weight models. Requires an API key.", protocol: "openai", url: "https://api.groq.com/openai/v1", keys_url: "https://console.groq.com/keys" },
           { key: "fireworks", name: "Fireworks", description: "Serverless inference for open-weight models. Requires an API key.", protocol: "openai", url: "https://api.fireworks.ai/inference/v1", keys_url: "https://app.fireworks.ai/settings/users/api-keys" }
         ],
         "Local" => [

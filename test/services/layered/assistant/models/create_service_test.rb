@@ -17,10 +17,10 @@ module Layered
             CreateService.new(@provider).call
           end
 
-          assert @provider.models.exists?(identifier: "claude-fable-5")
+          assert @provider.models.exists?(identifier: "claude-opus-5-5")
+          assert @provider.models.exists?(identifier: "claude-sonnet-5-5")
+          assert @provider.models.exists?(identifier: "claude-fable-5-1")
           assert @provider.models.exists?(identifier: "claude-opus-5")
-          assert @provider.models.exists?(identifier: "claude-opus-4-8")
-          assert @provider.models.exists?(identifier: "claude-sonnet-5")
           assert @provider.models.exists?(identifier: "claude-haiku-4-5")
         end
 

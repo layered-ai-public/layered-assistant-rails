@@ -124,6 +124,19 @@ if fireworks_key.present?
   Layered::Assistant::Models::CreateService.new(fireworks).call
 end
 
+together_key = credentials.dig(:providers, :together_api_key) || ENV["TOGETHER_API_KEY"]
+if together_key.present?
+  together = Layered::Assistant::Provider.find_or_create_by!(
+    protocol: :openai,
+    name: "Together AI"
+  ) do |provider|
+    provider.url = "https://api.together.ai/v1"
+    provider.secret = together_key
+  end
+
+  Layered::Assistant::Models::CreateService.new(together).call
+end
+
 # Personas
 personas_data = [
   {
