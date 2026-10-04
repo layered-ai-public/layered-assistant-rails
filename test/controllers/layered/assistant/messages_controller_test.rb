@@ -12,6 +12,15 @@ module Layered
         get "/layered/assistant/conversations/#{@conversation.uid}/messages"
         assert_response :success
         assert_select "table.l-ui-table"
+        assert_select ".l-ui-breadcrumbs a[href=?]", "/layered/assistant/conversations/#{@conversation.uid}", text: @conversation.name
+      end
+
+      test "should not list another owner's conversation's messages" do
+        @conversation.update!(owner: nil)
+
+        get "/layered/assistant/conversations/#{@conversation.uid}/messages"
+
+        assert_response :not_found
       end
 
       test "should create message and enqueue ai response job" do
@@ -46,13 +55,27 @@ module Layered
 
       test "should destroy message" do
         message = layered_assistant_messages(:hello)
+        message.update!(input_tokens: 10)
+        @conversation.update_token_totals!
 
         assert_difference("Message.count", -1) do
           delete "/layered/assistant/conversations/#{@conversation.uid}/messages/#{message.id}"
         end
 
         assert_redirected_to "/layered/assistant/conversations/#{@conversation.uid}/messages"
-        assert_equal "Message was successfully deleted.", flash[:notice]
+        assert_equal "Message deleted", flash[:notice]
+        assert_equal 0, @conversation.reload.input_tokens
+      end
+
+      test "should not destroy a message in another owner's conversation" do
+        message = layered_assistant_messages(:hello)
+        @conversation.update!(owner: nil)
+
+        assert_no_difference("Message.count") do
+          delete "/layered/assistant/conversations/#{@conversation.uid}/messages/#{message.id}"
+        end
+
+        assert_response :not_found
       end
     end
   end
