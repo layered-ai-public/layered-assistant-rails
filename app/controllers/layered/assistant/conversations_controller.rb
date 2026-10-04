@@ -1,80 +1,60 @@
 module Layered
   module Assistant
-    class ConversationsController < ApplicationController
+    # Conversations are a layered resource for listing, starting, renaming
+    # and deleting them; only `show` - the conversation itself - and `stop`
+    # are this engine's own.
+    class ConversationsController < ResourcesController
       include StoppableResponse
 
-      before_action :set_conversation, only: [ :show, :edit, :update, :destroy, :stop ]
-      before_action :set_assistants, only: [ :new, :create ]
-
-      def index
-        if params[:assistant_id]
-          @assistant = scoped(Assistant).find(params[:assistant_id])
-          @page_title = "Conversations - #{@assistant.name}"
-          @pagy, @conversations = pagy(@assistant.conversations.merge(scoped(Conversation)).includes(:owner, :user).by_created_at)
-        else
-          @page_title = "Conversations"
-          @pagy, @conversations = pagy(scoped(Conversation).includes(:assistant, :owner, :user).by_created_at)
-        end
-      end
+      before_action :set_conversation, only: [ :stop ]
+      before_action :drop_assistant_column, only: [ :index ], if: -> { params[:assistant_id] }
+      before_action :scope_choice_fields, only: [ :new, :create, :edit, :update ]
 
       def show
-        @page_title = @conversation.name
+        super
+        @conversation = @record
         @messages = @conversation.messages.includes(:model).by_created_at
         @models = scoped_models
         @selected_model_id = @messages.last&.model_id || @conversation.assistant.default_model_id || @models.first&.id
       end
 
-      def new
-        @page_title = "New conversation"
-        @conversation = Conversation.new(params.permit(conversation: [ :assistant_id ])[:conversation])
-      end
-
-      def create
-        @conversation = Conversation.new(conversation_params)
-        @conversation.owner = current_owner!
-        @conversation.user = current_conversation_user
-        @conversation.assistant = scoped(Assistant).find(conversation_params[:assistant_id]) if conversation_params[:assistant_id].present?
-        @conversation.name = Conversation.default_name if @conversation.name.blank?
-        if @conversation.save
-          redirect_to layered_assistant.conversation_path(@conversation)
-        else
-          render :new, status: :unprocessable_entity
-        end
-      end
-
-      def edit
-        @page_title = "Edit conversation"
-      end
-
-      def update
-        if @conversation.update(conversation_params)
-          redirect_to layered_assistant.conversations_path, notice: "Conversation was successfully updated."
-        else
-          render :edit, status: :unprocessable_entity
-        end
-      end
-
-      def destroy
-        @conversation.destroy
-        redirect_to layered_assistant.conversations_path, notice: "Conversation was successfully deleted."
-      end
-
       private
 
+      # `stop` is a custom member action, so the gem has loaded @record.
       def set_conversation
-        @conversation = scoped(Conversation).find_by!(uid: params[:id])
+        @conversation = @record
       end
 
-      def set_assistants
-        @assistants = scoped(Assistant).by_name
+      # Listed under an assistant, every row would name the same one.
+      def drop_assistant_column
+        @columns = @columns.reject { |column| column[:attribute] == :assistant_id }
       end
 
-      def conversation_params
-        if action_name == "create"
-          params.require(:conversation).permit(:name, :assistant_id)
+      # The assistant is chosen once, when the conversation is started, and
+      # only from the owner's own.
+      def scope_choice_fields
+        if action_name.in?(%w[new create])
+          assistants = scoped(Assistant).by_name.map { |assistant| [ assistant.name, assistant.id ] }
+          @fields = @fields.map { |field| field[:attribute] == :assistant_id ? field.merge(collection: assistants) : field }
         else
-          params.require(:conversation).permit(:name)
+          @fields = @fields.reject { |field| field[:attribute] == :assistant_id }
         end
+      end
+
+      # An out-of-scope assistant 404s rather than being silently dropped,
+      # matching how a record itself is looked up. A blank one leaves any
+      # assistant the route already chose in place.
+      def layered_resource_params
+        attributes = super
+        return attributes.except(:assistant_id) unless action_name == "create"
+
+        if attributes[:assistant_id].present?
+          attributes[:assistant_id] = scoped(Assistant).find(attributes[:assistant_id]).id
+        else
+          attributes.delete(:assistant_id)
+        end
+        attributes[:name] = Conversation.default_name if attributes[:name].blank?
+        attributes
       end
     end
   end

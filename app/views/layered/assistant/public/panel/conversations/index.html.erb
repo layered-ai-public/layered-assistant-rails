@@ -9,34 +9,14 @@
     <% end %>
 
     <% if @conversations.any? %>
-      <div class="l-ui-table-container">
-        <table class="l-ui-table l-ui-mt-0">
-          <caption class="l-ui-sr-only">Your conversations</caption>
-          <thead class="l-ui-table__header">
-            <tr>
-              <th scope="col" class="l-ui-table__header-cell">Created</th>
-              <th scope="col" class="l-ui-table__header-cell">Name</th>
-              <th scope="col" class="l-ui-table__header-cell">Messages</th>
-            </tr>
-          </thead>
-
-          <tbody class="l-ui-table__body">
-            <% @conversations.each do |conversation| %>
-              <tr>
-                <td class="l-ui-table__cell">
-                  <%= conversation.created_at.to_fs(:short) %>
-                </td>
-                <th scope="row" class="l-ui-table__cell l-ui-table__cell--primary">
-                  <%= link_to conversation.name, layered_assistant.public_panel_conversation_path(conversation), data: { turbo_frame: "assistant_panel" } %>
-                </th>
-                <td class="l-ui-table__cell">
-                  <%= conversation.messages_count || 0 %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
+      <%= l_ui_table(@conversations,
+            caption: "Your conversations",
+            columns: [
+              { attribute: :created_at, label: "Created", render: ->(c) { c.created_at.to_fs(:short) } },
+              { attribute: :name, primary: true, render: ->(c) { link_to c.name, layered_assistant.public_panel_conversation_path(c), data: { turbo_frame: "assistant_panel", turbo_prefetch: false } } },
+              { attribute: :messages_count, label: "Messages", render: ->(c) { c.messages_count || 0 } }
+            ]
+          ) %>
     <% end %>
 
     <%= form_with url: layered_assistant.public_panel_conversations_path(assistant_id: @assistant.id), method: :post do |f| %>

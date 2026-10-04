@@ -4,14 +4,18 @@ Layered::Assistant::Engine.routes.draw do
   layered_resources :skills, namespace: "Layered::Assistant", except: [ :show ]
   layered_resources :assistants, namespace: "Layered::Assistant", controller: "assistants", except: [ :show ]
   resources :assistants, only: [] do
-    resources :conversations, only: [ :index ]
+    layered_resources :conversations, namespace: "Layered::Assistant", controller: "conversations", only: [ :index, :new, :create ]
   end
   layered_resources :providers, namespace: "Layered::Assistant", controller: "providers", except: [ :show ]
   resources :providers, only: [] do
     layered_resources :models, namespace: "Layered::Assistant", except: [ :show ]
   end
-  resources :conversations, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
-    patch :stop, on: :member
+  layered_resources :conversations, namespace: "Layered::Assistant", controller: "conversations" do
+    member do
+      patch :stop
+    end
+  end
+  resources :conversations, only: [] do
     resources :messages, only: [ :index, :create, :destroy ]
     # Approving a tool call is the same act wherever it is rendered, and the
     # partial carrying the buttons is broadcast rather than requested, so it
