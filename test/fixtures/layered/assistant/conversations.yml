@@ -1,32 +1,32 @@
 greeting:
-  uid: conv_greeting_fixture_001
+  uid: conversation_6f1c2a10-0000-4000-8000-000000000001
   name: Greeting
   assistant: general
   owner: one (User)
   user: one (User)
 
 coding:
-  uid: conv_coding_fixture_002
+  uid: conversation_6f1c2a10-0000-4000-8000-000000000002
   name: Coding Help
   assistant: coding
   owner: one (User)
   user: one (User)
 
 empty:
-  uid: conv_empty_fixture_003
+  uid: conversation_6f1c2a10-0000-4000-8000-000000000003
   name: Empty Conversation
   assistant: general
   owner: one (User)
   user: one (User)
 
 private_convo:
-  uid: conv_private_fixture_004
+  uid: conversation_6f1c2a10-0000-4000-8000-000000000004
   name: Private conversation
   assistant: private
   owner: one (User)
   user: one (User)
 
 anonymous:
-  uid: conv_anonymous_fixture_005
+  uid: conversation_6f1c2a10-0000-4000-8000-000000000005
   name: Anonymous conversation
   assistant: general

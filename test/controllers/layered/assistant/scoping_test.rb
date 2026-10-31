@@ -9,6 +9,14 @@ module Layered
         assert_response :success
       end
 
+      test "conversation is not reachable by its sequential id" do
+        conversation = layered_assistant_conversations(:greeting)
+        get "/layered/assistant/conversations/#{conversation.id}"
+        assert_response :not_found
+        get "/layered/assistant/panel/conversations/#{conversation.id}"
+        assert_response :not_found
+      end
+
       test "unowned conversation returns 404" do
         conversation = layered_assistant_conversations(:greeting)
         conversation.update!(owner: nil)
