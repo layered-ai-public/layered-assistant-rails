@@ -7,6 +7,24 @@ module Layered
         assert_equal "New conversation", Conversation.default_name
       end
 
+      test "uid is generated as conversation_<uuid> and used as the param" do
+        conversation = Conversation.create!(name: "New", assistant: layered_assistant_assistants(:general), owner: users(:one))
+
+        assert_match Conversation::UID_FORMAT, conversation.uid
+        assert_equal conversation.uid, conversation.to_param
+        assert_not_equal conversation.id.to_s, conversation.to_param
+      end
+
+      test "uid must match the conversation_<uuid> format" do
+        conversation = layered_assistant_conversations(:greeting)
+
+        assert conversation.valid?
+        conversation.uid = "abc123"
+        assert_not conversation.valid?
+        conversation.uid = "conv_greeting_fixture_001"
+        assert_not conversation.valid?
+      end
+
       test "user is optional" do
         conversation = layered_assistant_conversations(:greeting)
 

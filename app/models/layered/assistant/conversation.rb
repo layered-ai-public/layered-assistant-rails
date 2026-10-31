@@ -3,8 +3,10 @@ module Layered
     class Conversation < ApplicationRecord
       include Ownable
 
-      # UID
-      has_secure_token :uid
+      # UID: the public identifier, in the form conversation_<uuid>
+      UID_FORMAT = /\Aconversation_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/
+
+      attribute :uid, :string, default: -> { "conversation_#{SecureRandom.uuid}" }
 
       # Associations
       belongs_to :assistant, counter_cache: true
@@ -22,6 +24,7 @@ module Layered
 
       # Validations
       validates :name, presence: true
+      validates :uid, format: { with: UID_FORMAT }, uniqueness: true
 
       # Scopes
       scope :by_name, -> { order(name: :asc, created_at: :desc) }
