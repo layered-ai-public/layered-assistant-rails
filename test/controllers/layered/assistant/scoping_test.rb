@@ -13,6 +13,10 @@ module Layered
         conversation = layered_assistant_conversations(:greeting)
         get "/layered/assistant/conversations/#{conversation.id}"
         assert_response :not_found
+      end
+
+      test "panel conversation is not reachable by its sequential id" do
+        conversation = layered_assistant_conversations(:greeting)
         get "/layered/assistant/panel/conversations/#{conversation.id}"
         assert_response :not_found
       end
