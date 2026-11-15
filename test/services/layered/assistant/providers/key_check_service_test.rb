@@ -43,6 +43,13 @@ module Layered
           assert_predicate check, :invalid?
         end
 
+        test "a restricted key that can't list models is neither valid nor invalid" do
+          body = { error: { message: "You have insufficient permissions for this operation. Missing scopes: api.model.read." } }.to_json
+          stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 401, body: body)
+
+          assert_equal :unknown, check.status
+        end
+
         test "a key that couldn't be checked is neither valid nor invalid" do
           stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 403)
           assert_equal :unknown, check.status

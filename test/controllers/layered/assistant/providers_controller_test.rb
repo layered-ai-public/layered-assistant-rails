@@ -125,6 +125,15 @@ module Layered
         end
       end
 
+      test "should create provider with a restricted key that can't list models" do
+        body = { error: { message: "You have insufficient permissions for this operation. Missing scopes: api.model.read." } }.to_json
+        stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 401, body: body)
+
+        assert_difference("Provider.count", 1) do
+          post "/layered/assistant/providers", params: { provider: { name: "OpenAI", protocol: "openai", secret: "sk-restricted" } }
+        end
+      end
+
       test "should not update provider with a key the provider refuses" do
         provider = layered_assistant_providers(:anthropic)
         stub_request(:get, "https://api.anthropic.com/v1/models").to_return(status: 401)

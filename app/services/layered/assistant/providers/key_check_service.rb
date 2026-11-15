@@ -6,8 +6,9 @@ module Layered
       # Asks a provider whether it accepts an API key, with the cheapest call
       # each answers: listing its models. Only the provider refusing the key
       # (400 or 401) marks it invalid. Anything else, from a restricted key
-      # without access to the models list (403) to the provider being down,
-      # leaves it unknown, so a key that might work is not turned away.
+      # without access to the models list (403, or OpenAI's 401 naming the
+      # missing scopes) to the provider being down, leaves it unknown, so a
+      # key that might work is not turned away.
       #
       # The URL is resolved the same way the chat clients resolve it: the
       # Anthropic client always talks to Anthropic, and the OpenAI client
@@ -27,6 +28,9 @@ module Layered
 
         REFUSED = [ 400, 401 ].freeze
 
+        # A refusal for a key that works but can't list models.
+        MISSING_PERMISSION = /insufficient permissions|missing scopes/i
+
         def initialize(protocol:, url:, secret:)
           @protocol = protocol.to_s
           @url = url.to_s.strip
@@ -39,7 +43,7 @@ module Layered
           response = request
           if response.is_a?(Net::HTTPSuccess)
             result(:valid, "The provider accepts this key.")
-          elsif REFUSED.include?(response.code.to_i)
+          elsif REFUSED.include?(response.code.to_i) && !response.body.to_s.match?(MISSING_PERMISSION)
             result(:invalid, "isn't accepted by the provider. Check it and paste it again")
           else
             unchecked
