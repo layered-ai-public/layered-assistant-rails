@@ -2,9 +2,10 @@ import { Controller } from "@hotwired/stimulus"
 
 // Checks a provider's API key as it's typed, through the server (see
 // Providers::KeyCheckService), once typing pauses, and badges it: Validated
-// when the provider accepts it, else Not validated, whether it refused the
-// key or couldn't be asked. The badge's title says which. The server checks
-// again when the form is sent, refusing only a key the provider refused.
+// when the provider accepts it, Not validated when it refuses it, and
+// Couldn't verify when it couldn't be asked or wouldn't say (a restricted
+// key, or the provider being down). The server checks again when the form is
+// sent, refusing only a key the provider refused.
 export default class extends Controller {
   static targets = ["secret", "protocol", "url", "badge"]
   static values = { endpoint: String, delay: { type: Number, default: 600 } }
@@ -45,11 +46,13 @@ export default class extends Controller {
       const { status, message } = await response.json()
       if (status === "valid") {
         this.showBadge("Validated", "success", message)
-      } else {
+      } else if (status === "invalid") {
         this.showBadge("Not validated", "danger", message)
+      } else {
+        this.showBadge("Couldn't verify", "warning", message)
       }
     } catch (error) {
-      if (error.name !== "AbortError") this.showBadge("Not validated", "danger", "The key couldn't be checked.")
+      if (error.name !== "AbortError") this.showBadge("Couldn't verify", "warning", "The key couldn't be checked.")
     }
   }
 
