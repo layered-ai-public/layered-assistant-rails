@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. This project follows [Semantic Versioning](https://semver.org/).
 
+## [0.10.0] - 2026-11-15
+
+### Breaking
+
+- Conversations now use `conversation_<uuid>` public identifiers in their URLs instead of the previous random tokens. A migration replaces the uid of every existing conversation, so old conversation URLs stop resolving; the integer primary key is untouched. Run `bin/rails generate layered:assistant:migrations` and `bin/rails db:migrate` after upgrading
+
+### Changed
+
+- README and agent skill explain what streaming needs from the host app: a queue adapter that runs jobs in the background (not `:inline`), and a cable adapter the job process can reach (`solid_cable` or `redis` rather than `async` when jobs run in a separate worker)
+- Agent skill no longer says the install generator writes a `scope` block; it documents ownership and an optional `owner` block
+
 ## [0.9.1] - 2026-10-04
 
 ### Changed
