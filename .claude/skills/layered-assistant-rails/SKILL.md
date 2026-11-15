@@ -27,7 +27,7 @@ The install generator:
 
 1. Verifies `layered-ui-rails` is installed - invokes its installer if not.
 2. Adds `import "layered_assistant"` to `app/javascript/application.js` (after the `layered_ui` import).
-3. Creates `config/initializers/layered_assistant.rb` with example `authorize` and `scope` blocks.
+3. Creates `config/initializers/layered_assistant.rb` with example `authorize` blocks, notes on record ownership with an optional `owner` block, and tool configuration examples.
 4. Mounts the engine at `/layered/assistant` in `config/routes.rb`.
 5. Copies migrations into the host app via the `layered:assistant:migrations` generator.
 
