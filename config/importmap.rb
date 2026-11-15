@@ -9,4 +9,5 @@ pin "layered_assistant/markdown_controller", to: "layered_assistant/markdown_con
 pin "layered_assistant/messages_controller", to: "layered_assistant/messages_controller.js"
 pin "layered_assistant/panel_controller", to: "layered_assistant/panel_controller.js"
 pin "layered_assistant/panel_nav_controller", to: "layered_assistant/panel_nav_controller.js"
+pin "layered_assistant/provider_key_check_controller", to: "layered_assistant/provider_key_check_controller.js"
 pin "layered_assistant/provider_template_controller", to: "layered_assistant/provider_template_controller.js"

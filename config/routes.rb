@@ -6,6 +6,7 @@ Layered::Assistant::Engine.routes.draw do
   resources :assistants, only: [] do
     layered_resources :conversations, namespace: "Layered::Assistant", controller: "conversations", only: [ :index, :new, :create ]
   end
+  post "providers/key_check", to: "provider_key_checks#create", as: :provider_key_check
   layered_resources :providers, namespace: "Layered::Assistant", controller: "providers", except: [ :show ]
   resources :providers, only: [] do
     layered_resources :models, namespace: "Layered::Assistant", except: [ :show ]
