@@ -33,6 +33,8 @@ The install generator:
 
 After installation, configure the initializer (see below) - **routes return 403 until an `authorize` block is set**. Then visit `/layered/assistant` to set up providers, models, personas, skills and assistants.
 
+**Streaming:** replies are generated in an Active Job and broadcast as Turbo Streams over Action Cable. The queue adapter must run jobs in the background (not `:inline`), and if jobs run in a separate worker process (Solid Queue's `bin/jobs`, Sidekiq), `config/cable.yml` must use `solid_cable` or `redis` rather than `async`. The Rails defaults (`:async` jobs, `async` cable) work in a single development process.
+
 ## Authorization
 
 All non-public engine routes are gated by an `authorize` block. The block runs in controller context, so you have access to `current_user`, `request`, `redirect_to`, `head`, `main_app`, etc.
@@ -229,6 +231,7 @@ The engine renders inside `layered-ui-rails` layouts and uses only `l-ui-` class
 - **Provider creation fails with encryption error** - run `bin/rails db:encryption:init` and add the keys to credentials, or set `Layered::Assistant.skip_db_encryption = true` for dev/test.
 - **Panel body never loads** - `turbo-rails` must be installed and `layered-ui-rails` must be mounted in the layout. Check `import "@hotwired/turbo-rails"` is present.
 - **`layered_assistant` JS controllers missing** - ensure `import "layered_assistant"` is in `app/javascript/application.js` (added by the install generator, after the `layered_ui` import).
+- **Replies don't stream, or only appear after a refresh** - the job's broadcasts aren't reaching the browser. Avoid the `:inline` queue adapter, and if jobs run in a separate worker, switch `config/cable.yml` from `async` to `solid_cable` or `redis`.
 - **No records visible, or `MissingOwnerError` on create** - `current_owner` is nil. Check the authorize block only admits signed-in users, and that any `Layered::Assistant.owner` block returns a record.
 
 ## Further reference

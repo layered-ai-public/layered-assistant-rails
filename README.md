@@ -76,6 +76,22 @@ bin/rails generate layered:assistant:migrations
 bin/rails db:migrate
 ```
 
+### Background jobs and Action Cable
+
+Assistant replies are generated in an Active Job and streamed to the browser
+as Turbo Streams over Action Cable. Streaming needs two things from the host
+app:
+
+- **A queue adapter that runs jobs in the background.** With `:inline`, the job
+  runs inside the request that sent the message, so the whole reply arrives at
+  once instead of streaming. The Rails default (`:async`) and Solid Queue both
+  work.
+- **A cable adapter the job process can reach.** The `async` cable adapter only
+  works within one process. It is fine when jobs also run in the web process
+  (the `:async` queue adapter), but if jobs run in a separate worker (Solid
+  Queue's `bin/jobs`, Sidekiq, etc.), their broadcasts never reach the browser.
+  Use `solid_cable` or `redis` in `config/cable.yml` instead.
+
 ## Authorization
 
 All non-public engine routes are **blocked by default** (403 Forbidden) until you configure an `authorize` block. The install generator creates a starter initialiser at `config/initializers/layered_assistant.rb` - uncomment one of the examples to get started.
