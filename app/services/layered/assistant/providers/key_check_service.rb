@@ -44,7 +44,7 @@ module Layered
           if response.is_a?(Net::HTTPSuccess)
             result(:valid, "The provider accepts this key.")
           elsif REFUSED.include?(response.code.to_i) && !response.body.to_s.match?(MISSING_PERMISSION)
-            result(:invalid, "isn't accepted by the provider. Check it and paste it again")
+            result(:invalid, "isn't accepted by the provider. Check it and paste it again.")
           else
             unchecked
           end

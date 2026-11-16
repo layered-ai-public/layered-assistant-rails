@@ -9,7 +9,7 @@ module Layered
 
       def create
         check = Providers::KeyCheckService.new(protocol: params[:protocol], url: params[:url], secret: params[:secret]).call
-        message = check.invalid? ? "This key #{check.message}." : check.message
+        message = check.invalid? ? "This key #{check.message}" : check.message
         render json: { status: check.status, message: message }
       end
     end
