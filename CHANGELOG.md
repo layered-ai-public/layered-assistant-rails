@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-16
+
+### Added
+
+- Provider API keys are checked as they are typed on the new and edit forms, by asking the provider to list its models, and badged Validated, Not validated or Couldn't verify. Saving checks again and refuses only a key the provider rejected, so an outage or a restricted key that can't list models never blocks saving. Key checks are rate limited to 20 a minute, as is saving a provider
+
 ### Changed
 
 - Creating a provider now seeds its models by asking the provider which models its API key can use (Anthropic's models endpoint, or `<url>/models` for OpenAI-compatible providers), rather than reading the hand-maintained `data/models.json` catalogue, which is removed. Non-chat models are left out and only the newest 20 are added, or every model when the provider gives no dates (as Gemini does)
