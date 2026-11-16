@@ -1,58 +1,89 @@
-require "net/http"
 require "json"
 
 module Layered
   module Assistant
     module Models
+      # Seeds a provider's models by asking the provider itself, using its own
+      # key, which models it offers. Anthropic has its own models endpoint;
+      # every other provider speaks the OpenAI protocol and lists its models
+      # at `<url>/models`. Models for something other than chat (embeddings,
+      # images, speech and so on) are left out, and only the newest LIMIT are
+      # kept, as aggregators such as OpenRouter list hundreds.
       class CreateService
-        MODELS_URL = "https://raw.githubusercontent.com/layered-ai-public/layered-assistant-rails/main/data/models.json".freeze
-        LOCAL_MODELS_PATH = Layered::Assistant::Engine.root.join("data", "models.json").freeze
+        LIMIT = 20
+        OTHER_USES = /audio|realtime|transcribe|tts|image|embed|dall-e|whisper|moderation|guard|ocr|davinci|babbage|sora/
 
         def initialize(provider)
           @provider = provider
+          @connection = Providers::Connection.for(provider)
         end
 
         def call
-          models_data = Rails.env.development? ? load_local_models : fetch_models
-          return if models_data.nil?
+          models = @connection.anthropic? ? anthropic_models : openai_models
+          return if models.nil?
 
-          entries = models_data[@provider.name]
-          if entries.nil?
-            Rails.logger.info "[layered-ui-assistant] No models found for provider #{@provider.name.inspect} in remote catalogue"
-            return
-          end
-
-          entries.each do |entry|
-            @provider.models.find_or_create_by!(identifier: entry["identifier"]) do |model|
-              model.name = entry["name"]
+          models.first(LIMIT).each do |model|
+            @provider.models.find_or_create_by!(identifier: model[:identifier]) do |record|
+              record.name = model[:name]
             end
           end
         end
 
         private
 
-        def load_local_models
-          unless File.exist?(LOCAL_MODELS_PATH)
-            Rails.logger.info "[layered-ui-assistant] Local model catalogue not found at #{LOCAL_MODELS_PATH} - skipping model sync"
-            return nil
+        # Newest first, a page at a time.
+        def anthropic_models
+          models = []
+          after = nil
+
+          loop do
+            page = get({ limit: 1000, after_id: after }.compact)
+            return if page.nil?
+
+            models += page["data"].to_a.map { |model| { identifier: model["id"], name: model["display_name"].presence || model["id"] } }
+            break unless page["has_more"]
+
+            after = page["last_id"]
           end
 
-          Rails.logger.info "[layered-ui-assistant] Loading model catalogue from local file (development)"
-          JSON.parse(File.read(LOCAL_MODELS_PATH))
+          models
         end
 
-        def fetch_models
-          uri = URI(MODELS_URL)
-          response = Net::HTTP.get_response(uri)
+        # OpenAI's list and those like it: `data`, or Together's bare array.
+        # Some say what each model is for, as Together's `type` and Mistral's
+        # `capabilities` do. Gemini prefixes its ids with "models/".
+        def openai_models
+          page = get
+          return if page.nil?
+
+          (page.is_a?(Array) ? page : page["data"].to_a)
+            .reject { |model| other_use?(model) }
+            .each_with_index
+            .sort_by { |model, index| [ -model["created"].to_i, index ] }
+            .map(&:first)
+            .map do |model|
+              identifier = model["id"].to_s.delete_prefix("models/")
+              { identifier: identifier, name: model["display_name"].presence || model["name"].presence || identifier }
+            end
+        end
+
+        def other_use?(model)
+          model["id"].to_s.match?(OTHER_USES) ||
+            (model.key?("type") && model["type"] != "chat") ||
+            model.dig("capabilities", "completion_chat") == false
+        end
+
+        def get(params = {})
+          response = @connection.get("models", params, open_timeout: 5, read_timeout: 15)
 
           unless response.is_a?(Net::HTTPSuccess)
-            Rails.logger.info "[layered-ui-assistant] Could not fetch model catalogue (HTTP #{response.code}) - skipping model sync"
+            Rails.logger.info "[layered-assistant] Could not list models for provider #{@provider.name.inspect} (HTTP #{response.code}) - skipping model sync"
             return nil
           end
 
           JSON.parse(response.body)
-        rescue SocketError, Errno::ECONNREFUSED, Errno::ETIMEDOUT, Net::OpenTimeout, Net::ReadTimeout => e
-          Rails.logger.info "[layered-ui-assistant] Could not reach GitHub to fetch model catalogue (#{e.class}) - skipping model sync"
+        rescue SocketError, SystemCallError, IOError, OpenSSL::SSL::SSLError, Timeout::Error, JSON::ParserError, URI::InvalidURIError => e
+          Rails.logger.info "[layered-assistant] Could not list models for provider #{@provider.name.inspect} (#{e.class}) - skipping model sync"
           nil
         end
       end

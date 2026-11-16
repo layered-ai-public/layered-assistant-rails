@@ -5,9 +5,9 @@ module Layered
   module Assistant
     class ProvidersControllerTest < ActionDispatch::IntegrationTest
       setup do
-        models_json = File.read(File.expand_path("../../../../data/models.json", __dir__))
-        stub_request(:get, Models::CreateService::MODELS_URL).to_return(status: 200, body: models_json)
         stub_request(:get, /\/models\z/).to_return(status: 200, body: "{}")
+        stub_request(:get, %r{\Ahttps://api.anthropic.com/v1/models})
+          .to_return(status: 200, body: { data: [ { id: "claude-opus-5-5", display_name: "Claude Opus 5.5" } ], has_more: false }.to_json)
       end
 
       test "should get index" do

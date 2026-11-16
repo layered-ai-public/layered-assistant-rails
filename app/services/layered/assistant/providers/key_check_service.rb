@@ -9,18 +9,11 @@ module Layered
       # without access to the models list (403, or OpenAI's 401 naming the
       # missing scopes) to the provider being down, leaves it unknown, so a
       # key that might work is not turned away.
-      #
-      # The URL is resolved the same way the chat clients resolve it: the
-      # Anthropic client always talks to Anthropic, and the OpenAI client
-      # appends paths straight onto the provider's URL when one is set.
       class KeyCheckService
         Result = Data.define(:status, :message) do
           def valid? = status == :valid
           def invalid? = status == :invalid
         end
-
-        ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models".freeze
-        OPENAI_BASE_URL = "https://api.openai.com/v1".freeze
 
         # Checked as it is typed, so it answers quickly or not at all.
         OPEN_TIMEOUT = 3
@@ -33,14 +26,14 @@ module Layered
 
         def initialize(protocol:, url:, secret:)
           @protocol = protocol.to_s
-          @url = url.to_s.strip
           @secret = secret.to_s.strip
+          @connection = Connection.new(protocol: protocol, url: url, secret: secret)
         end
 
         def call
           return result(:unknown, "") if @secret.empty? || !Provider.protocols.key?(@protocol)
 
-          response = request
+          response = @connection.get(check_path, open_timeout: OPEN_TIMEOUT, read_timeout: READ_TIMEOUT)
           if response.is_a?(Net::HTTPSuccess)
             result(:valid, "The provider accepts this key.")
           elsif REFUSED.include?(response.code.to_i) && !response.body.to_s.match?(MISSING_PERMISSION)
@@ -54,32 +47,9 @@ module Layered
 
         private
 
-        def request
-          uri = URI(check_url)
-          get = Net::HTTP::Get.new(uri)
-          headers.each { |name, value| get[name] = value }
-
-          Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
-                          open_timeout: OPEN_TIMEOUT, read_timeout: READ_TIMEOUT) do |http|
-            http.request(get)
-          end
-        end
-
-        def check_url
-          return ANTHROPIC_MODELS_URL if @protocol == "anthropic"
-
-          base = (@url.presence || OPENAI_BASE_URL).sub(/\/\z/, "")
-          # OpenRouter lists its models to anyone, so ask about the key itself.
-          path = URI(base).host == "openrouter.ai" ? "key" : "models"
-          "#{base}/#{path}"
-        end
-
-        def headers
-          if @protocol == "anthropic"
-            { "x-api-key" => @secret, "anthropic-version" => "2023-06-01" }
-          else
-            { "Authorization" => "Bearer #{@secret}" }
-          end
+        # OpenRouter lists its models to anyone, so ask about the key itself.
+        def check_path
+          URI(@connection.base_url).host == "openrouter.ai" ? "key" : "models"
         end
 
         def result(status, message) = Result.new(status: status, message: message)
