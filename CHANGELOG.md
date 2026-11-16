@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ### Changed
 
-- Creating a provider now seeds its models by asking the provider which models its API key can use (Anthropic's models endpoint, or `<url>/models` for OpenAI-compatible providers), rather than reading the hand-maintained `data/models.json` catalogue, which is removed. Non-chat models are left out and only the newest 20 are added
+- Creating a provider now seeds its models by asking the provider which models its API key can use (Anthropic's models endpoint, or `<url>/models` for OpenAI-compatible providers), rather than reading the hand-maintained `data/models.json` catalogue, which is removed. Non-chat models are left out and only the newest 20 are added, or every model when the provider gives no dates (as Gemini does)
 
 ## [0.10.0] - 2026-11-15
 

@@ -47,6 +47,7 @@ module Layered
               data: [
                 { id: "gpt-old", created: 1 },
                 { id: "text-embedding-3-large", created: 3 },
+                { id: "gpt-live-1", created: 4 },
                 { id: "gpt-new", created: 2 }
               ]
             }.to_json)
@@ -64,6 +65,21 @@ module Layered
           CreateService.new(@openai).call
 
           assert @openai.models.exists?(identifier: "gemini-3.8-flash")
+        end
+
+        test "uses Mistral's capabilities over its type and skips its aliases" do
+          @openai.update!(url: "https://api.mistral.ai/v1")
+          chat = { completion_chat: true }
+          stub_request(:get, "https://api.mistral.ai/v1/models")
+            .to_return(status: 200, body: { data: [
+              { id: "codestral-2508", name: "codestral-2508", type: "base", capabilities: chat },
+              { id: "codestral-latest", name: "codestral-2508", type: "base", capabilities: chat },
+              { id: "mistral-ocr-2512", name: "mistral-ocr-2512", type: "base", capabilities: { completion_chat: false } }
+            ] }.to_json)
+
+          CreateService.new(@openai).call
+
+          assert_equal [ "codestral-2508" ], @openai.models.pluck(:identifier)
         end
 
         test "reads a bare array and skips non-chat types" do
@@ -90,13 +106,22 @@ module Layered
           assert_not @openai.models.exists?(identifier: "model-1")
         end
 
-        test "keeps the provider's order when models have no created date" do
-          data = (1..(CreateService::LIMIT + 5)).map { |i| { id: "model-#{i}" } }
+        test "keeps the provider's order among models created at the same time" do
+          data = (1..(CreateService::LIMIT + 5)).map { |i| { id: "model-#{i}", created: 1 } }
           stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 200, body: { data: data }.to_json)
 
           CreateService.new(@openai).call
 
           assert_equal (1..CreateService::LIMIT).map { |i| "model-#{i}" }, @openai.models.order(:id).pluck(:identifier)
+        end
+
+        test "keeps every model, in the provider's order, when none has a created date" do
+          data = (1..(CreateService::LIMIT + 5)).map { |i| { id: "model-#{i}" } }
+          stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 200, body: { data: data }.to_json)
+
+          CreateService.new(@openai).call
+
+          assert_equal (1..(CreateService::LIMIT + 5)).map { |i| "model-#{i}" }, @openai.models.order(:id).pluck(:identifier)
         end
 
         test "does not duplicate existing models" do

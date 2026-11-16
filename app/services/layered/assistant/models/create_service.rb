@@ -7,11 +7,11 @@ module Layered
       # key, which models it offers. Anthropic has its own models endpoint;
       # every other provider speaks the OpenAI protocol and lists its models
       # at `<url>/models`. Models for something other than chat (embeddings,
-      # images, speech and so on) are left out, and only the newest LIMIT are
-      # kept, as aggregators such as OpenRouter list hundreds.
+      # images, speech, live voice and so on) are left out, and only the
+      # newest LIMIT are kept, as aggregators such as OpenRouter list hundreds.
       class CreateService
         LIMIT = 20
-        OTHER_USES = /audio|realtime|transcribe|tts|image|embed|dall-e|whisper|moderation|guard|ocr|davinci|babbage|sora/
+        OTHER_USES = /audio|realtime|live|transcribe|tts|image|embed|dall-e|whisper|moderation|guard|ocr|davinci|babbage|sora/
 
         def initialize(provider)
           @provider = provider
@@ -22,7 +22,7 @@ module Layered
           models = @connection.anthropic? ? anthropic_models : openai_models
           return if models.nil?
 
-          models.first(LIMIT).each do |model|
+          models.each do |model|
             @provider.models.find_or_create_by!(identifier: model[:identifier]) do |record|
               record.name = model[:name]
             end
@@ -46,18 +46,25 @@ module Layered
             after = page["last_id"]
           end
 
-          models
+          models.first(LIMIT)
         end
 
         # OpenAI's list and those like it: `data`, or Together's bare array.
         # Some say what each model is for, as Together's `type` and Mistral's
-        # `capabilities` do. Gemini prefixes its ids with "models/".
+        # `capabilities` do. Gemini prefixes its ids with "models/". Mistral
+        # also lists each alias as its own model, named after the model it
+        # points to, so only the first model with each name is kept.
+        #
+        # Without a `created` date on any model, as with Gemini, there is no
+        # telling which are newest, so none are cut.
         def openai_models
           page = get
           return if page.nil?
 
-          (page.is_a?(Array) ? page : page["data"].to_a)
-            .reject { |model| other_use?(model) }
+          models = (page.is_a?(Array) ? page : page["data"].to_a).reject { |model| other_use?(model) }
+          limit = models.any? { |model| model["created"].to_i > 0 } ? LIMIT : models.size
+
+          models
             .each_with_index
             .sort_by { |model, index| [ -model["created"].to_i, index ] }
             .map(&:first)
@@ -65,12 +72,17 @@ module Layered
               identifier = model["id"].to_s.delete_prefix("models/")
               { identifier: identifier, name: model["display_name"].presence || model["name"].presence || identifier }
             end
+            .uniq { |model| model[:name] }
+            .first(limit)
         end
 
+        # Mistral's `type` says whether a model is base or fine-tuned, not
+        # what it is for, so `capabilities` is trusted first when given.
         def other_use?(model)
-          model["id"].to_s.match?(OTHER_USES) ||
-            (model.key?("type") && model["type"] != "chat") ||
-            model.dig("capabilities", "completion_chat") == false
+          return true if model["id"].to_s.match?(OTHER_USES)
+          return model["capabilities"]["completion_chat"] == false if model["capabilities"].is_a?(Hash)
+
+          model.key?("type") && model["type"] != "chat"
         end
 
         def get(params = {})
