@@ -119,6 +119,7 @@ For a public (unauthenticated) panel scoped to one assistant:
 | `layered_assistant_panel_header(**opts, &block)` | Turbo frame for the panel header |
 | `layered_assistant_panel_body(**opts)` | Turbo frame that loads the authenticated panel conversations |
 | `layered_assistant_public_panel_body(assistant:, **opts)` | Turbo frame for an unauthenticated single-assistant panel |
+| `layered_assistant_conversation(conversation)` | Renders a conversation's messages and composer anywhere, such as the main viewport |
 | `l_assistant_accessible?` | Returns true if the current request would pass the `authorize` block - useful for hiding the panel from unauthorised users |
 
 Example - only render the panel for users who can access it:
@@ -133,6 +134,19 @@ Example - only render the panel for users who can access it:
   <% end %>
 <% end %>
 ```
+
+## Rendering a conversation in the main viewport
+
+```erb
+<div class="l-ui-conversation__container">
+  <%= layered_assistant_conversation(@conversation) %>
+</div>
+```
+
+The host loads the conversation through its own scoping (e.g. `Layered::Assistant::Conversation.owned_by(current_user).find_by!(uid: params[:id])`). The composer offers the models available to the conversation's owner.
+
+- **Live updates target CSS classes, not ids.** `Message` and `Conversation` broadcast to `.conversation_1_messages`, `.message_5`, `.conversation_1_composer` etc., so every copy of a conversation on the page updates - the panel and the main viewport can show the same one. Do not change these to `dom_id` targets.
+- **The panel is once per page.** Its frame ids (`assistant_panel`, `assistant_panel_header`) are fixed and the panel's Stimulus controllers look them up by id.
 
 ## Models
 

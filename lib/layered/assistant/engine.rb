@@ -21,6 +21,7 @@ module Layered
       initializer "layered-assistant-rails.helpers" do
         ActiveSupport.on_load(:action_controller_base) do
           helper Layered::Assistant::AccessHelper
+          helper Layered::Assistant::ConversationHelper
           helper Layered::Assistant::MessagesHelper
           helper Layered::Assistant::PanelHelper
         end
