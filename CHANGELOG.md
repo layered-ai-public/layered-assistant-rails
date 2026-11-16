@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-16
+
+### Added
+
+- `layered_assistant_conversation(conversation)` renders a conversation's messages and composer anywhere in a host app view, such as the main viewport, offering the models available to the conversation's owner. The same conversation can be open in the panel and the main viewport at once
+- The install generator warns when Active Record encryption keys are missing, rather than leaving it to fail on the first provider save
+
+### Changed
+
+- The main composer's form id is now based on its conversation (`composer_form_conversation_1`) rather than the fixed `composer-form`
+
 ## [0.11.0] - 2026-11-16
 
 ### Added
