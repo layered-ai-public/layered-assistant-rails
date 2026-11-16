@@ -1,0 +1,32 @@
+<%#
+  Ejected from layered-resource-rails 0.4.0 so the secret field can carry the
+  key check badge. It binds to the gem's controller contract - `@record`,
+  `@fields`, `@model`, `@form_url`, `layered_breadcrumbs` and
+  `layered_collection_path` - so check it against the gem's own `edit` view
+  when upgrading.
+%>
+<% fields = @fields.map do |field|
+     next field unless field[:attribute] == :secret
+
+     field.merge(hint: render("layered/assistant/providers/key_status"))
+   end %>
+
+<div class="l-ui-spread">
+  <div>
+    <%= l_ui_breadcrumbs do %>
+      <% layered_breadcrumbs.each do |crumb| %>
+        <%= layered_breadcrumb_item crumb[:label], crumb[:path] %>
+      <% end %>
+      <%= layered_breadcrumb_item @model.model_name.human.pluralize, layered_collection_path %>
+      <%= layered_breadcrumb_item "Edit", current: true %>
+    <% end %>
+
+    <h1 class="l-ui-heading">Edit <%= @model.model_name.human.downcase %></h1>
+  </div>
+</div>
+
+<div class="l-ui-mt-2"
+     data-controller="provider-key-check"
+     data-provider-key-check-endpoint-value="<%= layered_assistant.provider_key_check_path %>">
+  <%= l_ui_form(@record, fields: fields, url: @form_url, method: :patch) %>
+</div>

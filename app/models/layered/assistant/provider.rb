@@ -11,6 +11,11 @@ module Layered
       # unused from the controller side - it is not.
       attr_accessor :create_models
 
+      # Set by the provider forms (see ProviderResource) so a key the
+      # provider refuses is caught before it is saved. Off everywhere else,
+      # so seeds, consoles and tests never call out to a provider.
+      attr_accessor :check_secret
+
       # Positioning
       positioned
 
@@ -31,6 +36,7 @@ module Layered
       # Validations
       validates :name, :protocol, presence: true
       validates :url, format: { with: /\Ahttps?:\/\//i, message: "must start with http:// or https://" }, allow_blank: true
+      validate :secret_must_be_accepted, if: :check_secret?
 
       TEMPLATES = {
         "Cloud" => [
@@ -52,6 +58,22 @@ module Layered
       # Scopes
       scope :enabled, -> { where(enabled: true) }
       scope :sorted, -> { order(position: :asc, name: :asc) }
+
+      private
+
+      def check_secret?
+        check_secret && secret.present? &&
+          (will_save_change_to_secret? || will_save_change_to_protocol? || will_save_change_to_url?)
+      end
+
+      # Only a key the provider refused is turned away. One it couldn't be
+      # asked about is saved, so an outage doesn't block the form.
+      def secret_must_be_accepted
+        return if errors.include?(:url) || errors.include?(:protocol)
+
+        check = Providers::KeyCheckService.new(protocol: protocol, url: url, secret: secret).call
+        errors.add(:secret, check.message) if check.invalid?
+      end
     end
   end
 end

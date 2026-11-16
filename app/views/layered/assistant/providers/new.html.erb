@@ -1,7 +1,7 @@
 <%#
   Ejected from layered-resource-rails 0.1.0 so the new-provider form can carry
   the template picker and the model-seeding choice, neither of which is a
-  stored provider attribute. Edit renders the gem's own form.
+  stored provider attribute. Edit is ejected separately (see `edit.html.erb`).
 
   It binds to the gem's controller contract - `@record`, `@fields`, `@model`,
   `@form_url` and `layered_collection_path` - so check this template against
@@ -27,11 +27,14 @@
 
 <%# The key hint belongs beside the secret field, not up in the picker, so the
     Stimulus target is rendered as that field's hint - which also wires the
-    input's aria-describedby to it. %>
+    input's aria-describedby to it. The key check badge sits there too. %>
 <% fields = @fields.map do |field|
      next field unless field[:attribute] == :secret
 
-     field.merge(hint: tag.span(hidden: true, data: { provider_template_target: "secretHint" }))
+     field.merge(hint: safe_join([
+       render("layered/assistant/providers/key_status"),
+       tag.span(hidden: true, data: { provider_template_target: "secretHint" })
+     ], " "))
    end %>
 
 <div class="l-ui-spread">
@@ -45,10 +48,13 @@
   </div>
 </div>
 
-<div class="l-ui-mt-2" data-controller="provider-template" data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>">
+<div class="l-ui-mt-2"
+     data-controller="provider-template provider-key-check"
+     data-provider-template-templates-value="<%= Layered::Assistant::Provider::TEMPLATES.values.flatten.to_json %>"
+     data-provider-key-check-endpoint-value="<%= layered_assistant.provider_key_check_path %>">
   <div class="l-ui-form__group">
     <label class="l-ui-label" for="provider_template">Template</label>
-    <select id="provider_template" class="l-ui-select" data-action="provider-template#apply">
+    <select id="provider_template" class="l-ui-select" data-action="provider-template#apply provider-key-check#check">
       <option value="">Manual</option>
       <% Layered::Assistant::Provider::TEMPLATES.each do |group, templates| %>
         <optgroup label="<%= group %>">

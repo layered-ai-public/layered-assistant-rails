@@ -7,6 +7,7 @@ module Layered
       setup do
         models_json = File.read(File.expand_path("../../../../data/models.json", __dir__))
         stub_request(:get, Models::CreateService::MODELS_URL).to_return(status: 200, body: models_json)
+        stub_request(:get, /\/models\z/).to_return(status: 200, body: "{}")
       end
 
       test "should get index" do
@@ -86,6 +87,71 @@ module Layered
         end
 
         assert_response :unprocessable_entity
+      end
+
+      test "new and edit forms carry every key check target" do
+        get "/layered/assistant/providers/new"
+        %w[protocol url secret].each { |target| assert_select "[data-provider-key-check-target=?]", target }
+        assert_select "#provider_secret_hint [data-provider-key-check-target=?]", "badge"
+        assert_select "[data-provider-key-check-endpoint-value=?]", "/layered/assistant/providers/key_check"
+
+        get "/layered/assistant/providers/#{layered_assistant_providers(:anthropic).id}/edit"
+        %w[protocol url secret].each { |target| assert_select "[data-provider-key-check-target=?]", target }
+        assert_select "#provider_secret_hint [data-provider-key-check-target=?]", "badge"
+        assert_select "[data-provider-key-check-endpoint-value=?]", "/layered/assistant/providers/key_check"
+      end
+
+      test "the secret field is not filled in with the site login" do
+        get "/layered/assistant/providers/new"
+        assert_select "#provider_secret[autocomplete=?][data-1p-ignore][data-lpignore][data-bwignore]", "new-password"
+      end
+
+      test "should not create provider with a key the provider refuses" do
+        stub_request(:get, "https://api.anthropic.com/v1/models").to_return(status: 401)
+
+        assert_no_difference("Provider.count") do
+          post "/layered/assistant/providers", params: { provider: { name: "Anthropic", protocol: "anthropic", secret: "sk-wrong" } }
+        end
+
+        assert_response :unprocessable_entity
+        assert_select "#provider_secret_error", /isn't accepted by the provider/
+      end
+
+      test "should create provider when the key could not be checked" do
+        stub_request(:get, "https://api.anthropic.com/v1/models").to_return(status: 503)
+
+        assert_difference("Provider.count", 1) do
+          post "/layered/assistant/providers", params: { provider: { name: "Anthropic", protocol: "anthropic", secret: "sk-maybe" } }
+        end
+      end
+
+      test "should create provider with a restricted key that can't list models" do
+        body = { error: { message: "You have insufficient permissions for this operation. Missing scopes: api.model.read." } }.to_json
+        stub_request(:get, "https://api.openai.com/v1/models").to_return(status: 401, body: body)
+
+        assert_difference("Provider.count", 1) do
+          post "/layered/assistant/providers", params: { provider: { name: "OpenAI", protocol: "openai", secret: "sk-restricted" } }
+        end
+      end
+
+      test "should not update provider with a key the provider refuses" do
+        provider = layered_assistant_providers(:anthropic)
+        stub_request(:get, "https://api.anthropic.com/v1/models").to_return(status: 401)
+
+        patch "/layered/assistant/providers/#{provider.id}", params: { provider: { secret: "sk-wrong" } }
+
+        assert_response :unprocessable_entity
+        assert_not_equal "sk-wrong", provider.reload.secret
+      end
+
+      test "checks a key as it is typed" do
+        stub_request(:get, "https://api.anthropic.com/v1/models")
+          .with(headers: { "x-api-key" => "sk-good" }).to_return(status: 200)
+
+        post "/layered/assistant/providers/key_check", params: { protocol: "anthropic", secret: "sk-good" }, as: :json
+
+        assert_response :success
+        assert_equal "valid", response.parsed_body["status"]
       end
 
       test "should get edit" do
