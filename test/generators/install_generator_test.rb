@@ -68,6 +68,37 @@ class InstallGeneratorTest < Rails::Generators::TestCase
     end
   end
 
+  # -- Encryption ---------------------------------------------------------
+
+  test "warns when encryption keys are missing" do
+    stub_layered_ui_installed
+
+    output = without_encryption_keys { Dir.chdir(destination_root) { run_generator } }
+
+    assert_match "Active Record encryption keys are not configured", output
+    assert_match "bin/rails db:encryption:init", output
+  end
+
+  test "does not warn when encryption keys are configured" do
+    stub_layered_ui_installed
+
+    output = Dir.chdir(destination_root) { run_generator }
+
+    assert_no_match "encryption keys are not configured", output
+  end
+
+  test "does not warn when encryption is skipped" do
+    stub_layered_ui_installed
+    original = Layered::Assistant.skip_db_encryption
+    Layered::Assistant.skip_db_encryption = true
+
+    output = without_encryption_keys { Dir.chdir(destination_root) { run_generator } }
+
+    assert_no_match "encryption keys are not configured", output
+  ensure
+    Layered::Assistant.skip_db_encryption = original
+  end
+
   # -- Routes -------------------------------------------------------------
 
   test "mounts engine in routes" do
@@ -114,6 +145,16 @@ class InstallGeneratorTest < Rails::Generators::TestCase
 
     File.write File.join(destination_root, "app/assets/tailwind/application.css"), %(@import "tailwindcss";\n@import "./layered_ui";)
     File.write File.join(destination_root, "app/javascript/application.js"), js
+  end
+
+  def without_encryption_keys
+    config = ActiveRecord::Encryption.config
+    original = [ config.primary_key, config.key_derivation_salt ]
+    config.primary_key = nil
+    config.key_derivation_salt = nil
+    yield
+  ensure
+    config.primary_key, config.key_derivation_salt = original
   end
 
   def ui_before_assistant?(content)

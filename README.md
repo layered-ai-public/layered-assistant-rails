@@ -64,6 +64,7 @@ This will:
 - Add `import "layered_assistant"` to your `app/javascript/application.js` (after the layered-ui import)
 - Mount the engine at `/layered/assistant` in your `config/routes.rb`
 - Copy engine migrations into your application
+- Warn if Active Record encryption keys are missing (provider API keys are encrypted, so saving a provider needs them)
 
 All steps are idempotent - re-running the generator will not duplicate imports, routes, or migrations.
 
@@ -202,6 +203,22 @@ Both helpers accept keyword arguments that are forwarded as HTML attributes to t
 |---|---|
 | `layered_assistant_panel_header` | Empty Turbo Frame (`assistant_panel_header`) populated by the engine's panel views |
 | `layered_assistant_panel_body` | Turbo Frame (`assistant_panel`) that loads the conversation list from the engine's panel routes |
+
+The panel frame ids are fixed, so render the panel once per page.
+
+## Conversation helper
+
+To show a conversation outside the panel - in the main viewport, for example - render it with `layered_assistant_conversation`. It renders the messages and composer, and works out the models on offer from the conversation's owner:
+
+```erb
+<div class="l-ui-conversation__container">
+  <%= layered_assistant_conversation(@conversation) %>
+</div>
+```
+
+Load the conversation through your own scoping before passing it in, e.g. `Layered::Assistant::Conversation.owned_by(current_user).find_by!(uid: params[:id])`.
+
+The same conversation can be open in the panel and the main viewport at once. Live updates are broadcast to CSS classes (`.conversation_1_messages`) rather than element ids, so every copy on the page receives them. Keep it that way if you change the broadcasts.
 
 ## Tools
 

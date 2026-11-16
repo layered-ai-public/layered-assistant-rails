@@ -4,6 +4,6 @@
   <% end %>
 <% end %>
 
-<%= turbo_stream.replace "composer-form" do %>
+<%= turbo_stream.replace dom_id(@conversation, :composer_form) do %>
   <%= render "layered/assistant/messages/composer", conversation: @conversation, models: @models, selected_model_id: @selected_model_id, responding: @responding %>
 <% end %>

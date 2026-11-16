@@ -90,6 +90,10 @@ module Layered
       end
 
       # Broadcasting
+      #
+      # These target CSS classes rather than element ids so that every copy
+      # of a conversation on the page updates - the panel and the main
+      # viewport can show the same one. Keep them as `targets:` classes.
       def broadcast_created
         broadcast_append_to conversation,
           targets: ".#{dom_id(conversation)}_messages",

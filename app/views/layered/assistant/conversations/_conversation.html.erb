@@ -1,0 +1,16 @@
+<%= turbo_stream_from conversation %>
+
+<div class="l-ui-conversation__messages" data-controller="messages">
+  <div id="<%= dom_id(conversation) %>_messages" class="<%= dom_id(conversation) %>_messages l-ui-conversation" aria-live="polite" data-messages-target="list">
+    <%= render partial: "layered/assistant/messages/message", collection: messages, as: :message %>
+  </div>
+
+  <button class="l-ui-scroll-to-bottom"
+          data-messages-target="scrollButton"
+          data-action="click->messages#jumpToBottom"
+          aria-label="Scroll to bottom"
+          type="button">
+  </button>
+</div>
+
+<%= render "layered/assistant/messages/composer", conversation: conversation, models: models, selected_model_id: selected_model_id, responding: conversation.responding? %>

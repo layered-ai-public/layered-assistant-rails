@@ -64,6 +64,18 @@ module Layered
           invoke "layered:assistant:migrations"
         end
 
+        # Provider API keys are encrypted, so saving one fails without keys.
+        # Warn now rather than leave it to surface on the first provider.
+        def check_encryption_keys
+          return if Layered::Assistant.skip_db_encryption || encryption_keys_configured?
+
+          say ""
+          say "Active Record encryption keys are not configured.", :yellow
+          say "Provider API keys are encrypted, so saving a provider will fail until you either:"
+          say "  - run bin/rails db:encryption:init and add the keys to your credentials, or"
+          say "  - set Layered::Assistant.skip_db_encryption = true (dev/test only)"
+        end
+
         def show_instructions
           say ""
           say "layered-assistant-rails installed successfully", :green
@@ -74,6 +86,15 @@ module Layered
           say "  3. Routes return 403 until you uncomment an authorize block"
           say "  4. Visit /layered/assistant to get started"
           say ""
+        end
+
+        private
+
+        def encryption_keys_configured?
+          config = ActiveRecord::Encryption.config
+          config.primary_key.present? && config.key_derivation_salt.present?
+        rescue ActiveRecord::Encryption::Errors::Configuration
+          false
         end
       end
     end
